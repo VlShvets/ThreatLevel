@@ -1,55 +1,66 @@
 #ifndef PAINTER_H
 #define PAINTER_H
 
-#include <QDockWidget>
+#include <QTimer>
+#include <QQueue>
 
 #include "grapher2d.h"
 
 class Painter : public Grapher2D
 {
-    const static int TOTALTIME = 50;
-    const static float BASECOORDX = -40.0;
-    const static float BASECOORDY = -40.0;
-    const static float BASERADIUS = 10.0;
-    const static float TRACKCOORDX = 0.0;
-    const static float TRACKCOORDY = 0.0;
-    const static float TRACKMODULEV = 1.0;
-    const static float TRACKVECTORV = -M_PI_2;
+    Q_OBJECT
 
 public:
     Painter(QWidget *_parent = 0);
     ~Painter();
 
     int nBase;      /// Количество баз
-    int nTracks;    /// Количество трасс
+    int nTrack;     /// Количество трасс
 
-    struct Base         /// База
-    {
-        QPointF coord;  /// Координаты центра
-        float radius;   /// Радиус
-    };
+    int sizeOfMemory;   /// Длина следа
 
-    struct Track                    /// Трасса
+    /// Переменные, связанные со временем
+    QTimer *tTime;      /// Таймер времени
+    float totalTime;    /// Общее время моделирования (в секундах)
+    float time;         /// Текущее время
+
+    struct Base
     {
-        QPointF coord;              /// Координаты цели
-        float moduleV;              /// Модуль скорости цели
-        float vectorV;              /// Направление скорости цели
-        float angleBase;            /// Угол видимости базы
-        float angelVtoBase;         /// Угол между вектором скорости цели и прямой до центра базы
-        float distBase;             /// Расстояние до центра базы
-        QPointF tangentPoints[2];   /// Точки касания
+        QPointF pos;        /// Координаты
+        float radius;       /// Радиус
     };
+    QVector <Base> base;    /// Базы
+
+    struct Track
+    {
+        QPointF pos;        /// Координаты
+        float modV;         /// Модуль вектора скорости
+        float angV;         /// Угол вектора скорости от оси ординат
+
+        struct Target
+        {
+            float angVis;   /// Угол видимости базы
+            float angToV;   /// Угол между вектором скорости и прямой до центра базы
+            float dist;     /// Расстояние до центра базы
+            QPointF p1, p2; /// Точки касания
+        };
+        QVector <Target> target;    /// Цели
+    };
+    QVector <Track> track;  /// Трассы
 
 protected:
-    void timerEvent(QTimerEvent * _tEvent);
     void paintEvent(QPaintEvent * _pEvent);
 
-private:
-    float getTangentPoints(QPointF *_track, QPointF *_base,
-                           float _radius, QPointF *_tangentPoints);   /// Вычисление точек касания
+private slots:
+    void timerOut();
 
-    QVector <Base> bases;
-    QVector <Track> tracks;
+private:
+    void initializationParOfBase();     /// Начальная инициализация параметров баз
+    void initializationParOfTrack();    /// Начальная инициализация параметров трасс
+
+    /// Вычисление точек касания
+    float getTanPoints(const QPointF *_track, const QPointF *_base,
+                       const float _radius, QPointF *_p1, QPointF *_p2);
 };
 
 #endif // PAINTER_H

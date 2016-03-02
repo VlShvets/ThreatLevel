@@ -15,13 +15,18 @@ TARGET = CalcAngle
 TEMPLATE = app
 
 SOURCES += main.cpp\
+    settingtotal.cpp \
     painter.cpp \
-    tool.cpp \
-    calcangle.cpp
+    calcangle.cpp \
+    settingbase.cpp \
+    settingtrack.cpp
 
-HEADERS  += painter.h \
-    tool.h \
-    calcangle.h
+HEADERS  += \
+    settingtotal.h \
+    painter.h \
+    calcangle.h \
+    settingbase.h \
+    settingtrack.h
 
 unix {
     target.path = /usr/lib

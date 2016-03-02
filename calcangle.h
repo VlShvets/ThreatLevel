@@ -1,12 +1,15 @@
 #ifndef CALCANGLE_H
 #define CALCANGLE_H
 
-#include <QtCore/qglobal.h>
 #include <QApplication>
 #include <QMainWindow>
 #include <QTextCodec>
+#include <QToolBar>
+#include <QDockWidget>
 
-#include "tool.h"
+#include "settingbase.h"
+#include "settingtrack.h"
+#include "settingtotal.h"
 
 class CalcAngle : public QMainWindow
 {
@@ -16,7 +19,9 @@ public:
 
 private:
     Painter *painter;
-    Tool *tool;
+    SettingBase *settingBase;
+    SettingTrack *settingTrack;
+    SettingTotal *settingTotal;
 };
 
 #endif // CALCANGLE_H

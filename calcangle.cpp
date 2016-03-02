@@ -9,20 +9,35 @@ CalcAngle::CalcAngle(QWidget *_parent)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
 #endif
 
-    painter = new Painter();
-    this->setCentralWidget(painter);
+    painter = new Painter;
+    settingBase = new SettingBase(painter);
+    settingTrack = new SettingTrack(painter);
+    settingTotal = new SettingTotal(painter);
 
-    tool = new Tool(painter);
-    QDockWidget *dTool = new QDockWidget;
-    dTool->setWidget(tool);
-    dTool->setAllowedAreas(Qt::AllDockWidgetAreas);
-    dTool->setFeatures(QDockWidget::DockWidgetMovable);
-    dTool->setMaximumHeight(100);
-    addDockWidget(Qt::TopDockWidgetArea, dTool);
+    setCentralWidget(painter);
+
+    QDockWidget *dSettingForBase = new QDockWidget(this);
+    dSettingForBase->setWidget(settingBase);
+    dSettingForBase->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
+    dSettingForBase->setFeatures(QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::LeftDockWidgetArea, dSettingForBase);
+
+    QDockWidget *dSettingTrack = new QDockWidget(this);
+    dSettingTrack->setWidget(settingTrack);
+    dSettingTrack->setAllowedAreas(Qt::RightDockWidgetArea | Qt::LeftDockWidgetArea);
+    dSettingTrack->setFeatures(QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::LeftDockWidgetArea, dSettingTrack);
+
+    QToolBar *tSettingTotal = new QToolBar(this);
+    tSettingTotal->addWidget(settingTotal);
+    tSettingTotal->setMovable(false);
+    addToolBar(tSettingTotal);
 }
 
 CalcAngle::~CalcAngle()
 {
+    delete settingBase;
+    delete settingTrack;
+    delete settingTotal;
     delete painter;
-    delete tool;
 }
