@@ -6,12 +6,16 @@
 
 #include "grapher2d.h"
 
+#include "results.h"
+
+#define LENGTHARROW 30  /// Длина отображаемой стрелки вектора скорости в пикселях
+
 class Painter : public Grapher2D
 {
     Q_OBJECT
 
 public:
-    Painter(QWidget *_parent = 0);
+    Painter(class Results *_results, QWidget *_parent = 0);
     ~Painter();
 
     int nBase;      /// Количество баз
@@ -39,8 +43,7 @@ public:
 
         struct Target
         {
-            float angVis;   /// Угол видимости базы
-            float angToV;   /// Угол между вектором скорости и прямой до центра базы
+            float time;     /// Время достижения цели
             float dist;     /// Расстояние до центра базы
             QPointF p1, p2; /// Точки касания
         };
@@ -61,6 +64,8 @@ private:
     /// Вычисление точек касания
     float getTanPoints(const QPointF *_track, const QPointF *_base,
                        const float _radius, QPointF *_p1, QPointF *_p2);
+
+    class Results *results;
 };
 
 #endif // PAINTER_H

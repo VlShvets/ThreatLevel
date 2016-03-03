@@ -19,14 +19,16 @@ SOURCES += main.cpp\
     painter.cpp \
     calcangle.cpp \
     settingbase.cpp \
-    settingtrack.cpp
+    settingtrack.cpp \
+    results.cpp
 
 HEADERS  += \
     settingtotal.h \
     painter.h \
     calcangle.h \
     settingbase.h \
-    settingtrack.h
+    settingtrack.h \
+    results.h
 
 unix {
     target.path = /usr/lib

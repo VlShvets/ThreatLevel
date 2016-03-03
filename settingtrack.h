@@ -3,8 +3,8 @@
 
 #include <QGridLayout>
 #include <QLabel>
-#include <QLCDNumber>
 #include <QSlider>
+#include <QLCDNumber>
 #include <QTableWidget>
 
 #include "painter.h"
@@ -14,8 +14,8 @@ class SettingTrack : public QWidget
     Q_OBJECT
 
 public:
-    explicit SettingTrack(class Painter *_painter, QWidget *parent = 0);    /// Конструктор класса
-    ~SettingTrack();                                                        /// Деструктор класса
+    explicit SettingTrack(class Painter *_painter, QWidget *parent = 0);
+    ~SettingTrack();
 
 private slots:
     void changeNumberTrack(int _count);     /// Изменение количества целей

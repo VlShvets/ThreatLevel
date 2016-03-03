@@ -18,6 +18,7 @@ public:
     ~CalcAngle();
 
 private:
+    Results *results;
     Painter *painter;
     SettingBase *settingBase;
     SettingTrack *settingTrack;

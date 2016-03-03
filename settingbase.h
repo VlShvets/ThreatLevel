@@ -3,8 +3,8 @@
 
 #include <QGridLayout>
 #include <QLabel>
-#include <QLCDNumber>
 #include <QSlider>
+#include <QLCDNumber>
 #include <QTableWidget>
 
 #include "painter.h"
@@ -14,8 +14,8 @@ class SettingBase : public QWidget
     Q_OBJECT
 
 public:
-    explicit SettingBase(Painter *_painter, QWidget *parent = 0);   /// Конструктор класса
-    ~SettingBase();                                                 /// Деструктор класса
+    explicit SettingBase(Painter *_painter, QWidget *parent = 0);
+    ~SettingBase();
 
 private slots:
     void changeNumberBase(int _count);  /// Изменение количества баз

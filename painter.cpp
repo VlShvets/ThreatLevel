@@ -1,7 +1,7 @@
 #include "painter.h"
 
-Painter::Painter(QWidget *_parent)
-    : Grapher2D(_parent)
+Painter::Painter(Results *_results, QWidget *_parent)
+    : Grapher2D(_parent), results(_results)
 {
     setCSAbsMeasure(1000);
     setCSOrdMeasure(1000);
@@ -105,8 +105,8 @@ float Painter::getTanPoints(const QPointF *_track, const QPointF *_base, const f
         _p2->setX((E - _p2->y() * midDistTargetBase.y()) / midDistTargetBase.x());
     }
 
-    _p1[0] += *_base;
-    _p2[1] += *_base;
+    *_p1 += *_base;
+    *_p2 += *_base;
 
     return distance;
 }
@@ -148,19 +148,19 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         for(int i = 0; i < nBase; ++i)
         {
             track[j].target.push_back(Track::Target());
-            track[j].target[i].dist = getTanPoints(&track.at(j).pos, &base.at(i).pos, base.at(i).radius,
+            track[j].target[i].dist = getTanPoints(&pTrack.at(j), &base.at(i).pos, base.at(i).radius,
                                                       &track[j].target[i].p1, &track[j].target[i].p2);
 
-            /// Кратчайшее растояние
+            /// Угол видимости
             pen.setColor(Qt::darkBlue);
             p.setPen(pen);
-            p.drawLine(base.at(i).pos, pTrack.at(j));
+            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p1);
+            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p2);
 
-//            /// Угол видимости
-//            pen.setColor(Qt::darkGreen);
-//            p.setPen(pen);
-//            p.drawLine(track.at(j).pos, track.at(j).target.at(i).p1);
-//            p.drawLine(track.at(j).pos, track.at(j).target.at(i).p2);
+            /// Кратчайшее растояние
+            pen.setColor(Qt::darkRed);
+            p.setPen(pen);
+            p.drawLine(base.at(i).pos, pTrack.at(j));
         }
     }
 

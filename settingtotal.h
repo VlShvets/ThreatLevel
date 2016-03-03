@@ -6,8 +6,8 @@
 #include <QLabel>
 #include <QSlider>
 #include <QPushButton>
-#include <QSpinBox>
 #include <QStyle>
+#include <QSpinBox>
 
 #include "painter.h"
 
@@ -16,8 +16,8 @@ class SettingTotal : public QWidget
     Q_OBJECT
 
 public:
-    explicit SettingTotal(class Painter *_painter, QWidget *parent = 0);    /// Конструктор класса
-    ~SettingTotal();                                                        /// Деструктор класса
+    explicit SettingTotal(class Painter *_painter, QWidget *parent = 0);
+    ~SettingTotal();
 
 private slots:
     void changeSizeMemory(int _count);  /// Изменение длины следа
