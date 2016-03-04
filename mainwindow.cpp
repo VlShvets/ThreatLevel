@@ -1,6 +1,9 @@
-#include "calcangle.h"
+#include "mainwindow.h"
 
-CalcAngle::CalcAngle(QWidget *_parent)
+namespace ThreatLevel
+{
+
+MainWindow::MainWindow(QWidget *_parent)
     : QMainWindow(_parent)
 {
 #ifdef Q_OS_WIN         /// Widnows
@@ -8,6 +11,8 @@ CalcAngle::CalcAngle(QWidget *_parent)
 #elif defined Q_OS_UNIX /// Linux
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
 #endif
+
+    this->setWindowTitle(QObject::tr("Определение уровня угроз"));
 
     results = new Results;
     painter = new Painter(results);
@@ -35,17 +40,19 @@ CalcAngle::CalcAngle(QWidget *_parent)
     addDockWidget(Qt::LeftDockWidgetArea, dSettingTrack);
 
     QDockWidget *dResults = new QDockWidget(this);
-    dResults->setWidget(settingTrack);
+    dResults->setWidget(results);
     dResults->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dResults->setFeatures(QDockWidget::DockWidgetMovable);
     addDockWidget(Qt::RightDockWidgetArea, dResults);
 }
 
-CalcAngle::~CalcAngle()
+MainWindow::~MainWindow()
 {
     delete settingBase;
     delete settingTrack;
     delete settingTotal;
     delete painter;
     delete results;
+}
+
 }

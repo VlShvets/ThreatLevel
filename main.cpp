@@ -1,11 +1,11 @@
-#include "calcangle.h"
+#include "mainwindow.h"
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    CalcAngle calcAngle;
-    calcAngle.showMaximized();
+    ThreatLevel::MainWindow mainWindow;
+    mainWindow.showMaximized();
 
     return a.exec();
 }

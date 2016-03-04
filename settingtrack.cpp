@@ -1,10 +1,11 @@
 #include "settingtrack.h"
 
+namespace ThreatLevel
+{
+
 SettingTrack::SettingTrack(Painter *_painter, QWidget *parent) :
     QWidget(parent), painter(_painter)
 {
-    this->setWindowTitle(QObject::tr("Параметры трасс"));
-
     QGridLayout *gridLayout = new QGridLayout(this);
 
     gridLayout->addWidget(new QLabel(QObject::tr("Количество целей: ")), 0, 0, 1, 1);
@@ -12,56 +13,49 @@ SettingTrack::SettingTrack(Painter *_painter, QWidget *parent) :
     QSlider *sliderTrack = new QSlider(Qt::Horizontal);
     sliderTrack->setRange(1, 9);
     sliderTrack->setTickInterval(1);
-    sliderTrack->setValue(painter->nTrack);
+    sliderTrack->setValue(painter->getNumberOfTracks());
     sliderTrack->setTickPosition(QSlider::TicksAbove);
     sliderTrack->setFixedWidth(100);
-    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), this, SLOT(changeNumberTrack(int)));
+    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), painter, SLOT(setNumberOfTracks(int)));
+    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), this, SLOT(loadTable(int)));
     gridLayout->addWidget(sliderTrack, 0, 1, 1, 1);
 
-    lNumberTrack = new QLCDNumber(1);
+    QLCDNumber *lNumberTrack = new QLCDNumber(1);
     lNumberTrack->setSegmentStyle(QLCDNumber::Flat);
     lNumberTrack->setMode(QLCDNumber::Dec);
-    lNumberTrack->display(painter->nTrack);
+    lNumberTrack->display(painter->getNumberOfTracks());
     lNumberTrack->setFixedWidth(100);
+    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), lNumberTrack, SLOT(display(int)));
     gridLayout->addWidget(lNumberTrack, 0, 2, 1, 1);
 
     gridLayout->addWidget(new QLabel(QObject::tr("\tПараметры целей:")), 1, 0, 1, 3);
 
-    tParTrack = new QTableWidget(painter->nTrack, 4, this);
+    tParTrack = new QTableWidget(painter->getNumberOfTracks(), 4, this);
     tParTrack->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Скорость" << "Курс");
     QObject::connect(tParTrack, SIGNAL(cellChanged(int,int)), this, SLOT(changeParTrack(int,int)));
     gridLayout->addWidget(tParTrack, 2, 0, 1, 3);
 
-    loadTable();
+    loadTable(painter->getNumberOfTracks());
 
     this->setLayout(gridLayout);
 }
 
 SettingTrack::~SettingTrack()
 {
-    delete lNumberTrack;
     delete tParTrack;
 }
 
-void SettingTrack::loadTable()
+void SettingTrack::loadTable(int _number)
 {
-    for(int i = 0; i < painter->nTrack; ++i)
+    tParTrack->setRowCount(_number);
+
+    for(int i = 0; i < _number; ++i)
     {
-        tParTrack->setItem(i, 0, new QTableWidgetItem(QString::number(painter->track.at(i).pos.x())));
-        tParTrack->setItem(i, 1, new QTableWidgetItem(QString::number(painter->track.at(i).pos.y())));
-        tParTrack->setItem(i, 2, new QTableWidgetItem(QString::number(painter->track.at(i).modV)));
-        tParTrack->setItem(i, 3, new QTableWidgetItem(QString::number(painter->track.at(i).angV)));
+        tParTrack->setItem(i, 0, new QTableWidgetItem(QString::number(painter->trackAt(i).pos.x())));
+        tParTrack->setItem(i, 1, new QTableWidgetItem(QString::number(painter->trackAt(i).pos.y())));
+        tParTrack->setItem(i, 2, new QTableWidgetItem(QString::number(painter->trackAt(i).modV)));
+        tParTrack->setItem(i, 3, new QTableWidgetItem(QString::number(painter->trackAt(i).angV)));
     }
-}
-
-void SettingTrack::changeNumberTrack(int _count)
-{
-    painter->nTrack = _count;
-
-    tParTrack->setRowCount(_count);
-    loadTable();
-
-    lNumberTrack->display(_count);
 }
 
 void SettingTrack::changeParTrack(int _i, int _j)
@@ -70,22 +64,22 @@ void SettingTrack::changeParTrack(int _i, int _j)
     {
     case 0:
     {
-        painter->track[_i].pos.setX(tParTrack->item(_i, _j)->text().toFloat());
+        painter->getTrack(_i).pos.setX(tParTrack->item(_i, _j)->text().toFloat());
         break;
     }
     case 1:
     {
-        painter->track[_i].pos.setY(tParTrack->item(_i, _j)->text().toFloat());
+        painter->getTrack(_i).pos.setY(tParTrack->item(_i, _j)->text().toFloat());
         break;
     }
     case 2:
     {
-        painter->track[_i].modV = tParTrack->item(_i, _j)->text().toFloat();
+        painter->getTrack(_i).modV = tParTrack->item(_i, _j)->text().toFloat();
         break;
     }
     case 3:
     {
-        painter->track[_i].angV = tParTrack->item(_i, _j)->text().toFloat();
+        painter->getTrack(_i).angV = tParTrack->item(_i, _j)->text().toFloat();
         break;
     }
     default:
@@ -95,4 +89,6 @@ void SettingTrack::changeParTrack(int _i, int _j)
     }
 
     painter->repaint();
+}
+
 }

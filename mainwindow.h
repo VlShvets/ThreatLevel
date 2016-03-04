@@ -11,11 +11,14 @@
 #include "settingtrack.h"
 #include "settingtotal.h"
 
-class CalcAngle : public QMainWindow
+namespace ThreatLevel
+{
+
+class MainWindow : public QMainWindow
 {
 public:
-    CalcAngle(QWidget *_parent = 0);
-    ~CalcAngle();
+    MainWindow(QWidget *_parent = 0);
+    ~MainWindow();
 
 private:
     Results *results;
@@ -24,5 +27,7 @@ private:
     SettingTrack *settingTrack;
     SettingTotal *settingTotal;
 };
+
+}
 
 #endif // CALCANGLE_H

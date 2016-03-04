@@ -1,9 +1,12 @@
 #ifndef RESULTS_H
 #define RESULTS_H
 
-#include <QGridLayout>
+#include <QVBoxLayout>
 #include <QLabel>
 #include <QTableWidget>
+
+namespace ThreatLevel
+{
 
 class Results : public QWidget
 {
@@ -13,12 +16,15 @@ public:
     explicit Results(QWidget *parent = 0);
     ~Results();
 
-    void loadTable();
+    void loadTable(const QVector<QVector<float> > *_times, int _nBase, int _nTrack);
 
-signals:
+private:
+    int getIndexMinElement(const QVector <float> *_vector);
 
-public slots:
-    QTableWidget *tResults;  /// Таблица результатов
+
+    QTableWidget *tResults;     /// Таблица результатов
 };
+
+}
 
 #endif // RESULTS_H

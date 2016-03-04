@@ -1,5 +1,8 @@
 #include "painter.h"
 
+namespace ThreatLevel
+{
+
 Painter::Painter(Results *_results, QWidget *_parent)
     : Grapher2D(_parent), results(_results)
 {
@@ -7,16 +10,11 @@ Painter::Painter(Results *_results, QWidget *_parent)
     setCSOrdMeasure(1000);
     setCSZoom(2);
 
-    this->setWindowTitle(QObject::tr("Определение уровня угроз"));
-
     nBase = 3;
     nTrack = 3;
 
-    sizeOfMemory = 100;
+    speedFactor = 1.0;
     totalTime = 60.0;
-
-    tTime = new QTimer(this);
-    QObject::connect(tTime, SIGNAL(timeout()), this, SLOT(timerOut()));
 
     initializationParOfBase();
     initializationParOfTrack();
@@ -24,7 +22,6 @@ Painter::Painter(Results *_results, QWidget *_parent)
 
 Painter::~Painter()
 {
-    delete tTime;
     base.clear();
     track.clear();
 }
@@ -49,14 +46,20 @@ void Painter::initializationParOfTrack()
     }
 }
 
-void Painter::timerOut()
+void Painter::timerEvent(QTimerEvent *)
 {
     /// Время
     if(time < totalTime)
-        time += 0.1;
+        time += 0.1 * speedFactor;
     else
         time = 0;
 
+    repaint();
+}
+
+void Painter::resetTime()
+{
+    time = 0.0;
     repaint();
 }
 
@@ -64,10 +67,8 @@ void Painter::timerOut()
 //{
 //    /// Определение угла видимости базы
 //    track.angleBase = qAsin(base.radius / track.distBase);
-////    qDebug() << "target.angleBase = " << qRadiansToDegrees(target.angleBase);
 
-//    repaint();
-
+//    /// Условие окончания
 //    if(qAbs(base.coord.x() - track.coord.x()) < base.radius ||
 //       qAbs(base.coord.y() - track.coord.x()) < base.radius ||
 //       ++time == TOTALTIME)
@@ -109,6 +110,22 @@ float Painter::getTanPoints(const QPointF *_track, const QPointF *_base, const f
     *_p2 += *_base;
 
     return distance;
+}
+
+double Painter::angleRotate(float _x, float _y)
+{
+    if(_x > 0)
+        return qAtan(_y / _x);
+    else if(_x < 0 && _y >= 0)
+        return M_PI + qAtan(_y / _x);
+    else if(_x < 0 && _y < 0)
+        return -M_PI + qAtan(_y / _x);
+    else if(_x == 0 && _y > 0)
+        return M_PI_2;
+    else if(_x == 0 && _y < 0)
+        return -M_PI_2;
+    else
+        return 0.0;
 }
 
 void Painter::paintEvent(QPaintEvent * _pEvent)
@@ -164,7 +181,19 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         }
     }
 
+    /// Определение уровня угроз
+    QVector <QVector <float> > _times;
+    for(int i = 0; i < nBase; ++i)
+    {
+        _times.push_back(QVector <float>());
+        for(int j = 0; j < nTrack; ++j)
+            _times[i].push_back(track.at(j).target.at(i).dist / track.at(j).modV);
+    }
+    results->loadTable(&_times, nBase, nTrack);
+
     pTrack.clear();
 
     p.end();
+}
+
 }

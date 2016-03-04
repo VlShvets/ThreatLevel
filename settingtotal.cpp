@@ -1,5 +1,8 @@
 #include "settingtotal.h"
 
+namespace ThreatLevel
+{
+
 SettingTotal::SettingTotal(Painter *_painter, QWidget *parent) :
     QWidget(parent), painter(_painter), isStart(false)
 {
@@ -7,20 +10,29 @@ SettingTotal::SettingTotal(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QSplitter());
 
-    hLayout->addWidget(new QLabel(QObject::tr("Длина следа:")));
+    hLayout->addWidget(new QLabel(QObject::tr("Коэффициент скорости (x 0.1):")));
 
-    QSlider *sliderMemory = new QSlider(Qt::Horizontal);
-    sliderMemory->setRange(0, 200);
-    sliderMemory->setTickInterval(20);
-    sliderMemory->setValue(painter->sizeOfMemory);
-    sliderMemory->setTickPosition(QSlider::TicksAbove);
-    QObject::connect(sliderMemory, SIGNAL(valueChanged(int)), this, SLOT(changeSizeMemory(int)));
-    hLayout->addWidget(sliderMemory);
+    QSlider *sSpeedFactor = new QSlider(Qt::Horizontal);
+    sSpeedFactor->setRange(1, 20);
+    sSpeedFactor->setTickInterval(1);
+    sSpeedFactor->setValue(painter->getSpeedFactor());
+    sSpeedFactor->setTickPosition(QSlider::TicksAbove);
+    QObject::connect(sSpeedFactor, SIGNAL(valueChanged(int)), painter, SLOT(setSpeedFactor(int)));
+    hLayout->addWidget(sSpeedFactor);
+
+    QLCDNumber *lSpeedFactor = new QLCDNumber(2);
+    lSpeedFactor->setSegmentStyle(QLCDNumber::Flat);
+    lSpeedFactor->setMode(QLCDNumber::Dec);
+    lSpeedFactor->display(painter->getSpeedFactor());
+    QObject::connect(sSpeedFactor, SIGNAL(valueChanged(int)), lSpeedFactor, SLOT(display(int)));
+    hLayout->addWidget(lSpeedFactor);
+
+    hLayout->addWidget(new QSplitter());
 
     pStartStop = new QPushButton;
     pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     pStartStop->setFixedWidth(200);
-    QObject::connect(pStartStop, SIGNAL(clicked()), this, SLOT(visualizerStartStop()));
+    QObject::connect(pStartStop, SIGNAL(clicked()), this, SLOT(changeState()));
     hLayout->addWidget(pStartStop);
 
     hLayout->addWidget(new QSplitter());
@@ -28,15 +40,15 @@ SettingTotal::SettingTotal(Painter *_painter, QWidget *parent) :
     hLayout->addWidget(new QLabel(QObject::tr("Время моделирования:")));
 
     QSpinBox *sTotalTime = new QSpinBox(this);
-    sTotalTime->setValue((int) painter->totalTime);
+    sTotalTime->setValue(painter->getTotalTime());
     sTotalTime->setRange(0, 600);
     sTotalTime->setSuffix(QObject::tr(" c"));
-    QObject::connect(sTotalTime, SIGNAL(valueChanged(int)), this, SLOT(changeTotalTime(int)));
+    QObject::connect(sTotalTime, SIGNAL(valueChanged(int)), painter, SLOT(setTotalTime(int)));
     hLayout->addWidget(sTotalTime);
 
     pStartFromStart = new QPushButton(QObject::tr("Начать с начала"));
     pStartFromStart->setFixedWidth(200);
-    QObject::connect(pStartFromStart, SIGNAL(clicked()), this, SLOT(visualizerStartFromStart()));
+    QObject::connect(pStartFromStart, SIGNAL(clicked()), painter, SLOT(resetTime()));
     hLayout->addWidget(pStartFromStart);
 
     hLayout->addWidget(new QSplitter());
@@ -50,36 +62,20 @@ SettingTotal::~SettingTotal()
     delete pStartFromStart;
 }
 
-void SettingTotal::changeSizeMemory(int _count)
+void SettingTotal::changeState()
 {
-    painter->sizeOfMemory = _count + 1;
-}
-
-void SettingTotal::visualizerStartStop()
-{
+    static int nTimer;
     if(isStart)
     {
-        painter->tTime->stop();
-
+        painter->killTimer(nTimer);
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     }
     else
     {
-        painter->tTime->start(100);
-
+        nTimer = painter->startTimer(100);
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     }
     isStart = !isStart;
 }
 
-void SettingTotal::changeTotalTime(int _count)
-{
-    painter->totalTime = (float) _count;
-}
-
-void SettingTotal::visualizerStartFromStart()
-{
-    painter->time = 0.0;
-
-    painter->repaint();
 }

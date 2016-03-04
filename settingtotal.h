@@ -3,13 +3,16 @@
 
 #include <QHBoxLayout>
 #include <QSplitter>
-#include <QLabel>
 #include <QSlider>
+#include <QLCDNumber>
 #include <QPushButton>
 #include <QStyle>
 #include <QSpinBox>
 
 #include "painter.h"
+
+namespace ThreatLevel
+{
 
 class SettingTotal : public QWidget
 {
@@ -20,10 +23,7 @@ public:
     ~SettingTotal();
 
 private slots:
-    void changeSizeMemory(int _count);  /// Изменение длины следа
-    void visualizerStartStop();         /// Запуск и остановка отрисовщика
-    void changeTotalTime(int _count);   /// Изменение времени моделирования
-    void visualizerStartFromStart();    /// Запуск с начала
+    void changeState();     /// Запуск и остановка отрисовщика
 
 private:    
     class Painter *painter;
@@ -32,5 +32,7 @@ private:
     QPushButton *pStartStop;        /// Кнопка запуска и остановки процессов
     QPushButton *pStartFromStart;   /// Кнопка запуска с начала
 };
+
+}
 
 #endif // SETTINGTOTAL_H
