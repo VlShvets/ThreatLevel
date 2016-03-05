@@ -31,7 +31,7 @@ SettingTrack::SettingTrack(Painter *_painter, QWidget *parent) :
     gridLayout->addWidget(new QLabel(QObject::tr("\tПараметры целей:")), 1, 0, 1, 3);
 
     tParTrack = new QTableWidget(painter->getNumberOfTracks(), 4, this);
-    tParTrack->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Скорость" << "Курс");
+    tParTrack->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Скорость" << "Курс (град.)");
     QObject::connect(tParTrack, SIGNAL(cellChanged(int,int)), this, SLOT(changeParTrack(int,int)));
     gridLayout->addWidget(tParTrack, 2, 0, 1, 3);
 
@@ -54,7 +54,7 @@ void SettingTrack::loadTable(int _number)
         tParTrack->setItem(i, 0, new QTableWidgetItem(QString::number(painter->trackAt(i).pos.x())));
         tParTrack->setItem(i, 1, new QTableWidgetItem(QString::number(painter->trackAt(i).pos.y())));
         tParTrack->setItem(i, 2, new QTableWidgetItem(QString::number(painter->trackAt(i).modV)));
-        tParTrack->setItem(i, 3, new QTableWidgetItem(QString::number(painter->trackAt(i).angV)));
+        tParTrack->setItem(i, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(painter->trackAt(i).angV))));
     }
 }
 
@@ -79,7 +79,7 @@ void SettingTrack::changeParTrack(int _i, int _j)
     }
     case 3:
     {
-        painter->getTrack(_i).angV = tParTrack->item(_i, _j)->text().toFloat();
+        painter->getTrack(_i).angV = qDegreesToRadians(tParTrack->item(_i, _j)->text().toFloat());
         break;
     }
     default:

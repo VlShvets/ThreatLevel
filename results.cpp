@@ -48,6 +48,8 @@ void Results::loadTable(const QVector <QVector <float> > *_times, int _nBase, in
         tResults->item(_nBase, j)->setTextColor(Qt::darkRed);
         temp.clear();
     }
+
+    tResults->takeItem(_nBase, _nTrack);
 }
 
 int Results::getIndexMinElement(const QVector<float> *_vector)

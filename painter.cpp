@@ -1,5 +1,7 @@
 #include "painter.h"
 
+#include <QDebug>
+
 namespace ThreatLevel
 {
 
@@ -42,7 +44,7 @@ void Painter::initializationParOfTrack()
         track[j].pos.setX(-100000.0 + 20000 * (int) (j / 3));
         track[j].pos.setY(50000.0 + 20000 * (j % 3));
         track[j].modV = 3000.0;
-        track[j].angV = 90.0;
+        track[j].angV = M_PI_2;
     }
 }
 
@@ -112,20 +114,11 @@ float Painter::getTanPoints(const QPointF *_track, const QPointF *_base, const f
     return distance;
 }
 
-double Painter::angleRotate(float _x, float _y)
+float Painter::normalDistribution(float _mean, float _dev)
 {
-    if(_x > 0)
-        return qAtan(_y / _x);
-    else if(_x < 0 && _y >= 0)
-        return M_PI + qAtan(_y / _x);
-    else if(_x < 0 && _y < 0)
-        return -M_PI + qAtan(_y / _x);
-    else if(_x == 0 && _y > 0)
-        return M_PI_2;
-    else if(_x == 0 && _y < 0)
-        return -M_PI_2;
-    else
-        return 0.0;
+    float y = (float) qrand() / (RAND_MAX * _dev * qSqrt(2 * M_PI));
+    float ln = qLn(y * _dev * qSqrt(2 * M_PI));
+    return (qrand() % 2 == 0 ? 1.0 : -1.0) * qSqrt((ln < 0 ? -2.0 : 2.0) * _dev * _dev * ln) + _mean;
 }
 
 void Painter::paintEvent(QPaintEvent * _pEvent)
@@ -153,8 +146,8 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     p.setPen(pen);
     for(int j = 0; j < nTrack; ++j)
     {
-        pTrack.push_back(track.at(j).pos + QPoint(track.at(j).modV * qCos(M_PI_2 - (2 * M_PI / 360) * track.at(j).angV) * time,
-                                                  track.at(j).modV * qSin(M_PI_2 - (2 * M_PI / 360) * track.at(j).angV) * time));
+        pTrack.push_back(track.at(j).pos + QPoint(track.at(j).modV * qCos(M_PI_2 - track.at(j).angV) * time + normalDistribution(0, 1000),
+                                                  track.at(j).modV * qSin(M_PI_2 - track.at(j).angV) * time + normalDistribution(0, 1000)));
         p.drawPoint(pTrack.at(j));
     }
 
@@ -187,7 +180,9 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     {
         _times.push_back(QVector <float>());
         for(int j = 0; j < nTrack; ++j)
-            _times[i].push_back(track.at(j).target.at(i).dist / track.at(j).modV);
+            _times[i].push_back((track.at(j).target.at(i).dist - base.at(i).radius) /
+                                (track.at(j).modV * qCos(track.at(j).angV + qAtan2(base.at(i).pos.y() - pTrack.at(j).y(),
+                                                                                   base.at(i).pos.x() - pTrack.at(j).x()) - M_PI_2)));
     }
     results->loadTable(&_times, nBase, nTrack);
 

@@ -20,13 +20,13 @@ struct Track
 {
     QPointF pos;        /// Координаты
     float modV;         /// Модуль вектора скорости
-    float angV;         /// Угол вектора скорости от оси ординат
+    float angV;         /// Курс (в радианах)
 
     struct Target
     {
         float dist;     /// Расстояние до центра базы
 
-        QPointF p1, p2; /// Точки касания
+        QPointF p1, p2; /// Точки касания угла видимости
     };
     QVector <Target> target;    /// Цели
 };
@@ -65,11 +65,11 @@ private:
     void initializationParOfTrack();    /// Начальная инициализация параметров трасс
 
     /// Вычисление точек касания
-    float getTanPoints(const QPointF *_track, const QPointF *_base,
-                       const float _radius, QPointF *_p1, QPointF *_p2);
+    static float getTanPoints(const QPointF *_track, const QPointF *_base,
+                              const float _radius, QPointF *_p1, QPointF *_p2);
 
-    /// Вычисление угла поворота
-    double angleRotate(float _x, float _y);
+    /// Нормально распределенная случайная величина
+    static float normalDistribution(float _mean, float _dev);
 
     class Results *results;
 
