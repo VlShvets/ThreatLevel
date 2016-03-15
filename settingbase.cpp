@@ -11,7 +11,7 @@ SettingBase::SettingBase(Painter *_painter, QWidget *parent) :
     gridLayout->addWidget(new QLabel(QObject::tr("Количество баз: ")), 0, 0, 1, 1);
 
     QSlider *sliderBase = new QSlider(Qt::Horizontal);
-    sliderBase->setRange(1, 5);
+    sliderBase->setRange(1, MAXNUMBASES);
     sliderBase->setTickInterval(1);
     sliderBase->setValue(painter->getNumberOfBases());
     sliderBase->setTickPosition(QSlider::TicksAbove);

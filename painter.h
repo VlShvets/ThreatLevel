@@ -10,6 +10,10 @@
 namespace ThreatLevel
 {
 
+const int MAXNUMBASES = 5;
+const int MAXNUMTRACKS = 20;
+const int NUMTRACKINGROUP = 4;
+
 struct Base
 {
     QPointF pos;        /// Координаты

@@ -11,7 +11,7 @@ SettingTrack::SettingTrack(Painter *_painter, QWidget *parent) :
     gridLayout->addWidget(new QLabel(QObject::tr("Количество целей: ")), 0, 0, 1, 1);
 
     QSlider *sliderTrack = new QSlider(Qt::Horizontal);
-    sliderTrack->setRange(1, 9);
+    sliderTrack->setRange(1, MAXNUMTRACKS);
     sliderTrack->setTickInterval(1);
     sliderTrack->setValue(painter->getNumberOfTracks());
     sliderTrack->setTickPosition(QSlider::TicksAbove);
@@ -20,7 +20,7 @@ SettingTrack::SettingTrack(Painter *_painter, QWidget *parent) :
     QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), this, SLOT(loadTable(int)));
     gridLayout->addWidget(sliderTrack, 0, 1, 1, 1);
 
-    QLCDNumber *lNumberTrack = new QLCDNumber(1);
+    QLCDNumber *lNumberTrack = new QLCDNumber(2);
     lNumberTrack->setSegmentStyle(QLCDNumber::Flat);
     lNumberTrack->setMode(QLCDNumber::Dec);
     lNumberTrack->display(painter->getNumberOfTracks());
