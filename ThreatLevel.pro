@@ -17,18 +17,18 @@ TEMPLATE = app
 SOURCES += main.cpp\
     settingtotal.cpp \
     painter.cpp \
-    settingbase.cpp \
     settingtrack.cpp \
     results.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    settingarea.cpp
 
 HEADERS  += \
     settingtotal.h \
     painter.h \
-    settingbase.h \
     settingtrack.h \
     results.h \
-    mainwindow.h
+    mainwindow.h \
+    settingarea.h
 
 unix {
     target.path = /usr/lib
