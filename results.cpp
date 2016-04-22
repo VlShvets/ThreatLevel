@@ -7,7 +7,7 @@ Results::Results(QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 
-    vLayout->addWidget(new QLabel(QObject::tr("Базы\t\\\tРакеты")));
+    vLayout->addWidget(new QLabel(QObject::tr("Позиционные районы\t\\\tРакеты")));
 
     tResults = new QTableWidget(3, 5, this);
     tResults->setMinimumWidth(400);
@@ -32,7 +32,7 @@ void Results::loadTable(const QVector <QVector <float> > *_times, int _nBase, in
             tResults->setItem(i, j, new QTableWidgetItem(QString::number(_times->at(i).at(j))));
 
         /// Определение самой опасной трассы для каждой базы
-        tResults->setItem(i, _nTrack, new QTableWidgetItem(QString::number(_times->at(i).at(getIndexMinElement(&_times->at(i))))));
+        tResults->setItem(i, _nTrack, new QTableWidgetItem(QString::number(getIndexMinElement(&_times->at(i)) + 1)));
         tResults->item(i, getIndexMinElement(&_times->at(i)))->setBackgroundColor(QColor(255, 0, 0, 100));
         tResults->item(i, _nTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
     }
@@ -43,7 +43,7 @@ void Results::loadTable(const QVector <QVector <float> > *_times, int _nBase, in
         /// Определение наиболее вероятной базы каждой трассы
         for(int i = 0; i < _nBase; ++i)
             temp.push_back(_times->at(i).at(j));
-        tResults->setItem(_nBase, j, new QTableWidgetItem(QString::number(_times->at(getIndexMinElement(&temp)).at(j))));
+        tResults->setItem(_nBase, j, new QTableWidgetItem(QString::number(getIndexMinElement(&temp) + 1)));
         tResults->item(getIndexMinElement(&temp), j)->setTextColor(Qt::darkRed);
         tResults->item(_nBase, j)->setTextColor(Qt::darkRed);
         temp.clear();

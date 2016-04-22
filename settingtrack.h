@@ -4,6 +4,7 @@
 #include <QGridLayout>
 #include <QSlider>
 #include <QLCDNumber>
+#include <QTableWidget>
 
 #include "painter.h"
 
@@ -20,12 +21,12 @@ public:
 
 private slots:    
     void loadTable(int _number);            /// Загрузка таблицы с начальными данными
-    void changeParTrack(int _i, int _j);    /// Изменение параметров локаторов
+    void changeTrackPar(int _i, int _j);    /// Изменение параметров локаторов
 
 private:
     class Painter *painter;
 
-    QTableWidget *tParTrack;    /// Таблица параметров целей
+    QTableWidget *tTrackPar;    /// Таблица параметров целей
 };
 
 }

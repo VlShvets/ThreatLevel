@@ -3,34 +3,37 @@
 
 #include <QTimer>
 
-#include "grapher2d.h"
+#include "Grapher2D.h"
 
 #include "results.h"
 
 namespace ThreatLevel
 {
 
-const int MAXNUMBASES = 5;
-const int MAXNUMTRACKS = 20;
+const int MAXNUMAREAS = 5;
+const int MAXNUMTRACKS = 12;
 const int NUMTRACKINGROUP = 4;
 
-struct Base
+struct Area
 {
-    QPointF pos;        /// Координаты
-    float radius;       /// Радиус
+    QPointF pos;            /// Координаты
+    float radius;           /// Радиус
 };
 
 struct Track
 {
-    QPointF pos;        /// Координаты
-    float modV;         /// Модуль вектора скорости
-    float angV;         /// Курс (в радианах)
+    QPointF pos;            /// Координаты
+    float modV;             /// Модуль вектора скорости
+    float angV;             /// Курс (в радианах)
 
     struct Target
     {
-        float dist;     /// Расстояние до центра базы
+        float dist;         /// Расстояние до центра позиционного района
+        float angToV;       /// Угол между вектором скорости и прямой до центра позиционного района
 
-        QPointF p1, p2; /// Точки касания угла видимости
+        /// Точки касания угла видимости
+        QPointF p1;
+        QPointF p2;
     };
     QVector <Target> target;    /// Цели
 };
@@ -43,20 +46,20 @@ public:
     Painter(class Results *_results, QWidget *_parent = 0);
     ~Painter();
 
-    inline int getNumberOfBases();
-    inline int getNumberOfTracks();
+    inline int getAreaCount();
+    inline int getTrackCount();
     inline int getSpeedFactor();
     inline int getTotalTime();
 
-    inline Base baseAt(int _index) const;
-    inline Track trackAt(int _index) const;
+    inline const Area & areaAt(int _index) const;
+    inline const Track & trackAt(int _index) const;
 
-    inline Base & getBase(int _index);
+    inline Area & getArea(int _index);
     inline Track & getTrack(int _index);
 
 public slots:
-    inline void setNumberOfBases(int _nBase);
-    inline void setNumberOfTracks(int _Track);
+    inline void setAreaCount(int _nArea);
+    inline void setTrackCount(int _Track);
     inline void setSpeedFactor(int _speedFactor);
     inline void setTotalTime(int _totalTime);
     void resetTime();
@@ -65,11 +68,11 @@ protected:
     void paintEvent(QPaintEvent *_pEvent);
 
 private:
-    void initializationParOfBase();     /// Начальная инициализация параметров баз
-    void initializationParOfTrack();    /// Начальная инициализация параметров трасс
+    void initAreaPar();     /// Начальная инициализация параметров позиционных районов
+    void initTrackPar();    /// Начальная инициализация параметров трасс
 
     /// Вычисление точек касания
-    static float getTanPoints(const QPointF *_track, const QPointF *_base,
+    static float calcTanPoints(const QPointF *_track, const QPointF *_base,
                               const float _radius, QPointF *_p1, QPointF *_p2);
 
     /// Нормально распределенная случайная величина
@@ -81,22 +84,22 @@ private:
     float totalTime;    /// Общее время моделирования (в секундах)
     float time;         /// Текущее время
 
-    int nBase;      /// Количество баз
+    int nArea;      /// Количество позиционных районов
     int nTrack;     /// Количество трасс
 
-    QVector <Base> base;    /// Базы
+    QVector <Area> area;    /// Позиционные районы
     QVector <Track> track;  /// Трассы
 
 private slots:
     void timerEvent(QTimerEvent *);
 };
 
-int Painter::getNumberOfBases()
+int Painter::getAreaCount()
 {
-    return nBase;
+    return nArea;
 }
 
-int Painter::getNumberOfTracks()
+int Painter::getTrackCount()
 {
     return nTrack;
 }
@@ -111,19 +114,19 @@ int Painter::getTotalTime()
     return totalTime;
 }
 
-Base Painter::baseAt(int _index) const
+const Area & Painter::areaAt(int _index) const
 {
-    return base.at(_index);
+    return area.at(_index);
 }
 
-Track Painter::trackAt(int _index) const
+const Track & Painter::trackAt(int _index) const
 {
     return track.at(_index);
 }
 
-Base & Painter::getBase(int _index)
+Area &Painter::getArea(int _index)
 {
-    return base[_index];
+    return area[_index];
 }
 
 Track & Painter::getTrack(int _index)
@@ -131,12 +134,12 @@ Track & Painter::getTrack(int _index)
     return track[_index];
 }
 
-void Painter::setNumberOfBases(int _nBase)
+void Painter::setAreaCount(int _nArea)
 {
-    nBase =_nBase;
+    nArea =_nArea;
 }
 
-void Painter::setNumberOfTracks(int _Track)
+void Painter::setTrackCount(int _Track)
 {
     nTrack = _Track;
 }

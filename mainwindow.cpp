@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *_parent)
     results = new Results;
     painter = new Painter(results);
     settingTotal = new SettingTotal(painter);
-    settingBase = new SettingBase(painter);
+    settingArea = new SettingArea(painter);
     settingTrack = new SettingTrack(painter);
 
     setCentralWidget(painter);
@@ -27,11 +27,11 @@ MainWindow::MainWindow(QWidget *_parent)
     tSettingTotal->setMovable(false);
     addToolBar(tSettingTotal);
 
-    QDockWidget *dSettingForBase = new QDockWidget(this);
-    dSettingForBase->setWidget(settingBase);
-    dSettingForBase->setAllowedAreas(Qt::LeftDockWidgetArea);
-    dSettingForBase->setFeatures(QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::LeftDockWidgetArea, dSettingForBase);
+    QDockWidget *dSettingForArea = new QDockWidget(this);
+    dSettingForArea->setWidget(settingArea);
+    dSettingForArea->setAllowedAreas(Qt::LeftDockWidgetArea);
+    dSettingForArea->setFeatures(QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::LeftDockWidgetArea, dSettingForArea);
 
     QDockWidget *dSettingTrack = new QDockWidget(this);
     dSettingTrack->setWidget(settingTrack);
@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget *_parent)
 
 MainWindow::~MainWindow()
 {
-    delete settingBase;
+    delete settingArea;
     delete settingTrack;
     delete settingTotal;
     delete painter;

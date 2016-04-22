@@ -8,8 +8,9 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-unix|win32: LIBS += -L$$PWD/../../PTPV/Library/ -lGrapher2D
-INCLUDEPATH += $$PWD/../../PTPV/Grapher2D
+win32: LIBS += -L$$PWD/lib/Grapher2D/win -lGrapher2D
+unix: LIBS += -L$$PWD/lib/Grapher2D/unix -lGrapher2D
+INCLUDEPATH += $$PWD/lib/Grapher2D
 
 TARGET = ThreatLevel
 TEMPLATE = app

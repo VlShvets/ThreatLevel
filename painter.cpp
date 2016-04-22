@@ -12,31 +12,31 @@ Painter::Painter(Results *_results, QWidget *_parent)
     setCSOrdMeasure(10000);
     setCSZoom(2);
 
-    nBase = 3;
+    nArea = 3;
     nTrack = 3;
 
     speedFactor = 1.0;
     totalTime = 60.0;
 
-    initializationParOfBase();
-    initializationParOfTrack();
+    initAreaPar();
+    initTrackPar();
 }
 
 Painter::~Painter()
 {
-    base.clear();
+    area.clear();
     track.clear();
 }
 
-void Painter::initializationParOfBase()
+void Painter::initAreaPar()
 {
-    base.push_back(Base());         base.push_back(Base());         base.push_back(Base());         base.push_back(Base());         base.push_back(Base());
-    base[0].pos.setX(0.0);          base[1].pos.setX(-100000.0);    base[2].pos.setX(100000.0);     base[3].pos.setX(0.0);          base[4].pos.setX(0.0);
-    base[0].pos.setY(100000.0);     base[1].pos.setY(0.0);          base[2].pos.setY(0.0);          base[3].pos.setY(-100000.0);    base[4].pos.setY(0.0);
-    base[0].radius = 50000.0;       base[1].radius = 50000.0;       base[2].radius = 50000.0;       base[3].radius = 50000.0;       base[4].radius = 50000.0;
+    area.push_back(Area());         area.push_back(Area());         area.push_back(Area());         area.push_back(Area());         area.push_back(Area());
+    area[0].pos.setX(0.0);          area[1].pos.setX(-100000.0);    area[2].pos.setX(100000.0);     area[3].pos.setX(0.0);          area[4].pos.setX(0.0);
+    area[0].pos.setY(100000.0);     area[1].pos.setY(0.0);          area[2].pos.setY(0.0);          area[3].pos.setY(-100000.0);    area[4].pos.setY(0.0);
+    area[0].radius = 50000.0;       area[1].radius = 50000.0;       area[2].radius = 50000.0;       area[3].radius = 50000.0;       area[4].radius = 50000.0;
 }
 
-void Painter::initializationParOfTrack()
+void Painter::initTrackPar()
 {
     for(int j = 0; j < NUMTRACKINGROUP; ++j)
     {
@@ -60,20 +60,6 @@ void Painter::initializationParOfTrack()
         track.last().pos.setY(500000.0 + 6000 * (j % (int) qSqrt(NUMTRACKINGROUP)));
         track.last().modV = 3000.0;
         track.last().angV = 5 * M_PI_4;
-
-        /// Группа №4
-        track.push_back(Track());
-        track.last().pos.setX(-500000.0 - 6000 * (int) (j / qSqrt(NUMTRACKINGROUP)));
-        track.last().pos.setY(-500000.0 - 6000 * (j % (int) qSqrt(NUMTRACKINGROUP)));
-        track.last().modV = 3000.0;
-        track.last().angV = M_PI_4;
-
-        /// Группа №5
-        track.push_back(Track());
-        track.last().pos.setX(500000.0 + 6000 * (int) (j / qSqrt(NUMTRACKINGROUP)));
-        track.last().pos.setY(-500000.0 - 6000 * (j % (int) qSqrt(NUMTRACKINGROUP)));
-        track.last().modV = 3000.0;
-        track.last().angV = - M_PI_4;
     }
 }
 
@@ -106,7 +92,7 @@ void Painter::resetTime()
 //        killTimer(_tEvent->timerId());
 //}
 
-float Painter::getTanPoints(const QPointF *_track, const QPointF *_base, const float _radius, QPointF *_p1, QPointF *_p2)
+float Painter::calcTanPoints(const QPointF *_track, const QPointF *_base, const float _radius, QPointF *_p1, QPointF *_p2)
 {
     float distance = qSqrt((_base->x() - _track->x()) * (_base->x() - _track->x()) +
                            (_base->y() - _track->y()) * (_base->y() - _track->y()));
@@ -176,8 +162,8 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setColor(Qt::darkBlue);
     pen.setWidth(3);
     p.setPen(pen);
-    for(int i = 0; i < nBase; ++i)
-        p.drawEllipse(base.at(i).pos, base.at(i).radius, base.at(i).radius);
+    for(int i = 0; i < nArea; ++i)
+        p.drawEllipse(area.at(i).pos, area.at(i).radius, area.at(i).radius);
 
     /// Трассы
     QVector <QPointF> pTrack;
@@ -188,7 +174,6 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     {
         pTrack.push_back(track.at(j).pos + QPoint(track.at(j).modV * qCos(M_PI_2 - track.at(j).angV) * time + 1000 * normalDistribution(0, 0.2),
                                                   track.at(j).modV * qSin(M_PI_2 - track.at(j).angV) * time + 1000 * normalDistribution(0, 0.2)));
-
         p.drawPoint(pTrack.at(j));
     }
 
@@ -196,36 +181,63 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setWidth(1);
     for(int j = 0; j < nTrack; ++j)
     {
-        for(int i = 0; i < nBase; ++i)
+        float maxDist = 0.0;        /// Максимальное расстояние до центра позиционного района
+        float angToMaxDist = 0.0;   /// Угол между вектором скорости и прямой до центра наиболее удаленного района
+
+        for(int i = 0; i < nArea; ++i)
         {
             track[j].target.push_back(Track::Target());
-            track[j].target[i].dist = getTanPoints(&pTrack.at(j), &base.at(i).pos, base.at(i).radius,
-                                                      &track[j].target[i].p1, &track[j].target[i].p2);
+            track[j].target[i].dist = calcTanPoints(&pTrack.at(j), &area.at(i).pos, area.at(i).radius,
+                                                    &track[j].target[i].p1, &track[j].target[i].p2);
+            track[j].target[i].angToV = track.at(j).angV + qAtan2(area.at(i).pos.y() - pTrack.at(j).y(),
+                                                                  area.at(i).pos.x() - pTrack.at(j).x()) - M_PI_2;
+
+            if(maxDist < track.at(j).target.at(i).dist)
+            {
+                maxDist = track.at(j).target.at(i).dist;
+                angToMaxDist = track.at(j).target.at(i).angToV;
+            }
 
             /// Угол видимости
-            pen.setColor(Qt::darkBlue);
-            p.setPen(pen);
-            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p1);
-            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p2);
+//            pen.setColor(Qt::darkBlue);
+//            p.setPen(pen);
+//            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p1);
+//            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p2);
 
             /// Кратчайшее растояние
-            pen.setColor(Qt::darkRed);
-            p.setPen(pen);
-            p.drawLine(base.at(i).pos, pTrack.at(j));
+//            pen.setColor(Qt::darkRed);
+//            p.setPen(pen);
+//            p.drawLine(area.at(i).pos, pTrack.at(j));
         }
+
+        /// Вектор скорости
+        pen.setColor(Qt::darkGreen);
+        p.setPen(pen);
+        p.drawLine(pTrack.at(j), pTrack.at(j) + QPointF(maxDist * qSin(track.at(j).angV) / qCos(angToMaxDist),
+                                                        maxDist * qCos(track.at(j).angV) / qCos(angToMaxDist)));
     }
 
-    /// Определение уровня угроз
-    QVector <QVector <float> > _times;
-    for(int i = 0; i < nBase; ++i)
+    /// Расчет времени с ошибками
+    QVector <QVector <float> > timesWithError;
+    for(int i = 0; i < nArea; ++i)
     {
-        _times.push_back(QVector <float>());
+        timesWithError.push_back(QVector <float>());
         for(int j = 0; j < nTrack; ++j)
-            _times[i].push_back((track.at(j).target.at(i).dist - base.at(i).radius) /
-                                (track.at(j).modV * qCos(track.at(j).angV + qAtan2(base.at(i).pos.y() - pTrack.at(j).y(),
-                                                                                   base.at(i).pos.x() - pTrack.at(j).x()) - M_PI_2)));
+            timesWithError[i].push_back((track.at(j).target.at(i).dist - area.at(i).radius) /
+                                        (track.at(j).modV * qCos(track.at(j).target.at(i).angToV)));
     }
-    results->loadTable(&_times, nBase, nTrack);
+
+    /// Расчет эталонного времени
+    QVector <QVector <float> > timesNoError;
+    for(int i = 0; i < nArea; ++i)
+    {
+        timesNoError.push_back(QVector <float>());
+        for(int j = 0; j < nTrack; ++j)
+            timesNoError[i].push_back((track.at(j).target.at(i).dist - area.at(i).radius) /
+                                      (track.at(j).modV * qCos(track.at(j).target.at(i).angToV)));
+    }
+
+    results->loadTable(&timesWithError, nArea, nTrack);
 
     pTrack.clear();
 

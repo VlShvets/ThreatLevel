@@ -21,7 +21,6 @@ public:
 private:
     int getIndexMinElement(const QVector <float> *_vector);
 
-
     QTableWidget *tResults;     /// Таблица результатов
 };
 

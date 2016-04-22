@@ -4,28 +4,29 @@
 #include <QGridLayout>
 #include <QSlider>
 #include <QLCDNumber>
+#include <QTableWidget>
 
 #include "painter.h"
 
 namespace ThreatLevel
 {
 
-class SettingBase : public QWidget
+class SettingArea : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit SettingBase(Painter *_painter, QWidget *parent = 0);
-    ~SettingBase();
+    explicit SettingArea(Painter *_painter, QWidget *parent = 0);
+    ~SettingArea();
 
 private slots:
     void loadTable(int _number);        /// Загрузка таблицы с начальными данными
-    void changeParBase(int _i, int _j); /// Изменение параметров баз
+    void changeAreaPar(int _i, int _j); /// Изменение параметров баз
 
 private:
     class Painter *painter;
 
-    QTableWidget *tParBase;     /// Таблица параметров баз
+    QTableWidget *tAreaPar;     /// Таблица параметров баз
 };
 
 }

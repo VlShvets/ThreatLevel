@@ -7,7 +7,7 @@
 #include <QToolBar>
 #include <QDockWidget>
 
-#include "settingbase.h"
+#include "settingarea.h"
 #include "settingtrack.h"
 #include "settingtotal.h"
 
@@ -23,7 +23,7 @@ public:
 private:
     Results *results;
     Painter *painter;
-    SettingBase *settingBase;
+    SettingArea *settingArea;
     SettingTrack *settingTrack;
     SettingTotal *settingTotal;
 };
