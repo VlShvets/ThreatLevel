@@ -15,10 +15,10 @@ MainWindow::MainWindow(QWidget *_parent)
     this->setWindowTitle(QObject::tr("Определение уровня угроз"));
 
     results = new Results;
-    painter = new Painter(results);
+    settingArea = new SettingArea;
+    settingTrack = new SettingTrack;
+    painter = new Painter(settingArea, settingTrack, results);
     settingTotal = new SettingTotal(painter);
-    settingArea = new SettingArea(painter);
-    settingTrack = new SettingTrack(painter);
 
     setCentralWidget(painter);
 
@@ -48,10 +48,10 @@ MainWindow::MainWindow(QWidget *_parent)
 
 MainWindow::~MainWindow()
 {
-    delete settingArea;
-    delete settingTrack;
     delete settingTotal;
     delete painter;
+    delete settingArea;
+    delete settingTrack;
     delete results;
 }
 

@@ -1,5 +1,5 @@
-#ifndef SETTINGBASE_H
-#define SETTINGBASE_H
+#ifndef SETTINGAREA_H
+#define SETTINGAREA_H
 
 #include <QGridLayout>
 #include <QSlider>
@@ -11,24 +11,37 @@
 namespace ThreatLevel
 {
 
-class SettingArea : public QWidget
+const int MAXNUMAREAS = 5;
+const int DEFNUMAREAS = 3;
+
+class SettingArea : public QWidget  /// Класс позиционных районов
 {
     Q_OBJECT
 
 public:
-    explicit SettingArea(Painter *_painter, QWidget *parent = 0);
+    explicit SettingArea(QWidget *parent = 0);
     ~SettingArea();
 
+    inline int getCount();                          /// Полчить количество
+    inline float getPar(int _row, int _column);     /// Получить параметр
+
 private slots:
-    void loadTable(int _number);        /// Загрузка таблицы с начальными данными
-    void changeAreaPar(int _i, int _j); /// Изменение параметров баз
+    void initPar(int _number);                      /// Начальная инициализация параметров
 
 private:
-    class Painter *painter;
-
-    QTableWidget *tAreaPar;     /// Таблица параметров баз
+    QTableWidget *tAreaPar;                         /// Таблица параметров
 };
+
+int SettingArea::getCount()
+{
+    return tAreaPar->rowCount();
+}
+
+float SettingArea::getPar(int _row, int _column)
+{
+    return tAreaPar->item(_row, _column)->text().toFloat();
+}
 
 }
 
-#endif // SETTINGBASE_H
+#endif // SETTINGAREA_H

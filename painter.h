@@ -5,14 +5,12 @@
 
 #include "Grapher2D.h"
 
+#include "settingarea.h"
+#include "settingtrack.h"
 #include "results.h"
 
 namespace ThreatLevel
 {
-
-const int MAXNUMAREAS = 5;
-const int MAXNUMTRACKS = 12;
-const int NUMTRACKINGROUP = 4;
 
 struct Area
 {
@@ -43,11 +41,9 @@ class Painter : public Grapher2D
     Q_OBJECT
 
 public:
-    Painter(class Results *_results, QWidget *_parent = 0);
+    Painter(class SettingArea *_settingArea, class SettingTrack *_settingTrack, class Results *_results, QWidget *_parent = 0);
     ~Painter();
 
-    inline int getAreaCount();
-    inline int getTrackCount();
     inline int getSpeedFactor();
     inline int getTotalTime();
 
@@ -58,8 +54,6 @@ public:
     inline Track & getTrack(int _index);
 
 public slots:
-    inline void setAreaCount(int _nArea);
-    inline void setTrackCount(int _Track);
     inline void setSpeedFactor(int _speedFactor);
     inline void setTotalTime(int _totalTime);
     void resetTime();
@@ -67,9 +61,12 @@ public slots:
 protected:
     void paintEvent(QPaintEvent *_pEvent);
 
+private slots:
+    void timerEvent(QTimerEvent *);
+
 private:
-    void initAreaPar();     /// Начальная инициализация параметров позиционных районов
-    void initTrackPar();    /// Начальная инициализация параметров трасс
+    void loadAreaPar();     /// Загрузка параметров позиционных районов
+    void loadTrackPar();    /// Загрузка параметров трасс
 
     /// Вычисление точек касания
     static float calcTanPoints(const QPointF *_track, const QPointF *_base,
@@ -78,7 +75,9 @@ private:
     /// Нормально распределенная случайная величина
     static float normalDistribution(float _mean, float _dev);
 
-    class Results *results;
+    class SettingArea *settingArea;
+    SettingTrack *settingTrack;
+    Results *results;
 
     float speedFactor;  /// Коэффициент скорости
     float totalTime;    /// Общее время моделирования (в секундах)
@@ -89,20 +88,7 @@ private:
 
     QVector <Area> area;    /// Позиционные районы
     QVector <Track> track;  /// Трассы
-
-private slots:
-    void timerEvent(QTimerEvent *);
 };
-
-int Painter::getAreaCount()
-{
-    return nArea;
-}
-
-int Painter::getTrackCount()
-{
-    return nTrack;
-}
 
 int Painter::getSpeedFactor()
 {
@@ -132,16 +118,6 @@ Area &Painter::getArea(int _index)
 Track & Painter::getTrack(int _index)
 {
     return track[_index];
-}
-
-void Painter::setAreaCount(int _nArea)
-{
-    nArea =_nArea;
-}
-
-void Painter::setTrackCount(int _Track)
-{
-    nTrack = _Track;
 }
 
 void Painter::setSpeedFactor(int _speedFactor)

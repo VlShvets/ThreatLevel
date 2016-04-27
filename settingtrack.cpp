@@ -3,92 +3,89 @@
 namespace ThreatLevel
 {
 
-SettingTrack::SettingTrack(Painter *_painter, QWidget *parent) :
-    QWidget(parent), painter(_painter)
+SettingTrack::SettingTrack(QWidget *parent) : QWidget(parent)
 {
     QGridLayout *gridLayout = new QGridLayout(this);
 
-    gridLayout->addWidget(new QLabel(QObject::tr("Количество целей: ")), 0, 0, 1, 1);
+    gridLayout->addWidget(new QLabel(QObject::tr("Количество групп: ")), 0, 0, 1, 1);
+
+    QSlider *sliderGroup = new QSlider(Qt::Horizontal);
+    sliderGroup->setRange(1, MAXNUMGROUPS);
+    sliderGroup->setTickInterval(1);
+    sliderGroup->setValue(DEFNUMGROUPS);
+    sliderGroup->setTickPosition(QSlider::TicksAbove);
+    sliderGroup->setFixedWidth(100);
+    gridLayout->addWidget(sliderGroup, 0, 1, 1, 1);
+
+    lNumGroups = new QLCDNumber(1);
+    lNumGroups->setSegmentStyle(QLCDNumber::Flat);
+    lNumGroups->setMode(QLCDNumber::Dec);
+    lNumGroups->display(DEFNUMGROUPS);
+    lNumGroups->setFixedWidth(100);
+    QObject::connect(sliderGroup, SIGNAL(valueChanged(int)), lNumGroups, SLOT(display(int)));
+    gridLayout->addWidget(lNumGroups, 0, 2, 1, 1);
+
+    gridLayout->addWidget(new QLabel(QObject::tr("Количество трасс в группе: ")), 1, 0, 1, 1);
 
     QSlider *sliderTrack = new QSlider(Qt::Horizontal);
-    sliderTrack->setRange(1, MAXNUMTRACKS);
+    sliderTrack->setRange(1, MAXTRACKSINGROUP);
     sliderTrack->setTickInterval(1);
-    sliderTrack->setValue(painter->getTrackCount());
+    sliderTrack->setValue(DEFTRACKSINGROUP);
     sliderTrack->setTickPosition(QSlider::TicksAbove);
     sliderTrack->setFixedWidth(100);
-    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), painter, SLOT(setTrackCount(int)));
-    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), this, SLOT(loadTable(int)));
-    gridLayout->addWidget(sliderTrack, 0, 1, 1, 1);
+    gridLayout->addWidget(sliderTrack, 1, 1, 1, 1);
 
-    QLCDNumber *lNumberTrack = new QLCDNumber(2);
-    lNumberTrack->setSegmentStyle(QLCDNumber::Flat);
-    lNumberTrack->setMode(QLCDNumber::Dec);
-    lNumberTrack->display(painter->getTrackCount());
-    lNumberTrack->setFixedWidth(100);
-    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), lNumberTrack, SLOT(display(int)));
-    gridLayout->addWidget(lNumberTrack, 0, 2, 1, 1);
+    lTracksInGroup = new QLCDNumber(2);
+    lTracksInGroup->setSegmentStyle(QLCDNumber::Flat);
+    lTracksInGroup->setMode(QLCDNumber::Dec);
+    lTracksInGroup->display(DEFTRACKSINGROUP);
+    lTracksInGroup->setFixedWidth(100);
+    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), lTracksInGroup, SLOT(display(int)));
+    gridLayout->addWidget(lTracksInGroup, 1, 2, 1, 1);
 
-    gridLayout->addWidget(new QLabel(QObject::tr("\tПараметры целей:")), 1, 0, 1, 3);
+    gridLayout->addWidget(new QLabel(QObject::tr("\tПараметры целей:")), 2, 0, 1, 3);
 
-    tTrackPar = new QTableWidget(painter->getTrackCount(), 4, this);
+    tTrackPar = new QTableWidget(DEFNUMGROUPS * DEFTRACKSINGROUP, 4, this);
     tTrackPar->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Скорость" << "Курс (град.)");
-    QObject::connect(tTrackPar, SIGNAL(cellChanged(int,int)), this, SLOT(changeTrackPar(int,int)));
-    gridLayout->addWidget(tTrackPar, 2, 0, 1, 3);
-
-    loadTable(painter->getTrackCount());
+    QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), this, SLOT(initPar(int)));
+    gridLayout->addWidget(tTrackPar, 3, 0, 1, 3);
 
     this->setLayout(gridLayout);
+
+    initPar(DEFNUMGROUPS * DEFTRACKSINGROUP);
 }
 
 SettingTrack::~SettingTrack()
 {
+    delete lNumGroups;
+    delete lTracksInGroup;
     delete tTrackPar;
 }
 
-void SettingTrack::loadTable(int _number)
+void SettingTrack::initPar(int _number)
 {
     tTrackPar->setRowCount(_number);
 
-    for(int i = 0; i < _number; ++i)
+    for(int i = 0; i < lTracksInGroup->intValue(); ++i)
     {
-        tTrackPar->setItem(i, 0, new QTableWidgetItem(QString::number(painter->trackAt(i).pos.x())));
-        tTrackPar->setItem(i, 1, new QTableWidgetItem(QString::number(painter->trackAt(i).pos.y())));
-        tTrackPar->setItem(i, 2, new QTableWidgetItem(QString::number(painter->trackAt(i).modV)));
-        tTrackPar->setItem(i, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(painter->trackAt(i).angV))));
-    }
-}
+        /// Группа трасс №1
+        tTrackPar->setItem(i, 0, new QTableWidgetItem(QString::number(0.0 + DISTBETWEENTRACKS * (int) (i / qSqrt(lTracksInGroup->intValue())))));
+        tTrackPar->setItem(i, 1, new QTableWidgetItem(QString::number(-500000.0 - DISTBETWEENTRACKS * (i % (int) qSqrt(lTracksInGroup->intValue())))));
+        tTrackPar->setItem(i, 2, new QTableWidgetItem(QString::number(3000.0)));
+        tTrackPar->setItem(i, 3, new QTableWidgetItem(QString::number(0.0)));
 
-void SettingTrack::changeTrackPar(int _i, int _j)
-{
-    switch(_j)
-    {
-    case 0:
-    {
-        painter->getTrack(_i).pos.setX(tTrackPar->item(_i, _j)->text().toFloat());
-        break;
-    }
-    case 1:
-    {
-        painter->getTrack(_i).pos.setY(tTrackPar->item(_i, _j)->text().toFloat());
-        break;
-    }
-    case 2:
-    {
-        painter->getTrack(_i).modV = tTrackPar->item(_i, _j)->text().toFloat();
-        break;
-    }
-    case 3:
-    {
-        painter->getTrack(_i).angV = qDegreesToRadians(tTrackPar->item(_i, _j)->text().toFloat());
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
+        /// Группа трасс №2
+        tTrackPar->setItem(i + 1, 0, new QTableWidgetItem(QString::number(-500000.0 - DISTBETWEENTRACKS * (int) (i / qSqrt(lTracksInGroup->intValue())))));
+        tTrackPar->setItem(i + 1, 1, new QTableWidgetItem(QString::number(500000.0 + DISTBETWEENTRACKS * (i % (int) qSqrt(lTracksInGroup->intValue())))));
+        tTrackPar->setItem(i + 1, 2, new QTableWidgetItem(QString::number(3000.0)));
+        tTrackPar->setItem(i + 1, 3, new QTableWidgetItem(QString::number(3 * M_PI_4)));
 
-    painter->repaint();
+        /// Группа трасс №3
+        tTrackPar->setItem(i + 1, 0, new QTableWidgetItem(QString::number(500000.0 - DISTBETWEENTRACKS * (int) (i / qSqrt(lTracksInGroup->intValue())))));
+        tTrackPar->setItem(i + 1, 1, new QTableWidgetItem(QString::number(500000.0 + DISTBETWEENTRACKS * (i % (int) qSqrt(lTracksInGroup->intValue())))));
+        tTrackPar->setItem(i + 1, 2, new QTableWidgetItem(QString::number(3000.0)));
+        tTrackPar->setItem(i + 1, 3, new QTableWidgetItem(QString::number(5 * M_PI_4)));
+    }
 }
 
 }

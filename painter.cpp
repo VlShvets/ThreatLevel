@@ -5,21 +5,18 @@
 namespace ThreatLevel
 {
 
-Painter::Painter(Results *_results, QWidget *_parent)
-    : Grapher2D(_parent), results(_results)
+Painter::Painter(SettingArea *_settingArea, SettingTrack *_settingTrack, Results *_results, QWidget *_parent)
+    : Grapher2D(_parent), settingArea(_settingArea), settingTrack(_settingTrack), results(_results)
 {
     setCSAbsMeasure(10000);
     setCSOrdMeasure(10000);
     setCSZoom(2);
 
-    nArea = 3;
-    nTrack = 3;
-
     speedFactor = 1.0;
     totalTime = 60.0;
 
-    initAreaPar();
-    initTrackPar();
+    loadAreaPar();
+    loadTrackPar();
 }
 
 Painter::~Painter()
@@ -28,38 +25,28 @@ Painter::~Painter()
     track.clear();
 }
 
-void Painter::initAreaPar()
+void Painter::loadAreaPar()
 {
-    area.push_back(Area());         area.push_back(Area());         area.push_back(Area());         area.push_back(Area());         area.push_back(Area());
-    area[0].pos.setX(0.0);          area[1].pos.setX(-100000.0);    area[2].pos.setX(100000.0);     area[3].pos.setX(0.0);          area[4].pos.setX(0.0);
-    area[0].pos.setY(100000.0);     area[1].pos.setY(0.0);          area[2].pos.setY(0.0);          area[3].pos.setY(-100000.0);    area[4].pos.setY(0.0);
-    area[0].radius = 50000.0;       area[1].radius = 50000.0;       area[2].radius = 50000.0;       area[3].radius = 50000.0;       area[4].radius = 50000.0;
+    area.resize(settingArea->getCount());
+
+    for(int i = 0; i < area.count(); ++i)
+    {
+        area[i].pos.setX(settingArea->getPar(i, 0));
+        area[i].pos.setY(settingArea->getPar(i, 1));
+        area[i].radius = settingArea->getPar(i, 2);
+    }
 }
 
-void Painter::initTrackPar()
+void Painter::loadTrackPar()
 {
-    for(int j = 0; j < NUMTRACKINGROUP; ++j)
+    track.resize(settingTrack->getCount());
+
+    for(int i = 0; i < track.count(); ++i)
     {
-        /// Группа №1
-        track.push_back(Track());
-        track.last().pos.setX(0.0 + 6000 * (int) (j / qSqrt(NUMTRACKINGROUP)));
-        track.last().pos.setY(-500000.0 - 6000 * (j % (int) qSqrt(NUMTRACKINGROUP)));
-        track.last().modV = 3000.0;
-        track.last().angV = 0;
-
-        /// Группа №2
-        track.push_back(Track());
-        track.last().pos.setX(-500000.0 - 6000 * (int) (j / qSqrt(NUMTRACKINGROUP)));
-        track.last().pos.setY(500000.0 + 6000 * (j % (int) qSqrt(NUMTRACKINGROUP)));
-        track.last().modV = 3000.0;
-        track.last().angV = 3 * M_PI_4;
-
-        /// Группа №3
-        track.push_back(Track());
-        track.last().pos.setX(500000.0 + 6000 * (int) (j / qSqrt(NUMTRACKINGROUP)));
-        track.last().pos.setY(500000.0 + 6000 * (j % (int) qSqrt(NUMTRACKINGROUP)));
-        track.last().modV = 3000.0;
-        track.last().angV = 5 * M_PI_4;
+        track[i].pos.setX(settingTrack->getPar(i, 0));
+        track[i].pos.setY(settingTrack->getPar(i, 1));
+        track[i].modV = settingTrack->getPar(i, 2);
+        track[i].angV = settingTrack->getPar(i, 3);
     }
 }
 
