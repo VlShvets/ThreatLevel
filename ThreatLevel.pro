@@ -16,20 +16,20 @@ TARGET = ThreatLevel
 TEMPLATE = app
 
 SOURCES += main.cpp\
-    settingtotal.cpp \
     painter.cpp \
-    settingtrack.cpp \
     results.cpp \
     mainwindow.cpp \
-    settingarea.cpp
+    areaparameters.cpp \
+    settings.cpp \
+    trackparameters.cpp
 
 HEADERS  += \
-    settingtotal.h \
     painter.h \
-    settingtrack.h \
     results.h \
     mainwindow.h \
-    settingarea.h
+    areaparameters.h \
+    trackparameters.h \
+    settings.h
 
 unix {
     target.path = /usr/lib

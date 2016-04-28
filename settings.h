@@ -1,5 +1,5 @@
-#ifndef SETTINGTOTAL_H
-#define SETTINGTOTAL_H
+#ifndef SETTINGS_H
+#define SETTINGS_H
 
 #include <QHBoxLayout>
 #include <QSplitter>
@@ -14,13 +14,13 @@
 namespace ThreatLevel
 {
 
-class SettingTotal : public QWidget
+class Settings : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit SettingTotal(class Painter *_painter, QWidget *parent = 0);
-    ~SettingTotal();
+    explicit Settings(class Painter *_painter, QWidget *parent = 0);
+    ~Settings();
 
 private slots:
     void changeState();     /// Запуск и остановка отрисовщика
@@ -35,4 +35,4 @@ private:
 
 }
 
-#endif // SETTINGTOTAL_H
+#endif // SETTINGS_H

@@ -15,29 +15,29 @@ MainWindow::MainWindow(QWidget *_parent)
     this->setWindowTitle(QObject::tr("Определение уровня угроз"));
 
     results = new Results;
-    settingArea = new SettingArea;
-    settingTrack = new SettingTrack;
-    painter = new Painter(settingArea, settingTrack, results);
-    settingTotal = new SettingTotal(painter);
+    areaParameters = new AreaParameters;
+    trackParameters = new TrackParameters;
+    painter = new Painter(areaParameters, trackParameters, results);
+    settings = new Settings(painter);
 
     setCentralWidget(painter);
 
-    QToolBar *tSettingTotal = new QToolBar(this);
-    tSettingTotal->addWidget(settingTotal);
-    tSettingTotal->setMovable(false);
-    addToolBar(tSettingTotal);
+    QToolBar *tSettings = new QToolBar(this);
+    tSettings->addWidget(settings);
+    tSettings->setMovable(false);
+    addToolBar(tSettings);
 
-    QDockWidget *dSettingForArea = new QDockWidget(this);
-    dSettingForArea->setWidget(settingArea);
-    dSettingForArea->setAllowedAreas(Qt::LeftDockWidgetArea);
-    dSettingForArea->setFeatures(QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::LeftDockWidgetArea, dSettingForArea);
+    QDockWidget *dAreaParameters = new QDockWidget(this);
+    dAreaParameters->setWidget(areaParameters);
+    dAreaParameters->setAllowedAreas(Qt::LeftDockWidgetArea);
+    dAreaParameters->setFeatures(QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::LeftDockWidgetArea, dAreaParameters);
 
-    QDockWidget *dSettingTrack = new QDockWidget(this);
-    dSettingTrack->setWidget(settingTrack);
-    dSettingTrack->setAllowedAreas(Qt::LeftDockWidgetArea);
-    dSettingTrack->setFeatures(QDockWidget::DockWidgetMovable);
-    addDockWidget(Qt::LeftDockWidgetArea, dSettingTrack);
+    QDockWidget *dTrackParameters = new QDockWidget(this);
+    dTrackParameters->setWidget(trackParameters);
+    dTrackParameters->setAllowedAreas(Qt::LeftDockWidgetArea);
+    dTrackParameters->setFeatures(QDockWidget::DockWidgetMovable);
+    addDockWidget(Qt::LeftDockWidgetArea, dTrackParameters);
 
     QDockWidget *dResults = new QDockWidget(this);
     dResults->setWidget(results);
@@ -48,10 +48,10 @@ MainWindow::MainWindow(QWidget *_parent)
 
 MainWindow::~MainWindow()
 {
-    delete settingTotal;
+    delete settings;
     delete painter;
-    delete settingArea;
-    delete settingTrack;
+    delete areaParameters;
+    delete trackParameters;
     delete results;
 }
 

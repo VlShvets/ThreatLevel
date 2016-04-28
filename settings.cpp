@@ -1,9 +1,9 @@
-#include "settingtotal.h"
+#include "settings.h"
 
 namespace ThreatLevel
 {
 
-SettingTotal::SettingTotal(Painter *_painter, QWidget *parent) :
+Settings::Settings(Painter *_painter, QWidget *parent) :
     QWidget(parent), painter(_painter), isStart(false)
 {
     QHBoxLayout *hLayout = new QHBoxLayout(this);
@@ -56,13 +56,13 @@ SettingTotal::SettingTotal(Painter *_painter, QWidget *parent) :
     this->setLayout(hLayout);
 }
 
-SettingTotal::~SettingTotal()
+Settings::~Settings()
 {
     delete pStartStop;
     delete pStartFromStart;
 }
 
-void SettingTotal::changeState()
+void Settings::changeState()
 {
     static int nTimer;
     if(isStart)

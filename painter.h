@@ -5,12 +5,16 @@
 
 #include "Grapher2D.h"
 
-#include "settingarea.h"
-#include "settingtrack.h"
+#include "areaparameters.h"
+#include "trackparameters.h"
 #include "results.h"
 
 namespace ThreatLevel
 {
+
+class AreaParameters;
+class TrackParameters;
+class Results;
 
 struct Area
 {
@@ -41,7 +45,7 @@ class Painter : public Grapher2D
     Q_OBJECT
 
 public:
-    Painter(class SettingArea *_settingArea, class SettingTrack *_settingTrack, class Results *_results, QWidget *_parent = 0);
+    Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
 
     inline int getSpeedFactor();
@@ -75,16 +79,13 @@ private:
     /// Нормально распределенная случайная величина
     static float normalDistribution(float _mean, float _dev);
 
-    class SettingArea *settingArea;
-    SettingTrack *settingTrack;
+    AreaParameters *areaParameters;
+    TrackParameters *trackParameters;
     Results *results;
 
     float speedFactor;  /// Коэффициент скорости
     float totalTime;    /// Общее время моделирования (в секундах)
     float time;         /// Текущее время
-
-    int nArea;      /// Количество позиционных районов
-    int nTrack;     /// Количество трасс
 
     QVector <Area> area;    /// Позиционные районы
     QVector <Track> track;  /// Трассы

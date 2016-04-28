@@ -7,9 +7,9 @@
 #include <QToolBar>
 #include <QDockWidget>
 
-#include "settingarea.h"
-#include "settingtrack.h"
-#include "settingtotal.h"
+#include "areaparameters.h"
+#include "trackparameters.h"
+#include "settings.h"
 
 namespace ThreatLevel
 {
@@ -23,9 +23,9 @@ public:
 private:
     Results *results;
     Painter *painter;
-    SettingArea *settingArea;
-    SettingTrack *settingTrack;
-    SettingTotal *settingTotal;
+    AreaParameters *areaParameters;
+    TrackParameters *trackParameters;
+    Settings *settings;
 };
 
 }

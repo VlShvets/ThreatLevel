@@ -1,12 +1,10 @@
 #include "painter.h"
 
-#include <QDebug>
-
 namespace ThreatLevel
 {
 
-Painter::Painter(SettingArea *_settingArea, SettingTrack *_settingTrack, Results *_results, QWidget *_parent)
-    : Grapher2D(_parent), settingArea(_settingArea), settingTrack(_settingTrack), results(_results)
+Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent)
+    : Grapher2D(_parent), areaParameters(_areaParameters), trackParameters(_trackParameters), results(_results)
 {
     setCSAbsMeasure(10000);
     setCSOrdMeasure(10000);
@@ -27,26 +25,26 @@ Painter::~Painter()
 
 void Painter::loadAreaPar()
 {
-    area.resize(settingArea->getCount());
+    area.resize(areaParameters->getCount());
 
     for(int i = 0; i < area.count(); ++i)
     {
-        area[i].pos.setX(settingArea->getPar(i, 0));
-        area[i].pos.setY(settingArea->getPar(i, 1));
-        area[i].radius = settingArea->getPar(i, 2);
+        area[i].pos.setX(areaParameters->getPar(i, 0));
+        area[i].pos.setY(areaParameters->getPar(i, 1));
+        area[i].radius = areaParameters->getPar(i, 2);
     }
 }
 
 void Painter::loadTrackPar()
 {
-    track.resize(settingTrack->getCount());
+    track.resize(trackParameters->getCount());
 
     for(int i = 0; i < track.count(); ++i)
     {
-        track[i].pos.setX(settingTrack->getPar(i, 0));
-        track[i].pos.setY(settingTrack->getPar(i, 1));
-        track[i].modV = settingTrack->getPar(i, 2);
-        track[i].angV = settingTrack->getPar(i, 3);
+        track[i].pos.setX(trackParameters->getPar(i, 0));
+        track[i].pos.setY(trackParameters->getPar(i, 1));
+        track[i].modV = trackParameters->getPar(i, 2);
+        track[i].angV = trackParameters->getPar(i, 3);
     }
 }
 
@@ -64,6 +62,10 @@ void Painter::timerEvent(QTimerEvent *)
 void Painter::resetTime()
 {
     time = 0.0;
+
+    loadAreaPar();
+    loadTrackPar();
+
     repaint();
 }
 
@@ -149,7 +151,7 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setColor(Qt::darkBlue);
     pen.setWidth(3);
     p.setPen(pen);
-    for(int i = 0; i < nArea; ++i)
+    for(int i = 0; i < area.count(); ++i)
         p.drawEllipse(area.at(i).pos, area.at(i).radius, area.at(i).radius);
 
     /// Трассы
@@ -157,7 +159,7 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setColor(Qt::darkGreen);
     pen.setWidth(6);
     p.setPen(pen);
-    for(int j = 0; j < nTrack; ++j)
+    for(int j = 0; j < track.count(); ++j)
     {
         pTrack.push_back(track.at(j).pos + QPoint(track.at(j).modV * qCos(M_PI_2 - track.at(j).angV) * time + 1000 * normalDistribution(0, 0.2),
                                                   track.at(j).modV * qSin(M_PI_2 - track.at(j).angV) * time + 1000 * normalDistribution(0, 0.2)));
@@ -166,12 +168,12 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 
     /// Определение расстояния до базы и угла видимости
     pen.setWidth(1);
-    for(int j = 0; j < nTrack; ++j)
+    for(int j = 0; j < track.count(); ++j)
     {
         float maxDist = 0.0;        /// Максимальное расстояние до центра позиционного района
         float angToMaxDist = 0.0;   /// Угол между вектором скорости и прямой до центра наиболее удаленного района
 
-        for(int i = 0; i < nArea; ++i)
+        for(int i = 0; i < area.count(); ++i)
         {
             track[j].target.push_back(Track::Target());
             track[j].target[i].dist = calcTanPoints(&pTrack.at(j), &area.at(i).pos, area.at(i).radius,
@@ -206,25 +208,25 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 
     /// Расчет времени с ошибками
     QVector <QVector <float> > timesWithError;
-    for(int i = 0; i < nArea; ++i)
+    for(int i = 0; i < area.count(); ++i)
     {
         timesWithError.push_back(QVector <float>());
-        for(int j = 0; j < nTrack; ++j)
+        for(int j = 0; j < track.count(); ++j)
             timesWithError[i].push_back((track.at(j).target.at(i).dist - area.at(i).radius) /
                                         (track.at(j).modV * qCos(track.at(j).target.at(i).angToV)));
     }
 
     /// Расчет эталонного времени
     QVector <QVector <float> > timesNoError;
-    for(int i = 0; i < nArea; ++i)
+    for(int i = 0; i < area.count(); ++i)
     {
         timesNoError.push_back(QVector <float>());
-        for(int j = 0; j < nTrack; ++j)
+        for(int j = 0; j < track.count(); ++j)
             timesNoError[i].push_back((track.at(j).target.at(i).dist - area.at(i).radius) /
                                       (track.at(j).modV * qCos(track.at(j).target.at(i).angToV)));
     }
 
-    results->loadTable(&timesWithError, nArea, nTrack);
+    results->loadTable(&timesWithError, area.count(), track.count());
 
     pTrack.clear();
 

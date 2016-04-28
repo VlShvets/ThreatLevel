@@ -1,5 +1,5 @@
-#ifndef SETTINGAREA_H
-#define SETTINGAREA_H
+#ifndef AREAPARAMETERS_H
+#define AREAPARAMETERS_H
 
 #include <QGridLayout>
 #include <QSlider>
@@ -14,13 +14,13 @@ namespace ThreatLevel
 const int MAXNUMAREAS = 5;
 const int DEFNUMAREAS = 3;
 
-class SettingArea : public QWidget  /// Класс позиционных районов
+class AreaParameters : public QWidget  /// Класс позиционных районов
 {
     Q_OBJECT
 
 public:
-    explicit SettingArea(QWidget *parent = 0);
-    ~SettingArea();
+    explicit AreaParameters(QWidget *parent = 0);
+    ~AreaParameters();
 
     inline int getCount();                          /// Полчить количество
     inline float getPar(int _row, int _column);     /// Получить параметр
@@ -32,16 +32,16 @@ private:
     QTableWidget *tAreaPar;                         /// Таблица параметров
 };
 
-int SettingArea::getCount()
+int AreaParameters::getCount()
 {
     return tAreaPar->rowCount();
 }
 
-float SettingArea::getPar(int _row, int _column)
+float AreaParameters::getPar(int _row, int _column)
 {
-    return tAreaPar->item(_row, _column)->text().toFloat();
+    return tAreaPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
 }
 
 }
 
-#endif // SETTINGAREA_H
+#endif // AREAPARAMETERS_H
