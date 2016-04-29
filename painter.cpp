@@ -10,8 +10,6 @@ Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParamet
     setCSOrdMeasure(10000);
     setCSZoom(2);
 
-    totalTime = 60.0;
-
     loadAreaPar();
     loadTrackPar();
 }
@@ -38,30 +36,55 @@ void Painter::loadTrackPar()
 {
     track.resize(trackParameters->getCount());
 
-    for(int i = 0; i < track.count(); ++i)
+    for(int j = 0; j < track.count(); ++j)
     {
-        track[i].pos.setX(trackParameters->getPar(i, 0));
-        track[i].pos.setY(trackParameters->getPar(i, 1));
-        track[i].modV = trackParameters->getPar(i, 2);
-        track[i].angV = trackParameters->getPar(i, 3);
+        track[j].pos.setX(trackParameters->getPar(j, 0));
+        track[j].pos.setY(trackParameters->getPar(j, 1));
+        track[j].modV = trackParameters->getPar(j, 2);
+        track[j].angV = trackParameters->getPar(j, 3);
     }
 }
 
 void Painter::timerEvent(QTimerEvent *)
 {
-    /// Время
-    if(time < totalTime)
-        time += 0.1;
-    else
-        time = 0;
+    /// Трассы
+    for(int j = 0; j < track.count(); ++j)
+    {
+        track[j].pos += QPoint(track.at(j).modV * qCos(M_PI_2 - track.at(j).angV) * DELTA + 1000 * normalDistribution(0, 0.2),
+                               track.at(j).modV * qSin(M_PI_2 - track.at(j).angV) * DELTA + 1000 * normalDistribution(0, 0.2));
+    }
+
+    /// Определение расстояний от трасс до центров ПР
+    /// и углов между векторами скорости и прямыми до центров ПР
+    for(int j = 0; j < track.count(); ++j)
+    {
+        for(int i = 0; i < area.count(); ++i)
+        {
+            track[j].target.push_back(Track::Target());
+
+            /// Определение расстояния от трассы до центра ПР
+            track[j].target[i].dist = calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius,
+                                                    &track[j].target[i].p1, &track[j].target[i].p2);
+
+            /// Определение угла между вектором скорости и прямой до центра ПР
+            track[j].target[i].angToV = track.at(j).angV + qAtan2(area.at(i).pos.y() - track.at(j).pos.y(),
+                                                                  area.at(i).pos.x() - track.at(j).pos.x()) - M_PI_2;
+        }
+
+        /// Определение ближайшего ПР
+        track[j].nearTarget = &track[j].target[0];
+        for(int i = 1; i < area.count(); ++i)
+        {
+            if(track.at(j).nearTarget->dist > track.at(j).target.at(i).dist)
+                track[j].nearTarget = &track[j].target[i];
+        }
+    }
 
     repaint();
 }
 
-void Painter::resetTime()
+void Painter::reStart()
 {
-    time = 0.0;
-
     loadAreaPar();
     loadTrackPar();
 
@@ -146,7 +169,7 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     QPen pen;
     pen.setCosmetic(true);
 
-    /// Базы
+    /// Позиционные районы
     pen.setColor(Qt::darkBlue);
     pen.setWidth(3);
     p.setPen(pen);
@@ -154,57 +177,40 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         p.drawEllipse(area.at(i).pos, area.at(i).radius, area.at(i).radius);
 
     /// Трассы
-    QVector <QPointF> pTrack;
     pen.setColor(Qt::darkGreen);
-    pen.setWidth(6);
-    p.setPen(pen);
     for(int j = 0; j < track.count(); ++j)
     {
-        pTrack.push_back(track.at(j).pos + QPoint(track.at(j).modV * qCos(M_PI_2 - track.at(j).angV) * time + 1000 * normalDistribution(0, 0.2),
-                                                  track.at(j).modV * qSin(M_PI_2 - track.at(j).angV) * time + 1000 * normalDistribution(0, 0.2)));
-        p.drawPoint(pTrack.at(j));
+        pen.setWidth(6);
+        p.setPen(pen);
+        p.drawPoint(track.at(j).pos);
+
+        pen.setWidth(1);
+        p.setPen(pen);
+        p.drawLine(track.at(j).pos, track.at(j).pos + QPointF(track.at(j).nearTarget->dist *
+                                                              qSin(track.at(j).angV) / qCos(track.at(j).nearTarget->angToV),
+                                                              track.at(j).nearTarget->dist *
+                                                              qCos(track.at(j).angV) / qCos(track.at(j).nearTarget->angToV)));
     }
 
-    /// Определение расстояния до базы и угла видимости
-    pen.setWidth(1);
-    for(int j = 0; j < track.count(); ++j)
-    {
-        float maxDist = 0.0;        /// Максимальное расстояние до центра позиционного района
-        float angToMaxDist = 0.0;   /// Угол между вектором скорости и прямой до центра наиболее удаленного района
+    /// Отрисовка расстояний от трасс до центров ПР и углов видимости ПР
+//    pen.setWidth(1);
+//    for(int j = 0; j < track.count(); ++j)
+//    {
+//        for(int i = 0; i < area.count(); ++i)
+//        {
+//            /// Кратчайшее растояние до ПР
+//            pen.setColor(Qt::darkRed);
+//            p.setPen(pen);
+//            p.drawLine(area.at(i).pos, pTrack.at(j));
 
-        for(int i = 0; i < area.count(); ++i)
-        {
-            track[j].target.push_back(Track::Target());
-            track[j].target[i].dist = calcTanPoints(&pTrack.at(j), &area.at(i).pos, area.at(i).radius,
-                                                    &track[j].target[i].p1, &track[j].target[i].p2);
-            track[j].target[i].angToV = track.at(j).angV + qAtan2(area.at(i).pos.y() - pTrack.at(j).y(),
-                                                                  area.at(i).pos.x() - pTrack.at(j).x()) - M_PI_2;
-
-            if(maxDist < track.at(j).target.at(i).dist)
-            {
-                maxDist = track.at(j).target.at(i).dist;
-                angToMaxDist = track.at(j).target.at(i).angToV;
-            }
-
-            /// Угол видимости
+//            /// Угол видимости
 //            pen.setColor(Qt::darkBlue);
 //            p.setPen(pen);
 //            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p1);
 //            p.drawLine(pTrack.at(j), track.at(j).target.at(i).p2);
-
-            /// Кратчайшее растояние
-//            pen.setColor(Qt::darkRed);
-//            p.setPen(pen);
-//            p.drawLine(area.at(i).pos, pTrack.at(j));
-        }
-
-        /// Вектор скорости
-        pen.setColor(Qt::darkGreen);
-        p.setPen(pen);
-        p.drawLine(pTrack.at(j), pTrack.at(j) + QPointF(maxDist * qSin(track.at(j).angV) / qCos(angToMaxDist),
-                                                        maxDist * qCos(track.at(j).angV) / qCos(angToMaxDist)));
-    }
-
+//        }
+//    }
+/*
     /// Расчет времени с ошибками
     QVector <QVector <float> > timesWithError;
     for(int i = 0; i < area.count(); ++i)
@@ -215,20 +221,8 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
                                         (track.at(j).modV * qCos(track.at(j).target.at(i).angToV)));
     }
 
-    /// Расчет эталонного времени
-    QVector <QVector <float> > timesNoError;
-    for(int i = 0; i < area.count(); ++i)
-    {
-        timesNoError.push_back(QVector <float>());
-        for(int j = 0; j < track.count(); ++j)
-            timesNoError[i].push_back((track.at(j).target.at(i).dist - area.at(i).radius) /
-                                      (track.at(j).modV * qCos(track.at(j).target.at(i).angToV)));
-    }
-
     results->loadTable(&timesWithError, area.count(), track.count());
-
-    pTrack.clear();
-
+*/
     p.end();
 }
 

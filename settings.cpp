@@ -12,6 +12,13 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QSplitter());
 
+    QPushButton *pReStart = new QPushButton(QObject::tr("Начать с начала"));
+    pReStart->setFixedWidth(200);
+    QObject::connect(pReStart, SIGNAL(clicked()), painter, SLOT(reStart()));
+    hLayout->addWidget(pReStart);
+
+    hLayout->addWidget(new QSplitter());
+
     hLayout->addWidget(new QLabel(QObject::tr("Интервал таймера (1000 / X):")));
 
     QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
@@ -36,22 +43,6 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
     pStartStop->setFixedWidth(200);
     QObject::connect(pStartStop, SIGNAL(clicked()), this, SLOT(changeState()));
     hLayout->addWidget(pStartStop);
-
-    hLayout->addWidget(new QSplitter());
-
-    hLayout->addWidget(new QLabel(QObject::tr("Время моделирования:")));
-
-    QSpinBox *sTotalTime = new QSpinBox(this);
-    sTotalTime->setValue(painter->getTotalTime());
-    sTotalTime->setRange(0, 600);
-    sTotalTime->setSuffix(QObject::tr(" c"));
-    QObject::connect(sTotalTime, SIGNAL(valueChanged(int)), painter, SLOT(setTotalTime(int)));
-    hLayout->addWidget(sTotalTime);
-
-    QPushButton *pStartFromStart = new QPushButton(QObject::tr("Начать с начала"));
-    pStartFromStart->setFixedWidth(200);
-    QObject::connect(pStartFromStart, SIGNAL(clicked()), painter, SLOT(resetTime()));
-    hLayout->addWidget(pStartFromStart);
 
     hLayout->addWidget(new QSplitter());
 
