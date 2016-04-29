@@ -11,8 +11,8 @@
 namespace ThreatLevel
 {
 
-const int MAXNUMAREAS = 5;
-const int DEFNUMAREAS = 3;
+const int MAXNUMAREAS = 5;  /// Максимальное количество ПР
+const int DEFNUMAREAS = 3;  /// Количество ПР по умолчанию
 
 class AreaParameters : public QWidget  /// Класс позиционных районов
 {
@@ -22,14 +22,14 @@ public:
     explicit AreaParameters(QWidget *parent = 0);
     ~AreaParameters();
 
-    inline int getCount();                          /// Полчить количество
-    inline float getPar(int _row, int _column);     /// Получить параметр
+    inline int getCount();                          /// Получить количество ПР
+    inline float getPar(int _row, int _column);     /// Получить параметр ПР
 
 private slots:
-    void initPar(int _number);                      /// Начальная инициализация параметров
+    void initPar(int _number);                      /// Начальная инициализация параметров ПР
 
 private:
-    QTableWidget *tAreaPar;                         /// Таблица параметров
+    QTableWidget *tAreaPar;                         /// Таблица параметров ПР
 };
 
 int AreaParameters::getCount()

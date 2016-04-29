@@ -48,17 +48,15 @@ public:
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
 
-    inline int getSpeedFactor();
-    inline int getTotalTime();
-
     inline const Area & areaAt(int _index) const;
     inline const Track & trackAt(int _index) const;
 
     inline Area & getArea(int _index);
     inline Track & getTrack(int _index);
 
+    inline int getTotalTime();
+
 public slots:
-    inline void setSpeedFactor(int _speedFactor);
     inline void setTotalTime(int _totalTime);
     void resetTime();
 
@@ -83,23 +81,12 @@ private:
     TrackParameters *trackParameters;
     Results *results;
 
-    float speedFactor;  /// Коэффициент скорости
-    float totalTime;    /// Общее время моделирования (в секундах)
     float time;         /// Текущее время
+    float totalTime;    /// Общее время моделирования (в секундах)
 
     QVector <Area> area;    /// Позиционные районы
     QVector <Track> track;  /// Трассы
 };
-
-int Painter::getSpeedFactor()
-{
-    return (int) speedFactor * 10;
-}
-
-int Painter::getTotalTime()
-{
-    return totalTime;
-}
 
 const Area & Painter::areaAt(int _index) const
 {
@@ -121,9 +108,9 @@ Track & Painter::getTrack(int _index)
     return track[_index];
 }
 
-void Painter::setSpeedFactor(int _speedFactor)
+int Painter::getTotalTime()
 {
-    speedFactor = (float) _speedFactor / 10.0;
+    return totalTime;
 }
 
 void Painter::setTotalTime(int _totalTime)

@@ -14,6 +14,9 @@
 namespace ThreatLevel
 {
 
+const int MAXTIMERINTERVAL = 10;    /// Максимальный интервал таймера
+const int DEFTIMERINTERVAL = 10;    /// Интервал таймера по умолчанию
+
 class Settings : public QWidget
 {
     Q_OBJECT
@@ -23,14 +26,17 @@ public:
     ~Settings();
 
 private slots:
-    void changeState();     /// Запуск и остановка отрисовщика
+    void changeState();                         /// Запуск и остановка
+    void changeTimerInterval(int _interval);    /// Изменение интервала таймера
 
 private:    
     class Painter *painter;
 
     bool isStart;                   /// Флаг состояния кнопки
-    QPushButton *pStartStop;        /// Кнопка запуска и остановки процессов
-    QPushButton *pStartFromStart;   /// Кнопка запуска с начала
+    int idTimer;                    /// Номер таймера
+
+    QLCDNumber *lTimerInterval;     /// Интервал таймера
+    QPushButton *pStartStop;        /// Кнопка запуска и остановки
 };
 
 }

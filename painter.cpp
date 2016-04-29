@@ -10,7 +10,6 @@ Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParamet
     setCSOrdMeasure(10000);
     setCSZoom(2);
 
-    speedFactor = 1.0;
     totalTime = 60.0;
 
     loadAreaPar();
@@ -52,7 +51,7 @@ void Painter::timerEvent(QTimerEvent *)
 {
     /// Время
     if(time < totalTime)
-        time += 0.1 * speedFactor;
+        time += 0.1;
     else
         time = 0;
 

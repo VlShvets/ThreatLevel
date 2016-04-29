@@ -1,5 +1,7 @@
 #include "settings.h"
 
+#include <QDebug>
+
 namespace ThreatLevel
 {
 
@@ -10,22 +12,22 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QSplitter());
 
-    hLayout->addWidget(new QLabel(QObject::tr("Коэффициент скорости (x 0.1):")));
+    hLayout->addWidget(new QLabel(QObject::tr("Интервал таймера (1000 / X):")));
 
-    QSlider *sSpeedFactor = new QSlider(Qt::Horizontal);
-    sSpeedFactor->setRange(1, 20);
-    sSpeedFactor->setTickInterval(1);
-    sSpeedFactor->setValue(painter->getSpeedFactor());
-    sSpeedFactor->setTickPosition(QSlider::TicksAbove);
-    QObject::connect(sSpeedFactor, SIGNAL(valueChanged(int)), painter, SLOT(setSpeedFactor(int)));
-    hLayout->addWidget(sSpeedFactor);
+    QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
+    sTimerInterval->setRange(1, MAXTIMERINTERVAL);
+    sTimerInterval->setTickInterval(1);
+    sTimerInterval->setValue(DEFTIMERINTERVAL);
+    sTimerInterval->setTickPosition(QSlider::TicksAbove);
+    QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), this, SLOT(changeTimerInterval(int)));
+    hLayout->addWidget(sTimerInterval);
 
-    QLCDNumber *lSpeedFactor = new QLCDNumber(2);
-    lSpeedFactor->setSegmentStyle(QLCDNumber::Flat);
-    lSpeedFactor->setMode(QLCDNumber::Dec);
-    lSpeedFactor->display(painter->getSpeedFactor());
-    QObject::connect(sSpeedFactor, SIGNAL(valueChanged(int)), lSpeedFactor, SLOT(display(int)));
-    hLayout->addWidget(lSpeedFactor);
+    lTimerInterval = new QLCDNumber(2);
+    lTimerInterval->setSegmentStyle(QLCDNumber::Flat);
+    lTimerInterval->setMode(QLCDNumber::Dec);
+    lTimerInterval->display(DEFTIMERINTERVAL);
+    QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), lTimerInterval, SLOT(display(int)));
+    hLayout->addWidget(lTimerInterval);
 
     hLayout->addWidget(new QSplitter());
 
@@ -46,7 +48,7 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
     QObject::connect(sTotalTime, SIGNAL(valueChanged(int)), painter, SLOT(setTotalTime(int)));
     hLayout->addWidget(sTotalTime);
 
-    pStartFromStart = new QPushButton(QObject::tr("Начать с начала"));
+    QPushButton *pStartFromStart = new QPushButton(QObject::tr("Начать с начала"));
     pStartFromStart->setFixedWidth(200);
     QObject::connect(pStartFromStart, SIGNAL(clicked()), painter, SLOT(resetTime()));
     hLayout->addWidget(pStartFromStart);
@@ -59,23 +61,31 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 Settings::~Settings()
 {
     delete pStartStop;
-    delete pStartFromStart;
+    delete lTimerInterval;
 }
 
 void Settings::changeState()
 {
-    static int nTimer;
     if(isStart)
     {
-        painter->killTimer(nTimer);
+        painter->killTimer(idTimer);
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     }
     else
     {
-        nTimer = painter->startTimer(100);
+        idTimer = painter->startTimer((int) 1000 / lTimerInterval->intValue());
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     }
     isStart = !isStart;
+}
+
+void Settings::changeTimerInterval(int _interval)
+{
+    if(isStart)
+    {
+        painter->killTimer(idTimer);
+        idTimer = painter->startTimer((int) 1000 / _interval);
+    }
 }
 
 }
