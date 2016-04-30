@@ -11,14 +11,14 @@
 namespace ThreatLevel
 {
 
-const int MAXNUMAREAS = 5;  /// Максимальное количество ПР
-const int DEFNUMAREAS = 3;  /// Количество ПР по умолчанию
-
 class AreaParameters : public QWidget  /// Класс позиционных районов
 {
     Q_OBJECT
 
-public:
+public:    
+    const int MAXNUMAREAS = 5;  /// Максимальное количество ПР
+    const int DEFNUMAREAS = 3;  /// Количество ПР по умолчанию
+
     explicit AreaParameters(QWidget *parent = 0);
     ~AreaParameters();
 

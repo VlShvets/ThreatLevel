@@ -14,14 +14,14 @@
 namespace ThreatLevel
 {
 
-const int MAXTIMERINTERVAL = 10;    /// Максимальный интервал таймера
-const int DEFTIMERINTERVAL = 10;    /// Интервал таймера по умолчанию
-
 class Settings : public QWidget
 {
     Q_OBJECT
 
 public:
+    const int MAXTIMERINTERVAL = 10;    /// Максимальный интервал таймера
+    const int DEFTIMERINTERVAL = 10;    /// Интервал таймера по умолчанию
+
     explicit Settings(class Painter *_painter, QWidget *parent = 0);
     ~Settings();
 
