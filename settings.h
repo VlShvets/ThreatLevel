@@ -20,7 +20,7 @@ class Settings : public QWidget
 
 public:
     const int MAXTIMERINTERVAL = 10;    /// Максимальный интервал таймера
-    const int DEFTIMERINTERVAL = 10;    /// Интервал таймера по умолчанию
+    const int DEFTIMERINTERVAL = 1;     /// Интервал таймера по умолчанию
 
     explicit Settings(class Painter *_painter, QWidget *parent = 0);
     ~Settings();

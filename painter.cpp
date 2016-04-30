@@ -1,5 +1,7 @@
 #include "painter.h"
 
+#include <QDebug>
+
 namespace ThreatLevel
 {
 
@@ -12,6 +14,7 @@ Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParamet
 
     loadAreaPar();
     loadTrackPar();
+    loadEtalonPar();
 }
 
 Painter::~Painter()
@@ -24,6 +27,7 @@ void Painter::reStart()
 {
     loadAreaPar();
     loadTrackPar();
+    loadEtalonPar();
 
     repaint();
 }
@@ -60,10 +64,7 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         {
             pen.setWidth(1);
             p.setPen(pen);
-            p.drawLine(track.at(j).pos, track.at(j).pos + QPointF(track.at(j).farTarget->dist *
-                                                                  qSin(track.at(j).angV) / qCos(track.at(j).nearTarget->angToV),
-                                                                  track.at(j).farTarget->dist *
-                                                                  qCos(track.at(j).angV) / qCos(track.at(j).nearTarget->angToV)));
+            p.drawLine(track.at(j).pos, track[j].endPos);
         }
 
     }
@@ -97,17 +98,49 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 
 void Painter::timerEvent(QTimerEvent *)
 {
-    /// Трассы
-    for(int j = 0; j < track.count(); ++j)
+    /// Эталоны
+    /// ==================================================
+    for(int j = 0; j < etalon.count(); ++j)
     {
-        track[j].pos += QPoint(track.at(j).modV * qCos(M_PI_2 - track.at(j).angV) * DELTA + 1000 * normalDistribution(0, 0.2),
-                               track.at(j).modV * qSin(M_PI_2 - track.at(j).angV) * DELTA + 1000 * normalDistribution(0, 0.2));
+        /// Перемещение
+        etalon[j].pos += QPoint(etalon.at(j).modV * qCos(M_PI_2 - etalon.at(j).angV),
+                                etalon.at(j).modV * qSin(M_PI_2 - etalon.at(j).angV)) * DELTAT;
+
+        /// Определение расстояний от эталонов до центров ПР
+        /// и углов между векторами скорости и прямыми до центров ПР
+        for(int i = 0; i < area.count(); ++i)
+        {
+            etalon[j].target.push_back(Track::Target());
+
+            /// Определение расстояния от трассы до центра ПР
+            etalon[j].target[i].dist = calcDistance(&etalon.at(j).pos, &area.at(i).pos);
+
+            /// Определение угла между вектором скорости и прямой до центра ПР
+            etalon[j].target[i].angToV = etalon.at(j).angV + qAtan2(area.at(i).pos.y() - etalon.at(j).pos.y(),
+                                                                    area.at(i).pos.x() - etalon.at(j).pos.x()) - M_PI_2;
+        }
     }
 
-    /// Определение расстояний от трасс до центров ПР
-    /// и углов между векторами скорости и прямыми до центров ПР
+    /// Расчет эталонного времени
+    for(int i = 0; i < area.count(); ++i)
+    {
+        for(int j = 0; j < etalon.count(); ++j)
+            etalon[j].target[i].time = (etalon.at(j).target.at(i).dist - area.at(i).radius) /
+                                       (etalon.at(j).modV * qCos(etalon.at(j).target.at(i).angToV));
+    }
+    /// ==================================================
+
+    /// Трассы
+    /// ==================================================
     for(int j = 0; j < track.count(); ++j)
     {
+        track[j].pos = etalon.at(j).pos + QPoint(normalDistribution(0, DEVIATION),
+                                                 normalDistribution(0, DEVIATION)) * ERRPOS;
+        track[j].modV = etalon.at(j).modV + normalDistribution(0, DEVIATION) * ERRMODV;
+        track[j].angV = etalon.at(j).angV + qDegreesToRadians(normalDistribution(0, DEVIATION) * ERRANGV);
+
+        /// Определение расстояний от трасс до центров ПР
+        /// и углов между векторами скорости и прямыми до центров ПР
         for(int i = 0; i < area.count(); ++i)
         {
             track[j].target.push_back(Track::Target());
@@ -133,24 +166,35 @@ void Painter::timerEvent(QTimerEvent *)
             if(track.at(j).farTarget->dist < track.at(j).target.at(i).dist)
                 track[j].farTarget = &track[j].target[i];
         }
+
+        /// Определение координат экстраполированного конца траектории
+        track[j].endPos = track.at(j).pos + QPointF(track.at(j).farTarget->dist *
+                                                    qSin(track.at(j).angV) / qCos(track.at(j).farTarget->angToV),
+                                                    track.at(j).farTarget->dist *
+                                                    qCos(track.at(j).angV) / qCos(track.at(j).farTarget->angToV));
     }
 
-    /// Расчет эталонного времени и времени с погрешностями
+    /// Расчет времени с погрешностями
     for(int i = 0; i < area.count(); ++i)
     {
         for(int j = 0; j < track.count(); ++j)
-        {
-            /// Расчет эталонного времени
             track[j].target[i].time = (track.at(j).target.at(i).dist - area.at(i).radius) /
                                       (track.at(j).modV * qCos(track.at(j).target.at(i).angToV));
+    }
+    /// ==================================================
 
-            /// Расчет времени с погрешностями
-            track[j].target[i].errTime = (track.at(j).target.at(i).dist - area.at(i).radius) /
-                                         (track.at(j).modV * qCos(track.at(j).target.at(i).angToV));
+    /// Определение наиболее опасной трассы для каждого ПР
+    for(int i = 0; i < area.count(); ++i)
+    {
+        area[i].nDangerousTrack = 0;
+        for(int j = 1; j < track.count(); ++j)
+        {
+            if(track.at(area[i].nDangerousTrack).target.at(i).dist > track.at(j).target.at(i).dist)
+                area[i].nDangerousTrack = j;
         }
     }
 
-    results->loadTable(&area, &track);
+    results->loadTable(&area, &track, &etalon);
 
     repaint();
 }
@@ -179,6 +223,20 @@ void Painter::loadTrackPar()
         track[j].pos.setY(trackParameters->getPar(j, 1));
         track[j].modV = trackParameters->getPar(j, 2);
         track[j].angV = qDegreesToRadians(trackParameters->getPar(j, 3));
+    }
+}
+
+void Painter::loadEtalonPar()
+{
+    etalon.resize(trackParameters->getCount());
+
+    for(int j = 0; j < etalon.count(); ++j)
+    {
+        etalon[j].num = j;
+        etalon[j].pos.setX(trackParameters->getPar(j, 0));
+        etalon[j].pos.setY(trackParameters->getPar(j, 1));
+        etalon[j].modV = trackParameters->getPar(j, 2);
+        etalon[j].angV = qDegreesToRadians(trackParameters->getPar(j, 3));
     }
 }
 

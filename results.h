@@ -12,17 +12,15 @@ struct Track                /// Трасса
 {
     int num;                /// Номер
     QPointF pos;            /// Координаты
-    QPointF errPos;         /// Координаты с погрешностью
     float modV;             /// Модуль вектора скорости
     float angV;             /// Курс (в радианах)
+    QPointF endPos;         /// Координаты экстраполированного конца траектории
 
     struct Target
     {
         float dist;         /// Расстояние от трассы до центра ПР
+        float time;         /// Время достижения ПР
         float angToV;       /// Угол между вектором скорости и прямой до центра ПР
-
-        float time;         /// Точное время достижения ПР
-        float errTime;      /// Время достижения ПР с погрешностью
 
         /// Точки касания угла видимости
         QPointF p1;
@@ -40,7 +38,7 @@ struct Area                 /// Позиционный район
     QPointF pos;            /// Координаты
     float radius;           /// Радиус
 
-    Track *dangerousTrack;  /// Наиболее опасная трасса
+    int nDangerousTrack;    /// Номер наиболее опасная трасса
 };
 
 class Results : public QWidget
@@ -51,7 +49,7 @@ public:
     explicit Results(QWidget *parent = 0);
     ~Results();
 
-    void loadTable(const QVector <Area> *_area, const QVector <Track> *_track);
+    void loadTable(const QVector <Area> *_area, const QVector <Track> *_track, const QVector <Track> *_etalon);
 
 private:
     QTableWidget *tResults;     /// Таблица результатов

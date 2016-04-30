@@ -21,7 +21,7 @@ Results::~Results()
     delete tResults;
 }
 
-void Results::loadTable(const QVector<Area> *_area, const QVector<Track> *_track)
+void Results::loadTable(const QVector <Area> *_area, const QVector <Track> *_track, const QVector <Track> *_etalon)
 {
     tResults->setRowCount(_area->count());
     tResults->setColumnCount(_track->count() + 1);
@@ -29,27 +29,16 @@ void Results::loadTable(const QVector<Area> *_area, const QVector<Track> *_track
     for(int i = 0; i < _area->count(); ++i)
     {
         for(int j = 0; j < _track->count(); ++j)
-            tResults->setItem(i, j, new QTableWidgetItem(QString::number(_track->at(j).target.at(i).errTime)));
+            tResults->setItem(i, j, new QTableWidgetItem(QString::number(_track->at(j).target.at(i).time)));
 
         /// Подсвечивание самой опасной трассы для каждого ПР
-        if(_area->at(i).dangerousTrack != NULL)
-            tResults->item(i, _area->at(i).dangerousTrack->num)->setBackgroundColor(QColor(255, 0, 0, 100));
-//        tResults->setItem(i, _nTrack, new QTableWidgetItem(QString::number(getIndexMinElement(&_area->at(i)) + 1)));
-//        tResults->item(i, getIndexMinElement(&_area->at(i)))->setBackgroundColor(QColor(255, 0, 0, 100));
-//        tResults->item(i, _nTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
-    }
+        tResults->item(i, _area->at(i).nDangerousTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
 
-//    QVector <float> temp;
-//    for(int j = 0; j < _nTrack; ++j)
-//    {
-//        /// Определение наиболее вероятной базы каждой трассы
-//        for(int i = 0; i < _track; ++i)
-//            temp.push_back(_area->at(i).at(j));
-//        tResults->setItem(_track, j, new QTableWidgetItem(QString::number(getIndexMinElement(&temp) + 1)));
-//        tResults->item(getIndexMinElement(&temp), j)->setTextColor(Qt::darkRed);
-//        tResults->item(_track, j)->setTextColor(Qt::darkRed);
-//        temp.clear();
-//    }
+        /// Ошибка по времени для самой опасной трассы
+        tResults->setItem(i, _track->count(), new QTableWidgetItem(QString::number(_track->at(_area->at(i).nDangerousTrack).target.at(i).time -
+                                                                                   _etalon->at(_area->at(i).nDangerousTrack).target.at(i).time)));
+        tResults->item(i, _track->count())->setBackgroundColor(QColor(255, 255, 0, 100));
+    }
 }
 
 }

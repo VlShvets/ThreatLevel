@@ -21,7 +21,13 @@ class Painter : public Grapher2D
     Q_OBJECT
 
 public:    
-    const float DELTA = 0.1;    /// Константа времени
+    const float DELTAT = 0.1;    /// Константа времени
+
+    /// Погрешности
+    const float DEVIATION = 0.2;    /// Среднеквадратическое отклонение
+    const float ERRPOS = 1000.0;    /// Погрешность координаты
+    const float ERRMODV = 100.0;    /// Погрешность модуля скорости
+    const float ERRANGV = 15.0;     /// Погрешность курса
 
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
@@ -44,6 +50,7 @@ private slots:
 private:
     void loadAreaPar();         /// Загрузка параметров ПР
     void loadTrackPar();        /// Загрузка параметров трасс
+    void loadEtalonPar();       /// Загрузка параметров эталонов
 
     /// Вычисление расстояния от трассы до центра ПР
     static float calcDistance(const QPointF *_base, const QPointF *_track);
@@ -59,8 +66,9 @@ private:
     TrackParameters *trackParameters;
     Results *results;
 
-    QVector <Area> area;    /// Позиционные районы
-    QVector <Track> track;  /// Трассы
+    QVector <Area> area;        /// Позиционные районы
+    QVector <Track> track;      /// Трассы
+    QVector <Track> etalon;     /// Эталоны
 };
 
 const Area & Painter::areaAt(int _index) const
