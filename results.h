@@ -18,7 +18,7 @@ struct Track                /// Трасса
 
     struct Target
     {
-        float dist;         /// Расстояние от трассы до центра ПР
+        float dist;         /// Расстояние от трассы до границы ПР
         float time;         /// Время достижения ПР
         float angToV;       /// Угол между вектором скорости и прямой до центра ПР
 
@@ -28,8 +28,8 @@ struct Track                /// Трасса
     };
     QVector <Target> target;    /// Цели
 
-    Target *nearTarget;     /// Ближайший ПР
-    Target *farTarget;      /// Наиболее удаленный ПР
+    int nNearTarget;        /// Номер ближайшего ПР
+    int nFarTarget;         /// Номер наиболее удаленного ПР
 };
 
 struct Area                 /// Позиционный район

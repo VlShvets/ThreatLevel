@@ -60,7 +60,7 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         p.drawPoint(track.at(j).pos);
 
         /// Отрисовка курса
-        if(track.at(j).farTarget != NULL)
+        if(track.at(j).nFarTarget != -1)
         {
             pen.setWidth(1);
             p.setPen(pen);
@@ -85,9 +85,9 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 //            {
 //                pen.setColor(Qt::darkBlue);
 //                p.setPen(pen);
-//                if(track.at(j).target.at(i).p1 != NULL)
+//                if(!track.at(j).target.at(i).p1.isNull())
 //                    p.drawLine(track.at(j).pos, track.at(j).target.at(i).p1);
-//                if(track.at(j).target.at(i).p2 != NULL)
+//                if(!track.at(j).target.at(i).p2.isNull())
 //                    p.drawLine(track.at(j).pos, track.at(j).target.at(i).p2);
 //            }
 //        }
@@ -112,8 +112,8 @@ void Painter::timerEvent(QTimerEvent *)
         {
             etalon[j].target.push_back(Track::Target());
 
-            /// Определение расстояния от трассы до центра ПР
-            etalon[j].target[i].dist = calcDistance(&etalon.at(j).pos, &area.at(i).pos);
+            /// Определение расстояния от трассы до границы ПР
+            etalon[j].target[i].dist = calcDistance(&etalon.at(j).pos, &area.at(i).pos, area.at(i).radius);
 
             /// Определение угла между вектором скорости и прямой до центра ПР
             etalon[j].target[i].angToV = etalon.at(j).angV + qAtan2(area.at(i).pos.y() - etalon.at(j).pos.y(),
@@ -125,7 +125,7 @@ void Painter::timerEvent(QTimerEvent *)
     for(int i = 0; i < area.count(); ++i)
     {
         for(int j = 0; j < etalon.count(); ++j)
-            etalon[j].target[i].time = (etalon.at(j).target.at(i).dist - area.at(i).radius) /
+            etalon[j].target[i].time = etalon.at(j).target.at(i).dist /
                                        (etalon.at(j).modV * qCos(etalon.at(j).target.at(i).angToV));
     }
     /// ==================================================
@@ -134,8 +134,8 @@ void Painter::timerEvent(QTimerEvent *)
     /// ==================================================
     for(int j = 0; j < track.count(); ++j)
     {
-        track[j].pos = etalon.at(j).pos + QPoint(normalDistribution(0, DEVIATION),
-                                                 normalDistribution(0, DEVIATION)) * ERRPOS;
+        track[j].pos = etalon.at(j).pos + QPointF(normalDistribution(0, DEVIATION),
+                                                  normalDistribution(0, DEVIATION)) * ERRPOS;
         track[j].modV = etalon.at(j).modV + normalDistribution(0, DEVIATION) * ERRMODV;
         track[j].angV = etalon.at(j).angV + qDegreesToRadians(normalDistribution(0, DEVIATION) * ERRANGV);
 
@@ -145,40 +145,44 @@ void Painter::timerEvent(QTimerEvent *)
         {
             track[j].target.push_back(Track::Target());
 
-            /// Определение расстояния от трассы до центра ПР
-            track[j].target[i].dist = calcDistance(&track.at(j).pos, &area.at(i).pos);
+            /// Определение расстояния от трассы до границы ПР
+            track[j].target[i].dist = calcDistance(&track.at(j).pos, &area.at(i).pos, area.at(i).radius);
 
             /// Определение угла между вектором скорости и прямой до центра ПР
             track[j].target[i].angToV = track.at(j).angV + qAtan2(area.at(i).pos.y() - track.at(j).pos.y(),
                                                                   area.at(i).pos.x() - track.at(j).pos.x()) - M_PI_2;
+
+            /// Определение точек касания угла видимости
+//            calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius, &track[j].target[i].p1, &track[j].target[i].p2);
         }
 
         /// Определение ближайшего и наиболее удаленного ПР
-        track[j].farTarget = &track[j].target[0];
-        track[j].nearTarget = &track[j].target[0];
+        track[j].nFarTarget = 0;
+        track[j].nNearTarget = 0;
         for(int i = 1; i < area.count(); ++i)
         {
             /// Определение ближайшего ПР
-            if(track.at(j).nearTarget->dist > track.at(j).target.at(i).dist)
-                track[j].nearTarget = &track[j].target[i];
+            if(track.at(j).target.at(track.at(j).nNearTarget).dist > track.at(j).target.at(i).dist)
+                track[j].nNearTarget = i;
 
             /// Определение наиболее удаленного ПР
-            if(track.at(j).farTarget->dist < track.at(j).target.at(i).dist)
-                track[j].farTarget = &track[j].target[i];
+            if(track.at(j).target.at(track.at(j).nFarTarget).dist < track.at(j).target.at(i).dist)
+                track[j].nFarTarget = i;
         }
 
         /// Определение координат экстраполированного конца траектории
-        track[j].endPos = track.at(j).pos + QPointF(track.at(j).farTarget->dist *
-                                                    qSin(track.at(j).angV) / qCos(track.at(j).farTarget->angToV),
-                                                    track.at(j).farTarget->dist *
-                                                    qCos(track.at(j).angV) / qCos(track.at(j).farTarget->angToV));
+        track[j].endPos = track.at(j).pos +
+                          QPointF((track.at(j).target.at(track.at(j).nFarTarget).dist + area.at(track.at(j).nFarTarget).radius) *
+                                  qSin(track.at(j).angV) / qCos(track.at(j).target.at(track.at(j).nFarTarget).angToV),
+                                  (track.at(j).target.at(track.at(j).nFarTarget).dist + area.at(track.at(j).nFarTarget).radius) *
+                                  qCos(track.at(j).angV) / qCos(track.at(j).target.at(track.at(j).nFarTarget).angToV));
     }
 
     /// Расчет времени с погрешностями
     for(int i = 0; i < area.count(); ++i)
     {
         for(int j = 0; j < track.count(); ++j)
-            track[j].target[i].time = (track.at(j).target.at(i).dist - area.at(i).radius) /
+            track[j].target[i].time = track.at(j).target.at(i).dist /
                                       (track.at(j).modV * qCos(track.at(j).target.at(i).angToV));
     }
     /// ==================================================
@@ -219,10 +223,14 @@ void Painter::loadTrackPar()
     for(int j = 0; j < track.count(); ++j)
     {
         track[j].num = j;
+
         track[j].pos.setX(trackParameters->getPar(j, 0));
         track[j].pos.setY(trackParameters->getPar(j, 1));
         track[j].modV = trackParameters->getPar(j, 2);
         track[j].angV = qDegreesToRadians(trackParameters->getPar(j, 3));
+
+        track[j].nNearTarget = -1;
+        track[j].nFarTarget = -1;
     }
 }
 
@@ -233,6 +241,7 @@ void Painter::loadEtalonPar()
     for(int j = 0; j < etalon.count(); ++j)
     {
         etalon[j].num = j;
+
         etalon[j].pos.setX(trackParameters->getPar(j, 0));
         etalon[j].pos.setY(trackParameters->getPar(j, 1));
         etalon[j].modV = trackParameters->getPar(j, 2);
@@ -240,10 +249,10 @@ void Painter::loadEtalonPar()
     }
 }
 
-float Painter::calcDistance(const QPointF *_area, const QPointF *_track)
+float Painter::calcDistance(const QPointF *_area, const QPointF *_track, const float _radius)
 {
     return qSqrt((_area->x() - _track->x()) * (_area->x() - _track->x()) +
-                 (_area->y() - _track->y()) * (_area->y() - _track->y()));
+                 (_area->y() - _track->y()) * (_area->y() - _track->y())) - _radius;
 }
 
 float Painter::normalDistribution(float _mean, float _dev)
@@ -258,8 +267,8 @@ float Painter::normalDistribution(float _mean, float _dev)
 
 void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const float _radius, QPointF *_p1, QPointF *_p2)
 {
-    float distance = calcDistance(_area, _track);
-    if(distance < _radius)
+    float distance = calcDistance(_area, _track, _radius);
+    if(distance < 0)
     {
         _p1 = NULL;
         _p2 = NULL;
@@ -271,7 +280,7 @@ void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const f
 
     float a = midDistTargetBase.x() * midDistTargetBase.x() +
             midDistTargetBase.y() * midDistTargetBase.y();
-    float E = 0.5 * (_radius * _radius - 0.25 * distance * distance + a);
+    float E = 0.5 * (_radius * _radius - 0.25 * (distance + _radius) * (distance + _radius) + a);
 
     if(qAbs(midDistTargetBase.x()) < 1.e-6)
     {

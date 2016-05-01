@@ -25,7 +25,7 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     QObject::connect(sliderArea, SIGNAL(valueChanged(int)), lNumberArea, SLOT(display(int)));
     gridLayout->addWidget(lNumberArea, 0, 2, 1, 1);
 
-    gridLayout->addWidget(new QLabel(QObject::tr("\tПараметры баз:")), 1, 0, 1, 3);
+    gridLayout->addWidget(new QLabel(QObject::tr("\tНачальные параметры позиционных районов:")), 1, 0, 1, 3);
 
     tAreaPar = new QTableWidget(DEFNUMAREAS, 3, this);
     tAreaPar->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Радиус");

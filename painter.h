@@ -53,7 +53,7 @@ private:
     void loadEtalonPar();       /// Загрузка параметров эталонов
 
     /// Вычисление расстояния от трассы до центра ПР
-    static float calcDistance(const QPointF *_base, const QPointF *_track);
+    static float calcDistance(const QPointF *_base, const QPointF *_track, const float _radius);
 
     /// Нормально распределенная случайная величина
     static float normalDistribution(float _mean, float _dev);

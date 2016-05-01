@@ -19,7 +19,7 @@ public:
     const int MAXNUMGROUPS = 5;             /// Максимальное количество групп
     const int DEFNUMGROUPS = 3;             /// Количество групп по умолчанию
     const int MAXTRACKSINGROUP = 6;         /// Максимальное количество трасс в группе
-    const int DEFTRACKSINGROUP = 4;         /// Количество трасс в группе по умолчанию
+    const int DEFTRACKSINGROUP = 1;         /// Количество трасс в группе по умолчанию
 
     const int DISTBETWEENTRACKS = 6000;     /// Расстояние между трассами в группе
 

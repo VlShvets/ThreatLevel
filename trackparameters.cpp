@@ -45,7 +45,7 @@ TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
     QObject::connect(sliderTrack, SIGNAL(valueChanged(int)), this, SLOT(numTracksInGroupChanged(int)));
     gridLayout->addWidget(lTracksInGroup, 1, 2, 1, 1);
 
-    gridLayout->addWidget(new QLabel(QObject::tr("\tПараметры целей:")), 2, 0, 1, 3);
+    gridLayout->addWidget(new QLabel(QObject::tr("\tНачальные параметры трасс:")), 2, 0, 1, 3);
 
     tTrackPar = new QTableWidget(DEFNUMGROUPS * DEFTRACKSINGROUP, 4, this);
     tTrackPar->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Скорость" << "Курс (град.)");

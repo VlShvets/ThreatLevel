@@ -7,7 +7,7 @@ Results::Results(QWidget *parent) : QWidget(parent)
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 
-    vLayout->addWidget(new QLabel(QObject::tr("Позиционные районы\t\\\tРакеты")));
+    vLayout->addWidget(new QLabel(QObject::tr("Позиционные районы\t\\\tТрассы")));
 
     tResults = new QTableWidget(this);
     tResults->setMinimumWidth(400);
