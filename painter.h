@@ -20,7 +20,7 @@ class Painter : public Grapher2D
 {
     Q_OBJECT
 
-public:    
+public:
     const float DELTAT = 0.1;    /// Константа времени
 
     /// Погрешности

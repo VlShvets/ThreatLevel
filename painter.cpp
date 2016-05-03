@@ -48,16 +48,33 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setWidth(3);
     p.setPen(pen);
     for(int i = 0; i < area.count(); ++i)
+    {
+        /// Отрисовка местоположения
         p.drawEllipse(area.at(i).pos, area.at(i).radius, area.at(i).radius);
+
+        /// Отображение номера
+        p.save();
+        p.resetTransform();
+        p.translate(width() / 2.0 + getCSAbsShift(), height() / 2.0 + getCSOrdShift());
+        p.drawText(area.at(i).pos.x() * getCSAbsScale() - 20, area.at(i).pos.y() * getCSOrdScale() - 5, QString::number(i + 1));
+        p.restore();
+    }
 
     /// Трассы
     pen.setColor(Qt::darkGreen);
     for(int j = 0; j < track.count(); ++j)
     {
-        /// Отрисовка трассы
+        /// Отрисовка местоположения
         pen.setWidth(6);
         p.setPen(pen);
         p.drawPoint(track.at(j).pos);
+
+        /// Отображение номера
+        p.save();
+        p.resetTransform();
+        p.translate(width() / 2.0 + getCSAbsShift(), height() / 2.0 + getCSOrdShift());
+        p.drawText(track.at(j).pos.x() * getCSAbsScale() - 20, track.at(j).pos.y() * getCSOrdScale() - 5, QString::number(j + 1));
+        p.restore();
 
         /// Отрисовка курса
         if(track.at(j).nFarTarget != -1)
@@ -196,6 +213,9 @@ void Painter::timerEvent(QTimerEvent *)
             if(track.at(area[i].nDangerousTrack).target.at(i).dist > track.at(j).target.at(i).dist)
                 area[i].nDangerousTrack = j;
         }
+        area[i].time = track.at(area.at(i).nDangerousTrack).target.at(i).time;
+        area[i].errTime = track.at(area.at(i).nDangerousTrack).target.at(i).time -
+                          etalon.at(area.at(i).nDangerousTrack).target.at(i).time;
     }
 
     results->loadTable(&area, &track, &etalon);

@@ -38,7 +38,9 @@ struct Area                 /// Позиционный район
     QPointF pos;            /// Координаты
     float radius;           /// Радиус
 
-    int nDangerousTrack;    /// Номер наиболее опасная трасса
+    int nDangerousTrack;    /// Номер наиболее опасной трассы
+    float time;             /// Время поражения наиболее опасной трассой
+    float errTime;          /// Погрешность времени поражения
 };
 
 class Results : public QWidget

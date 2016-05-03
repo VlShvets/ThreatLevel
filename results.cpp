@@ -29,14 +29,16 @@ void Results::loadTable(const QVector <Area> *_area, const QVector <Track> *_tra
     for(int i = 0; i < _area->count(); ++i)
     {
         for(int j = 0; j < _track->count(); ++j)
-            tResults->setItem(i, j, new QTableWidgetItem(QString::number(_track->at(j).target.at(i).time)));
+            tResults->setItem(i, j, new QTableWidgetItem(QString::number(_track->at(j).target.at(i).time) + " (" +
+                                                         QString::number(_track->at(j).target.at(i).time -
+                                                                         _etalon->at(j).target.at(i).time) + ")"));
 
         /// Подсвечивание самой опасной трассы для каждого ПР
         tResults->item(i, _area->at(i).nDangerousTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
 
         /// Ошибка по времени для самой опасной трассы
-        tResults->setItem(i, _track->count(), new QTableWidgetItem(QString::number(_track->at(_area->at(i).nDangerousTrack).target.at(i).time -
-                                                                                   _etalon->at(_area->at(i).nDangerousTrack).target.at(i).time)));
+        tResults->setItem(i, _track->count(), new QTableWidgetItem(QString::number(_area->at(i).errTime) + " (" +
+                                                                   QString::number(_area->at(i).nDangerousTrack + 1) + ")"));
         tResults->item(i, _track->count())->setBackgroundColor(QColor(255, 255, 0, 100));
     }
 }
