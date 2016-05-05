@@ -17,7 +17,7 @@ class AreaParameters : public QWidget  /// Класс позиционных р�
 
 public:    
     const int MAXNUMAREAS = 5;  /// Максимальное количество ПР
-    const int DEFNUMAREAS = 3;  /// Количество ПР по умолчанию
+    const int DEFNUMAREAS = 1;  /// Количество ПР по умолчанию
 
     explicit AreaParameters(QWidget *parent = 0);
     ~AreaParameters();

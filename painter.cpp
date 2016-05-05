@@ -10,7 +10,7 @@ Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParamet
 {
     setCSAbsMeasure(10000);
     setCSOrdMeasure(10000);
-    setCSZoom(5);
+    setCSZoom(10);
 
     loadAreaPar();
     loadTrackPar();
@@ -123,13 +123,13 @@ void Painter::timerEvent(QTimerEvent *)
         etalon[j].pos += QPoint(etalon.at(j).modV * qCos(M_PI_2 - etalon.at(j).angV),
                                 etalon.at(j).modV * qSin(M_PI_2 - etalon.at(j).angV)) * DELTAT;
 
-        /// Определение расстояний от эталонов до центров ПР
-        /// и углов между векторами скорости и прямыми до центров ПР
+        /// Определение расстояний от эталона до границ ПР
+        /// и углов между вектором скорости и прямыми до центров ПР
         for(int i = 0; i < area.count(); ++i)
         {
             etalon[j].target.push_back(Track::Target());
 
-            /// Определение расстояния от трассы до границы ПР
+            /// Определение расстояния от эталона до границы ПР
             etalon[j].target[i].dist = calcDistance(&etalon.at(j).pos, &area.at(i).pos, area.at(i).radius);
 
             /// Определение угла между вектором скорости и прямой до центра ПР
@@ -151,12 +151,13 @@ void Painter::timerEvent(QTimerEvent *)
     /// ==================================================
     for(int j = 0; j < track.count(); ++j)
     {
-        track[j].pos = etalon.at(j).pos + QPointF(normalDistribution(0, DEVIATION),
-                                                  normalDistribution(0, DEVIATION)) * ERRPOS;
-        track[j].modV = etalon.at(j).modV + normalDistribution(0, DEVIATION) * ERRMODV;
-        track[j].angV = etalon.at(j).angV + qDegreesToRadians(normalDistribution(0, DEVIATION) * ERRANGV);
+        /// Внесение погрешностей
+        track[j].pos = etalon.at(j).pos + QPointF(normalDistribution(0, ERRPOS),
+                                                  normalDistribution(0, ERRPOS));
+        track[j].modV = etalon.at(j).modV + normalDistribution(0, ERRMODV);
+        track[j].angV = etalon.at(j).angV + qDegreesToRadians(normalDistribution(0, ERRANGV));
 
-        /// Определение расстояний от трасс до центров ПР
+        /// Определение расстояний от трасс до границ ПР
         /// и углов между векторами скорости и прямыми до центров ПР
         for(int i = 0; i < area.count(); ++i)
         {
@@ -168,6 +169,7 @@ void Painter::timerEvent(QTimerEvent *)
             /// Определение угла между вектором скорости и прямой до центра ПР
             track[j].target[i].angToV = track.at(j).angV + qAtan2(area.at(i).pos.y() - track.at(j).pos.y(),
                                                                   area.at(i).pos.x() - track.at(j).pos.x()) - M_PI_2;
+            qDebug() << qRadiansToDegrees(track[j].target[i].angToV);
 
             /// Определение точек касания угла видимости
 //            calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius, &track[j].target[i].p1, &track[j].target[i].p2);
@@ -282,7 +284,11 @@ float Painter::normalDistribution(float _mean, float _dev)
 
     float y = (float) qrand() / (RAND_MAX * _dev * qSqrt(2 * M_PI));
     float ln = qLn(y * _dev * qSqrt(2 * M_PI));
-    return (qrand() % 2 == 0 ? 1.0 : -1.0) * qSqrt((ln < 0 ? -2.0 : 2.0) * _dev * _dev * ln) + _mean;
+    float answer = qSqrt((ln < 0 ? -2.0 : 2.0) * _dev * _dev * ln);
+    if(answer > 2 * _dev)
+        return normalDistribution(_mean, _dev);
+
+    return (qrand() % 2 == 0 ? 1.0 : -1.0) * answer + _mean;
 }
 
 void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const float _radius, QPointF *_p1, QPointF *_p2)

@@ -51,7 +51,7 @@ void AreaParameters::initPar(int _number)
     case 5:
         /// Позиционный район №5
         tAreaPar->setItem(4, 0, new QTableWidgetItem(QString::number(0.0)));
-        tAreaPar->setItem(4, 1, new QTableWidgetItem(QString::number(0.0)));
+        tAreaPar->setItem(4, 1, new QTableWidgetItem(QString::number(100000.0)));
         tAreaPar->setItem(4, 2, new QTableWidgetItem(QString::number(50000.0)));
 
     case 4:
@@ -75,7 +75,7 @@ void AreaParameters::initPar(int _number)
     case 1:
         /// Позиционный район №1
         tAreaPar->setItem(0, 0, new QTableWidgetItem(QString::number(0.0)));
-        tAreaPar->setItem(0, 1, new QTableWidgetItem(QString::number(100000.0)));
+        tAreaPar->setItem(0, 1, new QTableWidgetItem(QString::number(0.0)));
         tAreaPar->setItem(0, 2, new QTableWidgetItem(QString::number(50000.0)));
 
     default:

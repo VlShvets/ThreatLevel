@@ -21,13 +21,12 @@ class Painter : public Grapher2D
     Q_OBJECT
 
 public:
-    const float DELTAT = 0.1;    /// Константа времени
+    const float DELTAT = 1.0;      /// Константа времени
 
     /// Погрешности
-    const float DEVIATION = 0.2;    /// Среднеквадратическое отклонение
-    const float ERRPOS = 1000.0;    /// Погрешность координаты
-    const float ERRMODV = 100.0;    /// Погрешность модуля скорости
-    const float ERRANGV = 15.0;     /// Погрешность курса
+    const float ERRPOS = 0.0;    /// Погрешность координаты
+    const float ERRMODV = 0.0;    /// Погрешность модуля скорости
+    const float ERRANGV = 0.0;     /// Погрешность курса
 
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
