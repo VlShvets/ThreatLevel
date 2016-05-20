@@ -37,7 +37,7 @@ void Results::loadTable(const QVector <Area> *_area, const QVector <Track> *_tra
         tResults->item(i, _area->at(i).nDangerousTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
 
         /// Ошибка по времени для самой опасной трассы
-        tResults->setItem(i, _track->count(), new QTableWidgetItem(QString::number(_area->at(i).errTime) + " (" +
+        tResults->setItem(i, _track->count(), new QTableWidgetItem(QString::number(_area->at(i).sigmaT) + " (" +
                                                                    QString::number(_area->at(i).nDangerousTrack + 1) + ")"));
         tResults->item(i, _track->count())->setBackgroundColor(QColor(255, 255, 0, 100));
     }

@@ -24,18 +24,20 @@ public:
     const float DELTAT = 1.0;      /// Константа времени
 
     /// Погрешности
-    const float ERRPOS = 0.0;    /// Погрешность координаты
-    const float ERRMODV = 0.0;    /// Погрешность модуля скорости
-    const float ERRANGV = 0.0;     /// Погрешность курса
+    const float ERRPOS = 800.0;    /// Погрешность координаты
+    const float ERRMODV = 30.0;    /// Погрешность модуля скорости
+    const float ERRANGV = 7.0;     /// Погрешность курса
 
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
 
     inline const Area & areaAt(int _index) const;
     inline const Track & trackAt(int _index) const;
+    inline const Track & etalonAt(int _index) const;
 
     inline Area & getArea(int _index);
     inline Track & getTrack(int _index);
+    inline Track & getEtalon(int _index);
 
 public slots:
     void reStart();
@@ -65,6 +67,8 @@ private:
     TrackParameters *trackParameters;
     Results *results;
 
+    int time;
+
     QVector <Area> area;        /// Позиционные районы
     QVector <Track> track;      /// Трассы
     QVector <Track> etalon;     /// Эталоны
@@ -80,6 +84,11 @@ const Track & Painter::trackAt(int _index) const
     return track.at(_index);
 }
 
+const Track & Painter::etalonAt(int _index) const
+{
+    return etalon.at(_index);
+}
+
 Area &Painter::getArea(int _index)
 {
     return area[_index];
@@ -88,6 +97,11 @@ Area &Painter::getArea(int _index)
 Track & Painter::getTrack(int _index)
 {
     return track[_index];
+}
+
+Track & Painter::getEtalon(int _index)
+{
+    return etalon[_index];
 }
 
 }

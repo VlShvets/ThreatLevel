@@ -11,6 +11,7 @@ namespace ThreatLevel
 struct Track                /// Трасса
 {
     int num;                /// Номер
+
     QPointF pos;            /// Координаты
     float modV;             /// Модуль вектора скорости
     float angV;             /// Курс (в радианах)
@@ -35,12 +36,15 @@ struct Track                /// Трасса
 struct Area                 /// Позиционный район
 {
     int num;                /// Номер
+
     QPointF pos;            /// Координаты
     float radius;           /// Радиус
 
     int nDangerousTrack;    /// Номер наиболее опасной трассы
     float time;             /// Время поражения наиболее опасной трассой
-    float errTime;          /// Погрешность времени поражения
+    float errTime;          /// Текущая погрешность времени поражения
+    float sumErrTime;       /// Сумма квадратов поргеностей времени поражения
+    float sigmaT;           /// Среднеквадратическаяпогрешность времени поражения
 };
 
 class Results : public QWidget

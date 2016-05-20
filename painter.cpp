@@ -15,12 +15,15 @@ Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParamet
     loadAreaPar();
     loadTrackPar();
     loadEtalonPar();
+
+    time = 0;
 }
 
 Painter::~Painter()
 {
     area.clear();
     track.clear();
+    etalon.clear();
 }
 
 void Painter::reStart()
@@ -28,6 +31,8 @@ void Painter::reStart()
     loadAreaPar();
     loadTrackPar();
     loadEtalonPar();
+
+    time = 0;
 
     repaint();
 }
@@ -115,6 +120,8 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 
 void Painter::timerEvent(QTimerEvent *)
 {
+    ++time;
+
     /// Эталоны
     /// ==================================================
     for(int j = 0; j < etalon.count(); ++j)
@@ -169,7 +176,6 @@ void Painter::timerEvent(QTimerEvent *)
             /// Определение угла между вектором скорости и прямой до центра ПР
             track[j].target[i].angToV = track.at(j).angV + qAtan2(area.at(i).pos.y() - track.at(j).pos.y(),
                                                                   area.at(i).pos.x() - track.at(j).pos.x()) - M_PI_2;
-            qDebug() << qRadiansToDegrees(track[j].target[i].angToV);
 
             /// Определение точек касания угла видимости
 //            calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius, &track[j].target[i].p1, &track[j].target[i].p2);
@@ -218,6 +224,10 @@ void Painter::timerEvent(QTimerEvent *)
         area[i].time = track.at(area.at(i).nDangerousTrack).target.at(i).time;
         area[i].errTime = track.at(area.at(i).nDangerousTrack).target.at(i).time -
                           etalon.at(area.at(i).nDangerousTrack).target.at(i).time;
+
+        /// Вычисление среднеквадратической погрешности времени поражения
+        area[i].sumErrTime += area[i].errTime * area[i].errTime;
+        area[i].sigmaT = qSqrt(area[i].sumErrTime / time);
     }
 
     results->loadTable(&area, &track, &etalon);
@@ -232,9 +242,12 @@ void Painter::loadAreaPar()
     for(int i = 0; i < area.count(); ++i)
     {
         area[i].num = i;
+
         area[i].pos.setX(areaParameters->getPar(i, 0));
         area[i].pos.setY(areaParameters->getPar(i, 1));
         area[i].radius = areaParameters->getPar(i, 2);
+
+        area[i].sumErrTime = 0.0;
     }
 }
 
