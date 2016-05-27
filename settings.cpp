@@ -19,7 +19,7 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QSplitter());
 
-    hLayout->addWidget(new QLabel(QObject::tr("Интервал таймера (1000 / X):")));
+    hLayout->addWidget(new QLabel(QObject::tr("Интервал таймера (100 / X):")));
 
     QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
     sTimerInterval->setRange(1, MAXTIMERINTERVAL);
@@ -64,7 +64,7 @@ void Settings::changeState()
     }
     else
     {
-        idTimer = painter->startTimer((int) 1000 / lTimerInterval->intValue());
+        idTimer = painter->startTimer((int) 100 / lTimerInterval->intValue());
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     }
     isStart = !isStart;
@@ -75,7 +75,7 @@ void Settings::changeTimerInterval(int _interval)
     if(isStart)
     {
         painter->killTimer(idTimer);
-        idTimer = painter->startTimer((int) 1000 / _interval);
+        idTimer = painter->startTimer((int) 100 / _interval);
     }
 }
 

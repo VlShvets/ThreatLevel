@@ -24,7 +24,6 @@ public:
     const float DELTAT = 1.0;      /// Константа времени
 
     /// Погрешности
-    const float ERRPOS = 800.0;    /// Погрешность координаты
     const float ERRMODV = 30.0;    /// Погрешность модуля скорости
     const float ERRANGV = 7.0;     /// Погрешность курса
 
@@ -49,12 +48,12 @@ private slots:
     void timerEvent(QTimerEvent *);
 
 private:
-    void loadAreaPar();         /// Загрузка параметров ПР
-    void loadTrackPar();        /// Загрузка параметров трасс
-    void loadEtalonPar();       /// Загрузка параметров эталонов
+    void loadAreaPar();         /// Начальная инициализация параметров ПР
+    void loadTrackPar();        /// Начальная инициализация параметров трасс
+    void loadEtalonPar();       /// Начальная инициализация параметров эталонов
 
-    /// Вычисление расстояния от трассы до центра ПР
-    static float calcDistance(const QPointF *_base, const QPointF *_track, const float _radius);
+    /// Вычисление расстояния между двумя точками
+    static float calcDistance(const QPointF *_p1, const QPointF *_p2);
 
     /// Нормально распределенная случайная величина
     static float normalDistribution(float _mean, float _dev);

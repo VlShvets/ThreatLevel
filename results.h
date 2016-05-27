@@ -8,18 +8,37 @@
 namespace ThreatLevel
 {
 
-struct Track                /// Трасса
+struct Area                 /// Позиционный район
 {
     int num;                /// Номер
 
     QPointF pos;            /// Координаты
+    float radius;           /// Радиус
+    float critTime;         /// Критическое время
+
+    int nDangerousTrack;    /// Номер наиболее опасной трассы
+    float time;             /// Время поражения наиболее опасной трассой
+    float errTime;          /// Текущая погрешность времени поражения
+    float sumErrTime;       /// Сумма квадратов погрешностей времени поражения
+    float sigmaT;           /// Среднеквадратическаяпогрешность времени поражения
+};
+
+struct Track                /// Трасса
+{
+    int num;                /// Номер
+
+    QPointF startPos;       /// Начальные координаты
     float modV;             /// Модуль вектора скорости
     float angV;             /// Курс (в радианах)
+
+    QPointF pos;            /// Текущие координаты
     QPointF endPos;         /// Координаты экстраполированного конца траектории
 
     struct Target
     {
-        float dist;         /// Расстояние от трассы до границы ПР
+        float startDist;    /// Расстояние от начальной точки трассы до центра ПР
+
+        float dist;         /// Текущее расстояние от трассы до центра ПР
         float time;         /// Время достижения ПР
         float angToV;       /// Угол между вектором скорости и прямой до центра ПР
 
@@ -29,22 +48,8 @@ struct Track                /// Трасса
     };
     QVector <Target> target;    /// Цели
 
-    int nNearTarget;        /// Номер ближайшего ПР
+//    int nNearTarget;        /// Номер ближайшего ПР
     int nFarTarget;         /// Номер наиболее удаленного ПР
-};
-
-struct Area                 /// Позиционный район
-{
-    int num;                /// Номер
-
-    QPointF pos;            /// Координаты
-    float radius;           /// Радиус
-
-    int nDangerousTrack;    /// Номер наиболее опасной трассы
-    float time;             /// Время поражения наиболее опасной трассой
-    float errTime;          /// Текущая погрешность времени поражения
-    float sumErrTime;       /// Сумма квадратов поргеностей времени поражения
-    float sigmaT;           /// Среднеквадратическаяпогрешность времени поражения
 };
 
 class Results : public QWidget
