@@ -17,9 +17,8 @@ struct Area                 /// Позиционный район
     float critTime;         /// Критическое время
 
     int nDangerousTrack;    /// Номер наиболее опасной трассы
-    float time;             /// Время поражения наиболее опасной трассой
-    float errTime;          /// Текущая погрешность времени поражения
-    float sumErrTime;       /// Сумма квадратов погрешностей времени поражения
+    float diffTime;         /// Текущая погрешность времени поражения
+    float sumDiffTime;      /// Сумма квадратов погрешностей времени поражения
     float sigmaT;           /// Среднеквадратическаяпогрешность времени поражения
 };
 
@@ -28,23 +27,32 @@ struct Track                /// Трасса
     int num;                /// Номер
 
     QPointF startPos;       /// Начальные координаты
-    float modV;             /// Модуль вектора скорости
-    float angV;             /// Курс (в радианах)
-
     QPointF pos;            /// Текущие координаты
     QPointF endPos;         /// Координаты экстраполированного конца траектории
+
+    float modV;             /// Модуль вектора скорости
+    float errModV;          /// Модуль вектора скорости с погрешностью
+
+    float angV;             /// Курс (в радианах)
+    float errAngV;          /// Курс с погрешностью (в радианах)
 
     struct Target
     {
         float startDist;    /// Расстояние от начальной точки трассы до центра ПР
 
         float dist;         /// Текущее расстояние от трассы до центра ПР
+        float errDist;      /// Текущее расстояние от трассы до центра ПР с погрешностью
+
         float time;         /// Время достижения ПР
+        float errTime;      /// Время достижения ПР с погрешностью
+
         float angToV;       /// Угол между вектором скорости и прямой до центра ПР
+        float errAngToV;    /// Угол между вектором скорости и прямой до центра ПР с погрешностью
+        float maxAngToV;    /// Максимально возможный угол между вектором скорости и прямой до центра ПР
 
         /// Точки касания угла видимости
-        QPointF p1;
-        QPointF p2;
+//        QPointF p1;
+//        QPointF p2;
     };
     QVector <Target> target;    /// Цели
 
@@ -60,7 +68,7 @@ public:
     explicit Results(QWidget *parent = 0);
     ~Results();
 
-    void loadTable(const QVector <Area> *_area, const QVector <Track> *_track, const QVector <Track> *_etalon);
+    void loadTable(const QVector <Area> *_area, const QVector <Track> *_track);
 
 private:
     QTableWidget *tResults;     /// Таблица результатов

@@ -21,7 +21,7 @@ class Painter : public Grapher2D
     Q_OBJECT
 
 public:
-    const float DELTAT = 1.0;      /// Константа времени
+    const float DELTAT = 10.0;      /// Константа времени
 
     /// Погрешности
     const float ERRMODV = 30.0;    /// Погрешность модуля скорости
@@ -32,11 +32,9 @@ public:
 
     inline const Area & areaAt(int _index) const;
     inline const Track & trackAt(int _index) const;
-    inline const Track & etalonAt(int _index) const;
 
     inline Area & getArea(int _index);
     inline Track & getTrack(int _index);
-    inline Track & getEtalon(int _index);
 
 public slots:
     void reStart();
@@ -50,7 +48,6 @@ private slots:
 private:
     void loadAreaPar();         /// Начальная инициализация параметров ПР
     void loadTrackPar();        /// Начальная инициализация параметров трасс
-    void loadEtalonPar();       /// Начальная инициализация параметров эталонов
 
     /// Вычисление расстояния между двумя точками
     static float calcDistance(const QPointF *_p1, const QPointF *_p2);
@@ -70,7 +67,6 @@ private:
 
     QVector <Area> area;        /// Позиционные районы
     QVector <Track> track;      /// Трассы
-    QVector <Track> etalon;     /// Эталоны
 };
 
 const Area & Painter::areaAt(int _index) const
@@ -83,11 +79,6 @@ const Track & Painter::trackAt(int _index) const
     return track.at(_index);
 }
 
-const Track & Painter::etalonAt(int _index) const
-{
-    return etalon.at(_index);
-}
-
 Area &Painter::getArea(int _index)
 {
     return area[_index];
@@ -96,11 +87,6 @@ Area &Painter::getArea(int _index)
 Track & Painter::getTrack(int _index)
 {
     return track[_index];
-}
-
-Track & Painter::getEtalon(int _index)
-{
-    return etalon[_index];
 }
 
 }
