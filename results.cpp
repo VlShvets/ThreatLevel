@@ -34,11 +34,11 @@ void Results::loadTable(const QVector <Area> *_area, const QVector <Track> *_tra
                                                                          _track->at(j).target.at(i).time) + ")"));
 
         /// Подсвечивание самой опасной трассы для каждого ПР
-        tResults->item(i, _area->at(i).nDangerousTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
+        tResults->item(i, _area->at(i).nDangerTrack)->setBackgroundColor(QColor(255, 0, 0, 100));
 
         /// Ошибка по времени для самой опасной трассы
         tResults->setItem(i, _track->count(), new QTableWidgetItem(QString::number(_area->at(i).sigmaT) + " (" +
-                                                                   QString::number(_area->at(i).nDangerousTrack + 1) + ")"));
+                                                                   QString::number(_area->at(i).nDangerTrack + 1) + ")"));
         tResults->item(i, _track->count())->setBackgroundColor(QColor(255, 255, 0, 100));
     }
 }

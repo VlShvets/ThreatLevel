@@ -24,8 +24,9 @@ public:
     const float DELTAT = 10.0;      /// Константа времени
 
     /// Погрешности
-    const float ERRMODV = 30.0;    /// Погрешность модуля скорости
-    const float ERRANGV = 7.0;     /// Погрешность курса
+    const float ERRMODV = 45.0;     /// Погрешность модуля скорости
+    const float ERRANGV = 10.0;     /// Погрешность курса
+    const float WEIGHT = 0.9;       /// Весовой коэфициент ( < 1.0)
 
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
@@ -55,6 +56,9 @@ private:
     /// Нормально распределенная случайная величина
     static float normalDistribution(float _mean, float _dev);
 
+    /// Гауссова случайная величина
+    static float gaussDistribution(float _mean, float _dev);
+
     /// Вычисление точек касания
     static void calcTanPoints(const QPointF *_track, const QPointF *_area,
                               const float _radius, QPointF *_p1, QPointF *_p2);
@@ -62,8 +66,6 @@ private:
     AreaParameters *areaParameters;
     TrackParameters *trackParameters;
     Results *results;
-
-    int time;
 
     QVector <Area> area;        /// Позиционные районы
     QVector <Track> track;      /// Трассы
