@@ -24,7 +24,7 @@ public:
     const float DELTAT = 10.0;      /// Константа времени
 
     /// Погрешности
-    const float ERRMODV = 45.0;     /// Погрешность модуля скорости
+    const float ERRMODV = 30.0;     /// Погрешность модуля скорости
     const float ERRANGV = 10.0;     /// Погрешность курса
     const float WEIGHT = 0.9;       /// Весовой коэфициент ( < 1.0)
 
@@ -53,11 +53,11 @@ private:
     /// Вычисление расстояния между двумя точками
     static float calcDistance(const QPointF *_p1, const QPointF *_p2);
 
-    /// Нормально распределенная случайная величина
-    static float normalDistribution(float _mean, float _dev);
-
-    /// Гауссова случайная величина
+    /// Распределение Гаусса
     static float gaussDistribution(float _mean, float _dev);
+
+    /// Равномерное распределение
+    static float uniformDistribution(float _mean, float _dev);
 
     /// Вычисление точек касания
     static void calcTanPoints(const QPointF *_track, const QPointF *_area,
