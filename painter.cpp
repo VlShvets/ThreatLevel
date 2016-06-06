@@ -1,7 +1,5 @@
 #include "painter.h"
 
-#include <QDebug>
-
 namespace ThreatLevel
 {
 
@@ -111,12 +109,14 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     p.end();
 }
 
-void Painter::timerEvent(QTimerEvent *)
+void Painter::timerEvent(QTimerEvent *_tEvent)
 {
     /// Точные значения
     /// ==================================================
     for(int j = 0; j < track.count(); ++j)
-    {
+    {        
+        ++track[j].countP;
+
         /// Перемещение
         track[j].pos += QPointF(track.at(j).modV * qSin(track.at(j).angV),
                                 track.at(j).modV * qCos(track.at(j).angV)) * DELTAT;
@@ -129,7 +129,10 @@ void Painter::timerEvent(QTimerEvent *)
 
             /// Условие окончания
             if(track.at(j).target.at(i).dist < 0)
-                return;
+            {
+                killTimer(_tEvent->timerId());
+                idTimer = -1;
+            }
         }
     }
 
@@ -147,28 +150,25 @@ void Painter::timerEvent(QTimerEvent *)
     for(int j = 0; j < track.count(); ++j)
     {
         /// Внесение погрешностей
-        if(track.at(j).errModV == 0.0)
-            track[j].errModV = track.at(j).modV + gaussDistribution(0, ERRMODV);
-        else
-            track[j].errModV = track.at(j).errModV                                  * WEIGHT +
-                              (track.at(j).modV + gaussDistribution(0, ERRMODV))    * (1.0 - WEIGHT);
-        track[j].errAngV = track.at(j).angV + qDegreesToRadians(gaussDistribution(0, ERRANGV));
+        track[j].errModV = track.at(j).modV + gaussDistribution(0, ERRMODV);
+        track[j].errAngV = track.at(j).angV + qDegreesToRadians(uniformDistribution(0, ERRANGV));
 
         /// Сглаживание погрешностей через проекции вектора скорости
-//        if(track.at(j).errVx == 0.0)
-//            track[j].errVx = track.at(j).modV * qSin(track.at(j).angV);
-//        else
-//            track[j].errVx = track.at(j).errVx                                  * WEIGHT +
-//                            (track.at(j).errModV * qSin(track.at(j).errAngV))   * (1.0 - WEIGHT);
+        if(track.at(j).errVx == 0.0)
+            track[j].errVx = track.at(j).errModV * qSin(track.at(j).errAngV);
+        else
+            track[j].errVx = track.at(j).errVx                                  * WEIGHT +
+                            (track.at(j).errModV * qSin(track.at(j).errAngV))   * (1.0 - WEIGHT);
 
-//        if(track.at(j).errVy == 0.0)
-//            track[j].errVy = track.at(j).modV * qCos(track.at(j).angV);
-//        else
-//            track[j].errVy = track.at(j).errVy                                  * WEIGHT +
-//                            (track.at(j).errModV * qCos(track.at(j).errAngV))   * (1.0 - WEIGHT);
+        if(track.at(j).errVy == 0.0)
+            track[j].errVy = track.at(j).errModV * qCos(track.at(j).errAngV);
+        else
+            track[j].errVy = track.at(j).errVy                                  * WEIGHT +
+                            (track.at(j).errModV * qCos(track.at(j).errAngV))   * (1.0 - WEIGHT);
 
-//        track[j].errModV = qSqrt(track.at(j).errVx * track.at(j).errVx + track.at(j).errVy * track.at(j).errVy);
-//        track[j].errAngV = qAtan2(track.at(j).errVx, track.at(j).errVy);
+        /// Возврат к модулю скорости и курсу
+        track[j].errModV = qSqrt(track.at(j).errVx * track.at(j).errVx + track.at(j).errVy * track.at(j).errVy);
+        track[j].errAngV = qAtan2(track.at(j).errVx, track.at(j).errVy);
 
         /// Определение углов между вектором скорости и прямыми до центров ПР
         /// и расстояний от проекции трассы до центров ПР
@@ -177,18 +177,6 @@ void Painter::timerEvent(QTimerEvent *)
             /// Определение угла между вектором скорости и прямой до центра ПР
             track[j].target[i].errAngToV = track.at(j).errAngV - qAtan2(area.at(i).pos.x() - track.at(j).startPos.x(),
                                                                         area.at(i).pos.y() - track.at(j).startPos.y());
-//            qDebug() << "errAngToV = " << qRadiansToDegrees(track.at(j).target.at(i).errAngToV);
-
-            if(track.at(j).target.at(i).errAngToV < 0 ||
-               track.at(j).target.at(i).errAngToV > qAsin(area.at(i).radius / track.at(j).target.at(i).startDist))
-//            if(qAbs(track.at(j).target.at(i).errAngToV) > qAsin(area.at(i).radius / track.at(j).target.at(i).startDist))
-            {
-                ++track[j].target[i].nPassP;
-                qDebug() << "Пропуск: " << track[j].target[i].nPassP;
-                return;
-            }
-            ++track[j].target[i].nTakeP;
-            qDebug() << "Взято: " << track[j].target[i].nTakeP;
 
             /// Определение расстояния от проекции трассы до центра ПР
             track[j].target[i].errDist = track.at(j).target.at(i).startDist -
@@ -239,7 +227,7 @@ void Painter::timerEvent(QTimerEvent *)
 
         /// Вычисление среднеквадратической погрешности времени поражения
         area[i].sumDiffTime += area[i].diffTime * area[i].diffTime;
-        area[i].sigmaT = qSqrt(area[i].sumDiffTime / track.at(area.at(i).nDangerTrack).target.at(i).nTakeP);
+        area[i].sigmaT = qSqrt(area[i].sumDiffTime / track.at(area.at(i).nDangerTrack).countP);
     }
 
     results->loadTable(&area, &track);
@@ -284,10 +272,9 @@ void Painter::loadTrackPar()
         track[j].pos = track.at(j).startPos;
 
         /// Обнуление рекурентно использующихся параметров
-        track[j].errModV = 0.0;
-        track[j].errAngV = 0.0;
         track[j].errVx = 0.0;
         track[j].errVy = 0.0;
+        track[j].countP = 0;
 
         /// Очистка номера ближайшего ПР
         track[j].nNearTarget = -1;
@@ -306,8 +293,6 @@ void Painter::loadTrackPar()
 
             /// Обнуление рекурентно использующихся параметров
             track[j].target[i].errAngToV = 0.0;
-            track[j].target[i].nTakeP = 0;
-            track[j].target[i].nPassP = 0;
         }
     }
 }
@@ -320,24 +305,14 @@ float Painter::calcDistance(const QPointF *_p1, const QPointF *_p2)
 
 float Painter::gaussDistribution(float _mean, float _dev)
 {
-    static float lastMean = _mean;
-    static float lastDev = _dev;
-
     static bool ready = false;
     static float second = 0.0;
 
-    if(lastMean == _mean && lastDev == _dev && ready)
+    if(ready)
     {
         ready = false;
-
-//        if(qAbs(second) > 1.5)
-//            return gaussDistribution(_mean, _dev);
-
         return second * _dev + _mean;
     }
-
-    lastMean = _mean;
-    lastDev = _dev;
 
     float u, v, s;
     do
@@ -350,17 +325,19 @@ float Painter::gaussDistribution(float _mean, float _dev)
 
     float r = qSqrt(-2.0 * qLn(s) / s);
     second = r * u;
-    ready = true;
 
-//    if(qAbs(r * v) > 1.5)
-//        return gaussDistribution(_mean, _dev);
+    if(qAbs(second) < 1.5)
+        ready = true;
 
-    return r * v * _dev + _mean;
+    if(qAbs(r * v) < 1.5)
+        return r * v * _dev + _mean;
+
+    return gaussDistribution(_mean, _dev);
 }
 
 float Painter::uniformDistribution(float _mean, float _dev)
 {
-    return 2 * qAbs(_mean - _dev) * ((float) qrand() / RAND_MAX) + _mean - _dev;
+    return 2 * _dev * ((float) qrand() / RAND_MAX) - _dev + _mean;
 }
 
 void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const float _radius, QPointF *_p1, QPointF *_p2)

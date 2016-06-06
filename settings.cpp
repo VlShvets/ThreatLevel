@@ -59,12 +59,13 @@ void Settings::changeState()
 {
     if(isStart)
     {
-        painter->killTimer(idTimer);
+        if(painter->getIdTimer() != -1)
+            painter->killTimer(painter->getIdTimer());
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     }
     else
     {
-        idTimer = painter->startTimer((int) 100 / lTimerInterval->intValue());
+        painter->setIdTimer(painter->startTimer((int) 100 / lTimerInterval->intValue()));
         pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
     }
     isStart = !isStart;
@@ -74,8 +75,9 @@ void Settings::changeTimerInterval(int _interval)
 {
     if(isStart)
     {
-        painter->killTimer(idTimer);
-        idTimer = painter->startTimer((int) 100 / _interval);
+        if(painter->getIdTimer() != -1)
+            painter->killTimer(painter->getIdTimer());
+        painter->setIdTimer(painter->startTimer((int) 100 / _interval));
     }
 }
 

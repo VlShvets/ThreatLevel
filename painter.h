@@ -37,6 +37,9 @@ public:
     inline Area & getArea(int _index);
     inline Track & getTrack(int _index);
 
+    inline void setIdTimer(int _idTimer);
+    inline int getIdTimer();
+
 public slots:
     void reStart();
 
@@ -44,7 +47,7 @@ protected:
     void paintEvent(QPaintEvent *_pEvent);
 
 private slots:
-    void timerEvent(QTimerEvent *);
+    void timerEvent(QTimerEvent *_tEvent);
 
 private:
     void loadAreaPar();         /// Начальная инициализация параметров ПР
@@ -66,6 +69,8 @@ private:
     AreaParameters *areaParameters;
     TrackParameters *trackParameters;
     Results *results;
+
+    int idTimer;                /// Номер таймера (-1 - нет таймера)
 
     QVector <Area> area;        /// Позиционные районы
     QVector <Track> track;      /// Трассы
@@ -89,6 +94,16 @@ Area &Painter::getArea(int _index)
 Track & Painter::getTrack(int _index)
 {
     return track[_index];
+}
+
+void Painter::setIdTimer(int _idTimer)
+{
+    idTimer = _idTimer;
+}
+
+int Painter::getIdTimer()
+{
+    return idTimer;
 }
 
 }

@@ -29,14 +29,13 @@ private slots:
     void changeState();                         /// Запуск и остановка
     void changeTimerInterval(int _interval);    /// Изменение интервала таймера
 
-private:    
-    class Painter *painter;
-
-    bool isStart;                   /// Флаг состояния кнопки
-    int idTimer;                    /// Номер таймера
-
+private:
     QLCDNumber *lTimerInterval;     /// Интервал таймера
     QPushButton *pStartStop;        /// Кнопка запуска и остановки
+
+    bool isStart;                   /// Флаг состояния кнопки
+
+    class Painter *painter;
 };
 
 }
