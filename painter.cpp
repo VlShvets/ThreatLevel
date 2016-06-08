@@ -118,6 +118,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         ++track[j].countP;
 
         /// Перемещение
+        track[j].modV += track.at(j).boost * DELTAT / 2.0;
         track[j].pos += QPointF(track.at(j).modV * qSin(track.at(j).angV),
                                 track.at(j).modV * qCos(track.at(j).angV)) * DELTAT;
 
@@ -267,6 +268,7 @@ void Painter::loadTrackPar()
         track[j].startPos.setY(trackParameters->getPar(j, 1));
         track[j].modV = trackParameters->getPar(j, 2);
         track[j].angV = qDegreesToRadians(trackParameters->getPar(j, 3));
+        track[j].boost = trackParameters->getPar(j, 4);
 
         /// Присвоение текущим координатам начальных координат трассы
         track[j].pos = track.at(j).startPos;
@@ -337,7 +339,7 @@ float Painter::gaussDistribution(float _mean, float _dev)
 
 float Painter::uniformDistribution(float _mean, float _dev)
 {
-    return 2 * _dev * ((float) qrand() / RAND_MAX) - _dev + _mean;
+    return 2.0 * _dev * ((float) qrand() / RAND_MAX) - _dev + _mean;
 }
 
 void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const float _radius, QPointF *_p1, QPointF *_p2)
