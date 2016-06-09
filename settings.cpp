@@ -73,10 +73,9 @@ void Settings::changeState()
 
 void Settings::changeTimerInterval(int _interval)
 {
-    if(isStart)
+    if(isStart && painter->getIdTimer() != -1)
     {
-        if(painter->getIdTimer() != -1)
-            painter->killTimer(painter->getIdTimer());
+        painter->killTimer(painter->getIdTimer());
         painter->setIdTimer(painter->startTimer((int) 100 / _interval));
     }
 }

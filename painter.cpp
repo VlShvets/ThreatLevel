@@ -118,7 +118,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         ++track[j].countP;
 
         /// Перемещение
-        track[j].modV += track.at(j).boost * DELTAT / 2.0;
+        track[j].modV += track.at(j).boost * DELTAT;
         track[j].pos += QPointF(track.at(j).modV * qSin(track.at(j).angV),
                                 track.at(j).modV * qCos(track.at(j).angV)) * DELTAT;
 
@@ -129,7 +129,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
                                       calcDistance(&track.at(j).startPos, &track.at(j).pos) * qCos(track.at(j).target.at(i).angToV);
 
             /// Условие окончания
-            if(track.at(j).target.at(i).dist < 0)
+            if(track.at(j).target.at(i).dist < 0 && idTimer != -1)
             {
                 killTimer(_tEvent->timerId());
                 idTimer = -1;
