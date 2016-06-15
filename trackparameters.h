@@ -17,7 +17,7 @@ class TrackParameters : public QWidget     /// Класс трасс
 
 public:        
     const int MAXNUMGROUPS = 5;             /// Максимальное количество групп
-    const int DEFNUMGROUPS = 1;             /// Количество групп по умолчанию
+    const int DEFNUMGROUPS = 5;             /// Количество групп по умолчанию
     const int MAXTRACKSINGROUP = 12;        /// Максимальное количество трасс в группе
     const int DEFTRACKSINGROUP = 1;         /// Количество трасс в группе по умолчанию
 

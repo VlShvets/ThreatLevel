@@ -85,35 +85,35 @@ void TrackParameters::initPar(int _nGroups, int _nTracksInGroup)
         {
         case 5:
             /// Группа трасс №5
-            tTrackPar->setItem(_nGroups * i + 4, 0, new QTableWidgetItem(QString::number(-130000.0 - DISTBETWEENTRACKS * (i / 4))));
-            tTrackPar->setItem(_nGroups * i + 4, 1, new QTableWidgetItem(QString::number(-320000.0 - DISTBETWEENTRACKS * (i % 4))));
-            tTrackPar->setItem(_nGroups * i + 4, 2, new QTableWidgetItem(QString::number(180.0)));
+            tTrackPar->setItem(_nGroups * i + 4, 0, new QTableWidgetItem(QString::number(-160000.0 - DISTBETWEENTRACKS * (i / 4))));
+            tTrackPar->setItem(_nGroups * i + 4, 1, new QTableWidgetItem(QString::number(-390000.0 - DISTBETWEENTRACKS * (i % 4))));
+            tTrackPar->setItem(_nGroups * i + 4, 2, new QTableWidgetItem(QString::number(250.0)));
             tTrackPar->setItem(_nGroups * i + 4, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.5 * M_PI_4 + M_PI / 36.0))));
-            tTrackPar->setItem(_nGroups * i + 4, 4, new QTableWidgetItem(QString::number(0.03)));
+            tTrackPar->setItem(_nGroups * i + 4, 4, new QTableWidgetItem(QString::number(-0.05)));
 
         case 4:
             /// Группа трасс №4
-            tTrackPar->setItem(_nGroups * i + 3, 0, new QTableWidgetItem(QString::number(130000.0 + DISTBETWEENTRACKS * (i / 4))));
-            tTrackPar->setItem(_nGroups * i + 3, 1, new QTableWidgetItem(QString::number(-320000.0 - DISTBETWEENTRACKS * (i % 4))));
+            tTrackPar->setItem(_nGroups * i + 3, 0, new QTableWidgetItem(QString::number(160000.0 + DISTBETWEENTRACKS * (i / 4))));
+            tTrackPar->setItem(_nGroups * i + 3, 1, new QTableWidgetItem(QString::number(-390000.0 - DISTBETWEENTRACKS * (i % 4))));
             tTrackPar->setItem(_nGroups * i + 3, 2, new QTableWidgetItem(QString::number(180.0)));
             tTrackPar->setItem(_nGroups * i + 3, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.5 * M_PI_4 + M_PI / 36.0))));
-            tTrackPar->setItem(_nGroups * i + 3, 4, new QTableWidgetItem(QString::number(0.03)));
+            tTrackPar->setItem(_nGroups * i + 3, 4, new QTableWidgetItem(QString::number(0.05)));
 
         case 3:
             /// Группа трасс №3
-            tTrackPar->setItem(_nGroups * i + 2, 0, new QTableWidgetItem(QString::number(245000.0 + DISTBETWEENTRACKS * (i / 4))));
-            tTrackPar->setItem(_nGroups * i + 2, 1, new QTableWidgetItem(QString::number(-245000.0 - DISTBETWEENTRACKS * (i % 4))));
-            tTrackPar->setItem(_nGroups * i + 2, 2, new QTableWidgetItem(QString::number(180.0)));
+            tTrackPar->setItem(_nGroups * i + 2, 0, new QTableWidgetItem(QString::number(300000.0 + DISTBETWEENTRACKS * (i / 4))));
+            tTrackPar->setItem(_nGroups * i + 2, 1, new QTableWidgetItem(QString::number(-300000.0 - DISTBETWEENTRACKS * (i % 4))));
+            tTrackPar->setItem(_nGroups * i + 2, 2, new QTableWidgetItem(QString::number(215.0)));
             tTrackPar->setItem(_nGroups * i + 2, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.0 * M_PI_4 + M_PI / 36.0))));
-            tTrackPar->setItem(_nGroups * i + 2, 4, new QTableWidgetItem(QString::number(0.04)));
+            tTrackPar->setItem(_nGroups * i + 2, 4, new QTableWidgetItem(QString::number(0.0)));
 
         case 2:
             /// Группа трасс №2
-            tTrackPar->setItem(_nGroups * i + 1, 0, new QTableWidgetItem(QString::number(-245000.0 - DISTBETWEENTRACKS * (i / 4))));
-            tTrackPar->setItem(_nGroups * i + 1, 1, new QTableWidgetItem(QString::number(-245000.0 - DISTBETWEENTRACKS * (i % 4))));
-            tTrackPar->setItem(_nGroups * i + 1, 2, new QTableWidgetItem(QString::number(180.0)));
+            tTrackPar->setItem(_nGroups * i + 1, 0, new QTableWidgetItem(QString::number(-350000.0 - DISTBETWEENTRACKS * (i / 4))));
+            tTrackPar->setItem(_nGroups * i + 1, 1, new QTableWidgetItem(QString::number(-350000.0 - DISTBETWEENTRACKS * (i % 4))));
+            tTrackPar->setItem(_nGroups * i + 1, 2, new QTableWidgetItem(QString::number(250.0)));
             tTrackPar->setItem(_nGroups * i + 1, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(M_PI_4 + M_PI / 36.0))));
-            tTrackPar->setItem(_nGroups * i + 1, 4, new QTableWidgetItem(QString::number(0.04)));
+            tTrackPar->setItem(_nGroups * i + 1, 4, new QTableWidgetItem(QString::number(0.0)));
 
         case 1:
             /// Группа трасс №1
@@ -121,7 +121,7 @@ void TrackParameters::initPar(int _nGroups, int _nTracksInGroup)
             tTrackPar->setItem(_nGroups * i, 1, new QTableWidgetItem(QString::number(-350000.0 - DISTBETWEENTRACKS * (i % 4))));
             tTrackPar->setItem(_nGroups * i, 2, new QTableWidgetItem(QString::number(180.0)));
             tTrackPar->setItem(_nGroups * i, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.0 + M_PI / 36.0))));
-            tTrackPar->setItem(_nGroups * i, 4, new QTableWidgetItem(QString::number(0.05)));
+            tTrackPar->setItem(_nGroups * i, 4, new QTableWidgetItem(QString::number(0.0)));
 
         }
     }

@@ -73,17 +73,14 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         p.restore();
 
         /// Отрисовка курса
+        pen.setWidth(1);
+        p.setPen(pen);
         if(track.at(j).nNearTarget != -1)
-        {
-            pen.setWidth(1);
-            p.setPen(pen);
-            p.drawLine(track.at(j).startPos, track[j].endPos);;
-        }
+            p.drawLine(track.at(j).startPos, track[j].endPos);
 
     }
 
     /// Отрисовка расстояний от трасс до центров ПР и углов видимости ПР
-//    pen.setWidth(1);
 //    for(int j = 0; j < track.count(); ++j)
 //    {
 //        for(int i = 0; i < area.count(); ++i)
@@ -94,10 +91,10 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 //            p.drawLine(area.at(i).pos, track.at(j).pos);
 
 //            /// Угол видимости
+//            pen.setColor(Qt::darkBlue);
+//            p.setPen(pen);
 //            if(track.at(j).target.count() != 0)
 //            {
-//                pen.setColor(Qt::darkBlue);
-//                p.setPen(pen);
 //                if(!track.at(j).target.at(i).p1.isNull())
 //                    p.drawLine(track.at(j).pos, track.at(j).target.at(i).p1);
 //                if(!track.at(j).target.at(i).p2.isNull())
@@ -122,27 +119,27 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         track[j].pos += QPointF(track.at(j).modV * qSin(track.at(j).angV),
                                 track.at(j).modV * qCos(track.at(j).angV)) * DELTAT;
 
-        /// Определение расстояний от проекции трассы до центров ПР
+        /// Вычисление расстояний от проекции трассы до центров ПР
         for(int i = 0; i < area.count(); ++i)
-        {
             track[j].target[i].dist = track.at(j).target.at(i).startDist -
                                       calcDistance(&track.at(j).startPos, &track.at(j).pos) * qCos(track.at(j).target.at(i).angToV);
-
-            /// Условие окончания
-            if(track.at(j).target.at(i).dist < 0 && idTimer != -1)
-            {
-                killTimer(_tEvent->timerId());
-                idTimer = -1;
-            }
-        }
     }
 
     /// Расчет времени поражения ПР
     for(int i = 0; i < area.count(); ++i)
     {
         for(int j = 0; j < track.count(); ++j)
+        {
             track[j].target[i].time = track.at(j).target.at(i).dist /
                                       (track.at(j).modV * qCos(track.at(j).target.at(i).angToV));
+
+            /// Условие окончания
+            if(track.at(j).target.at(i).time < 0 && idTimer != -1)
+            {
+                killTimer(_tEvent->timerId());
+                idTimer = -1;
+            }
+        }
     }
     /// ==================================================
 
@@ -172,35 +169,17 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         track[j].errAngV = qAtan2(track.at(j).errVx, track.at(j).errVy);
 
         /// Определение углов между вектором скорости и прямыми до центров ПР
-        /// и расстояний от проекции трассы до центров ПР
+        /// и вычисление расстояний от проекции трассы до центров ПР
         for(int i = 0; i < area.count(); ++i)
         {
             /// Определение угла между вектором скорости и прямой до центра ПР
             track[j].target[i].errAngToV = track.at(j).errAngV - qAtan2(area.at(i).pos.x() - track.at(j).startPos.x(),
                                                                         area.at(i).pos.y() - track.at(j).startPos.y());
 
-            /// Определение расстояния от проекции трассы до центра ПР
+            /// Вычисление расстояния от проекции трассы до центра ПР
             track[j].target[i].errDist = track.at(j).target.at(i).startDist -
                                          calcDistance(&track.at(j).startPos, &track.at(j).pos) * qCos(track.at(j).target.at(i).errAngToV);
-
-            /// Определение точек касания угла видимости
-//            calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius, &track[j].target[i].p1, &track[j].target[i].p2);
         }
-
-        /// Определение ближайшего ПР
-        track[j].nNearTarget = 0;
-        for(int i = 1; i < area.count(); ++i)
-        {
-            if(track.at(j).target.at(track.at(j).nNearTarget).dist > track.at(j).target.at(i).dist)
-                track[j].nNearTarget = i;
-        }
-
-        /// Определение координат экстраполированного конца траектории
-        track[j].endPos = track.at(j).startPos +
-                          QPointF((track.at(j).target.at(track.at(j).nNearTarget).startDist /
-                                   qCos(track.at(j).target.at(track.at(j).nNearTarget).errAngToV)) * qSin(track.at(j).errAngV),
-                                  (track.at(j).target.at(track.at(j).nNearTarget).startDist /
-                                   qCos(track.at(j).target.at(track.at(j).nNearTarget).errAngToV)) * qCos(track.at(j).errAngV));
     }
 
     /// Расчет времени поражения ПР
@@ -208,17 +187,19 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
     {
         for(int j = 0; j < track.count(); ++j)
             track[j].target[i].errTime = track.at(j).target.at(i).errDist /
-                                         (track.at(j).errModV * qCos(track.at(j).target.at(i).errAngToV));
+                                        (track.at(j).errModV * qCos(track.at(j).target.at(i).errAngToV));
     }
     /// ==================================================
 
+    /// Погрешность времени поражения ПР
+    /// ==================================================
     for(int i = 0; i < area.count(); ++i)
     {
         /// Определение наиболее опасной трассы
         area[i].nDangerTrack = 0;
         for(int j = 1; j < track.count(); ++j)
         {
-            if(track.at(area[i].nDangerTrack).target.at(i).dist > track.at(j).target.at(i).dist)
+            if(track.at(area[i].nDangerTrack).target.at(i).errTime > track.at(j).target.at(i).errTime)
                 area[i].nDangerTrack = j;
         }
 
@@ -231,7 +212,35 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         area[i].sigmaT = qSqrt(area[i].sumDiffTime / track.at(area.at(i).nDangerTrack).countP);
     }
 
+    /// Отображение результатов вычислений
     results->loadTable(&area, &track);
+    /// ==================================================
+
+    /// Вычисление параметров для отрисовки
+    /// ==================================================
+    for(int j = 0; j < track.count(); ++j)
+    {
+        /// Определение ближайшего ПР
+        track[j].nNearTarget = 0;
+        for(int i = 1; i < area.count(); ++i)
+        {
+            if(track.at(j).target.at(track.at(j).nNearTarget).dist > track.at(j).target.at(i).dist)
+                track[j].nNearTarget = i;
+        }
+
+        /// Вычисление координат экстраполированного конца траектории
+        track[j].endPos = track.at(j).startPos +
+                          QPointF((track.at(j).target.at(track.at(j).nNearTarget).startDist /
+                                   qCos(track.at(j).target.at(track.at(j).nNearTarget).errAngToV)) * qSin(track.at(j).errAngV),
+                                  (track.at(j).target.at(track.at(j).nNearTarget).startDist /
+                                   qCos(track.at(j).target.at(track.at(j).nNearTarget).errAngToV)) * qCos(track.at(j).errAngV));
+
+        /// Вычисление точек касания угла видимости
+//        for(int i = 0; i < area.count(); ++i)
+//            calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius, &track[j].target[i].p1, &track[j].target[i].p2);
+
+    }
+    /// ==================================================
 
     repaint();
 }
@@ -347,8 +356,8 @@ void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const f
     float distance = calcDistance(_area, _track) - _radius;
     if(distance < 0)
     {
-        _p1 = NULL;
-        _p2 = NULL;
+        *_p1 *= 0.0;
+        *_p2 *= 0.0;
 
         return;
     }
