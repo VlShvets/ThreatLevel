@@ -122,7 +122,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         /// Вычисление расстояний от проекции трассы до центров ПР
         for(int i = 0; i < area.count(); ++i)
             track[j].target[i].dist = track.at(j).target.at(i).startDist -
-                                      calcDistance(&track.at(j).startPos, &track.at(j).pos) * qCos(track.at(j).target.at(i).angToV);
+                                      calcDistance(track.at(j).startPos, track.at(j).pos) * qCos(track.at(j).target.at(i).angToV);
     }
 
     /// Расчет времени поражения ПР
@@ -178,7 +178,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
 
             /// Вычисление расстояния от проекции трассы до центра ПР
             track[j].target[i].errDist = track.at(j).target.at(i).startDist -
-                                         calcDistance(&track.at(j).startPos, &track.at(j).pos) * qCos(track.at(j).target.at(i).errAngToV);
+                                         calcDistance(track.at(j).startPos, track.at(j).pos) * qCos(track.at(j).target.at(i).errAngToV);
         }
     }
 
@@ -213,7 +213,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
     }
 
     /// Отображение результатов вычислений
-    results->loadTable(&area, &track);
+    results->loadTable(area, track);
     /// ==================================================
 
     /// Вычисление параметров для отрисовки
@@ -237,7 +237,7 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
 
         /// Вычисление точек касания угла видимости
 //        for(int i = 0; i < area.count(); ++i)
-//            calcTanPoints(&track.at(j).pos, &area.at(i).pos, area.at(i).radius, &track[j].target[i].p1, &track[j].target[i].p2);
+//            calcTanPoints(track.at(j).pos, area.at(i).pos, area.at(i).radius, track[j].target[i].p1, track[j].target[i].p2);
 
     }
     /// ==================================================
@@ -296,7 +296,7 @@ void Painter::loadTrackPar()
             track[j].target.push_back(Track::Target());
 
             /// Определение расстояния от начальных координат трассы до центра ПР
-            track[j].target[i].startDist = calcDistance(&track.at(j).startPos, &area.at(i).pos);
+            track[j].target[i].startDist = calcDistance(track.at(j).startPos, area.at(i).pos);
 
             /// Определение угла между вектором скорости и прямой от начальной точки до центра ПР
             track[j].target[i].angToV = track.at(j).angV - qAtan2(area.at(i).pos.x() - track.at(j).startPos.x(),
@@ -308,10 +308,10 @@ void Painter::loadTrackPar()
     }
 }
 
-float Painter::calcDistance(const QPointF *_p1, const QPointF *_p2)
+float Painter::calcDistance(const QPointF &_p1, const QPointF &_p2)
 {
-    return qSqrt((_p1->x() - _p2->x()) * (_p1->x() - _p2->x()) +
-                 (_p1->y() - _p2->y()) * (_p1->y() - _p2->y()));
+    return qSqrt((_p1.x() - _p2.x()) * (_p1.x() - _p2.x()) +
+                 (_p1.y() - _p2.y()) * (_p1.y() - _p2.y()));
 }
 
 float Painter::gaussDistribution(float _mean, float _dev)
@@ -351,18 +351,18 @@ float Painter::uniformDistribution(float _mean, float _dev)
     return 2.0 * _dev * ((float) qrand() / RAND_MAX) - _dev + _mean;
 }
 
-void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const float _radius, QPointF *_p1, QPointF *_p2)
+void Painter::calcTanPoints(const QPointF &_track, const QPointF &_area, const float _radius, QPointF &_p1, QPointF &_p2)
 {
     float distance = calcDistance(_area, _track) - _radius;
     if(distance < 0)
     {
-        *_p1 *= 0.0;
-        *_p2 *= 0.0;
+        _p1 *= 0.0;
+        _p2 *= 0.0;
 
         return;
     }
 
-    QPointF midDistTargetBase((*_track - *_area) / 2.0);
+    QPointF midDistTargetBase((_track - _area) / 2.0);
 
     float a = midDistTargetBase.x() * midDistTargetBase.x() +
             midDistTargetBase.y() * midDistTargetBase.y();
@@ -370,11 +370,11 @@ void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const f
 
     if(qAbs(midDistTargetBase.x()) < 1.e-6)
     {
-        _p1->setX(qSqrt(_radius * _radius - E * E / (midDistTargetBase.y() * midDistTargetBase.y())));
-        _p1->setY(E / midDistTargetBase.y());
+        _p1.setX(qSqrt(_radius * _radius - E * E / (midDistTargetBase.y() * midDistTargetBase.y())));
+        _p1.setY(E / midDistTargetBase.y());
 
-        _p2->setX(- qSqrt(_radius * _radius - E * E / (midDistTargetBase.y() * midDistTargetBase.y())));
-        _p2->setY(E / midDistTargetBase.y());
+        _p2.setX(- qSqrt(_radius * _radius - E * E / (midDistTargetBase.y() * midDistTargetBase.y())));
+        _p2.setY(E / midDistTargetBase.y());
     }
     else
     {
@@ -382,15 +382,15 @@ void Painter::calcTanPoints(const QPointF *_track, const QPointF *_area, const f
         float c = E * E - (_radius * _radius * midDistTargetBase.x() * midDistTargetBase.x());
         float D = b * b - a * c;
 
-        _p1->setY((- b + qSqrt(D)) / a);
-        _p2->setY((- b - qSqrt(D)) / a);
+        _p1.setY((- b + qSqrt(D)) / a);
+        _p2.setY((- b - qSqrt(D)) / a);
 
-        _p1->setX((E - _p1->y() * midDistTargetBase.y()) / midDistTargetBase.x());
-        _p2->setX((E - _p2->y() * midDistTargetBase.y()) / midDistTargetBase.x());
+        _p1.setX((E - _p1.y() * midDistTargetBase.y()) / midDistTargetBase.x());
+        _p2.setX((E - _p2.y() * midDistTargetBase.y()) / midDistTargetBase.x());
     }
 
-    *_p1 += *_area;
-    *_p2 += *_area;
+    _p1 += _area;
+    _p2 += _area;
 }
 
 }

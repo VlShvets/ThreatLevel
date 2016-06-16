@@ -22,11 +22,11 @@ class Painter : public Grapher2D
 
 public:
     const float DELTAT = 10.0;      /// Константа времени
+    const float WEIGHT = 0.9;       /// Весовой коэфициент сглаживания ( < 1.0)
 
     /// Погрешности
     const float ERRMODV = 30.0;     /// Погрешность модуля скорости
     const float ERRANGV = 10.0;     /// Погрешность курса
-    const float WEIGHT = 0.9;       /// Весовой коэфициент ( < 1.0)
 
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
@@ -54,7 +54,7 @@ private:
     void loadTrackPar();        /// Начальная инициализация параметров трасс
 
     /// Вычисление расстояния между двумя точками
-    static float calcDistance(const QPointF *_p1, const QPointF *_p2);
+    static float calcDistance(const QPointF &_p1, const QPointF &_p2);
 
     /// Распределение Гаусса
     static float gaussDistribution(float _mean, float _dev);
@@ -63,8 +63,8 @@ private:
     static float uniformDistribution(float _mean, float _dev);
 
     /// Вычисление точек касания
-    static void calcTanPoints(const QPointF *_track, const QPointF *_area,
-                              const float _radius, QPointF *_p1, QPointF *_p2);
+    static void calcTanPoints(const QPointF &_track, const QPointF &_area,
+                              const float _radius, QPointF &_p1, QPointF &_p2);
 
     AreaParameters *areaParameters;
     TrackParameters *trackParameters;

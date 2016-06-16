@@ -60,8 +60,8 @@ struct Track                /// Трасса
         float maxAngToV;    /// Максимально возможный угол между вектором скорости и прямой до центра ПР
 
         /// Точки касания угла видимости
-        QPointF p1;
-        QPointF p2;
+//        QPointF p1;
+//        QPointF p2;
     };
     QVector <Target> target;    /// Цели
 };
@@ -74,7 +74,7 @@ public:
     explicit Results(QWidget *parent = 0);
     ~Results();
 
-    void loadTable(const QVector <Area> *_area, const QVector <Track> *_track);
+    void loadTable(const QVector <Area> &_area, const QVector <Track> &_track);
 
 private:
     QTableWidget *tResults;     /// Таблица результатов
