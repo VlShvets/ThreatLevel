@@ -31,12 +31,6 @@ public:
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
 
-    inline const Area & areaAt(int _index) const;
-    inline const Track & trackAt(int _index) const;
-
-    inline Area & getArea(int _index);
-    inline Track & getTrack(int _index);
-
     inline void setIdTimer(int _idTimer);
     inline int getIdTimer();
 
@@ -52,18 +46,25 @@ private slots:
 private:
     void loadAreaPar();         /// Начальная инициализация параметров ПР
     void loadTrackPar();        /// Начальная инициализация параметров трасс
+    void calcStaticPar();       /// Вычисление неизменяющихся параметров
+
+    /// Быстрая сортировка целей по времени поражения определенного ПР с погрешностью
+    void quickSortTargets(const int _numArea, const int _first, const int _last);
+
+    /// Перестановка двух трасс в списке целей определенного ПР
+    void swapTargets(const int _numArea, const int _numTarget1, const int _numTarget2);
 
     /// Вычисление расстояния между двумя точками
     static float calcDistance(const QPointF &_p1, const QPointF &_p2);
 
     /// Распределение Гаусса
-    static float gaussDistribution(float _mean, float _dev);
+    static float gaussDistribution(const float _mean, const float _dev);
 
     /// Равномерное распределение
-    static float uniformDistribution(float _mean, float _dev);
+    static float uniformDistribution(const float _mean, const float _dev);
 
     /// Вычисление точек касания
-    static void calcTanPoints(const QPointF &_track, const QPointF &_area,
+    static void calcTanPoints(const QPointF &_area, const QPointF &_track,
                               const float _radius, QPointF &_p1, QPointF &_p2);
 
     AreaParameters *areaParameters;
@@ -75,26 +76,6 @@ private:
     QVector <Area> area;        /// Позиционные районы
     QVector <Track> track;      /// Трассы
 };
-
-const Area & Painter::areaAt(int _index) const
-{
-    return area.at(_index);
-}
-
-const Track & Painter::trackAt(int _index) const
-{
-    return track.at(_index);
-}
-
-Area &Painter::getArea(int _index)
-{
-    return area[_index];
-}
-
-Track & Painter::getTrack(int _index)
-{
-    return track[_index];
-}
 
 void Painter::setIdTimer(int _idTimer)
 {
