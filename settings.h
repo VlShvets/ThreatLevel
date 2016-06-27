@@ -33,9 +33,9 @@ private:
     QLCDNumber *lTimerInterval;     /// Интервал таймера
     QPushButton *pStartStop;        /// Кнопка запуска и остановки
 
-    bool isStart;                   /// Флаг состояния кнопки
-
     class Painter *painter;
+
+    bool isStart;                   /// Флаг состояния кнопки    
 };
 
 }

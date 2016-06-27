@@ -32,7 +32,7 @@ public:
     ~Painter();
 
     inline void setIdTimer(int _idTimer);
-    inline int getIdTimer();
+    inline int getIdTimer() const;
 
 public slots:
     void reStart();
@@ -48,7 +48,7 @@ private:
     void loadTrackPar();        /// Начальная инициализация параметров трасс
     void calcStaticPar();       /// Вычисление неизменяющихся параметров
 
-    /// Быстрая сортировка целей по времени поражения определенного ПР с погрешностью
+    /// Быстрая сортировка целей по времени поражения с погрешностью определенного ПР
     void quickSortTargets(const int _numArea, const int _first, const int _last);
 
     /// Перестановка двух трасс в списке целей определенного ПР
@@ -57,15 +57,19 @@ private:
     /// Вычисление расстояния между двумя точками
     static float calcDistance(const QPointF &_p1, const QPointF &_p2);
 
-    /// Распределение Гаусса
-    static float gaussDistribution(const float _mean, const float _dev);
-
-    /// Равномерное распределение
-    static float uniformDistribution(const float _mean, const float _dev);
+    /// Вычисление координат экстраполированного конца траектории
+    static const QPointF calcEndPos(const QPointF &_startPos, const float _startDist, const float _errAngToV,
+                                    const float _errModV,const float _critTime, const float _errAngV);
 
     /// Вычисление точек касания
     static void calcTanPoints(const QPointF &_area, const QPointF &_track,
                               const float _radius, QPointF &_p1, QPointF &_p2);
+
+    /// Равномерное распределение
+    static float uniformDistribution(const float _mean, const float _dev);
+
+    /// Распределение Гаусса
+    static float gaussDistribution(const float _mean, const float _dev);
 
     AreaParameters *areaParameters;
     TrackParameters *trackParameters;
@@ -82,7 +86,7 @@ void Painter::setIdTimer(int _idTimer)
     idTimer = _idTimer;
 }
 
-int Painter::getIdTimer()
+int Painter::getIdTimer() const
 {
     return idTimer;
 }

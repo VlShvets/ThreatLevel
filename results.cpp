@@ -34,7 +34,7 @@ void Results::loadTable(const QVector<Area> &_area)
 
         /// Погрешность времени поражения ПР самой опасной трассой
         tResults->setItem(i, _area.at(i).target.count(), new QTableWidgetItem(QString::number(_area.at(i).sigmaT) + " (" +
-                                                                   QString::number(_area.at(i).target.at(0).num + 1) + ")"));
+                                                                              QString::number(_area.at(i).diffTime) + ")"));
         tResults->item(i, _area.at(i).target.count())->setBackgroundColor(QColor(255, 0, 0, 50));
     }
 }

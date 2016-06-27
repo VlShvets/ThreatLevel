@@ -26,8 +26,8 @@ public:
     explicit TrackParameters(QWidget *parent = 0);
     ~TrackParameters();
 
-    inline int getCount();                              /// Получить количество
-    inline float getPar(int _row, int _column);         /// Получить параметр
+    inline int getCount() const;                        /// Получить количество
+    inline float getPar(int _row, int _column) const;   /// Получить параметр
 
 private slots:
     void numGroupsChanged(int _num);
@@ -41,12 +41,12 @@ private:
     QTableWidget *tTrackPar;                            /// Таблица параметров
 };
 
-int TrackParameters::getCount()
+int TrackParameters::getCount() const
 {
     return tTrackPar->rowCount();
 }
 
-float TrackParameters::getPar(int _row, int _column)
+float TrackParameters::getPar(int _row, int _column) const
 {
     return tTrackPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
 }

@@ -19,8 +19,8 @@ Painter::~Painter()
 {
     for(int i = 0; i < area.count(); ++i)
         area[i].target.clear();
-    track.clear();
     area.clear();
+    track.clear();
 }
 
 void Painter::reStart()
@@ -45,12 +45,20 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 
     /// Позиционные районы
     pen.setColor(Qt::darkBlue);
-    pen.setWidth(3);
     p.setPen(pen);
     for(int i = 0; i < area.count(); ++i)
     {
         /// Отрисовка местоположения
+        pen.setStyle(Qt::SolidLine);
+        pen.setWidth(3);
+        p.setPen(pen);
         p.drawEllipse(area.at(i).pos, area.at(i).radius, area.at(i).radius);
+
+        /// Отрисовка радиуса локации
+        pen.setStyle(Qt::DashLine);
+        pen.setWidth(1);
+        p.setPen(pen);
+        p.drawEllipse(area.at(i).pos, area.at(i).radarRange, area.at(i).radarRange);
 
         /// Отображение номера
         p.save();
@@ -63,12 +71,19 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 
     /// Трассы
     pen.setColor(Qt::darkGreen);
+    pen.setStyle(Qt::SolidLine);
     for(int j = 0; j < track.count(); ++j)
     {
         /// Отрисовка местоположения
         pen.setWidth(6);
         p.setPen(pen);
         p.drawPoint(track.at(j).pos);
+
+        /// Отрисовка курса
+        pen.setWidth(1);
+        p.setPen(pen);
+        if(!track.at(j).endPos.isNull())
+            p.drawLine(track.at(j).startPos, track.at(j).endPos);
 
         /// Отображение номера
         p.save();
@@ -77,13 +92,6 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         p.drawText(track.at(j).pos.x() * getCSAbsScale() - 20, track.at(j).pos.y() * getCSOrdScale() - 5,
                    QString::number(track.at(j).num + 1));
         p.restore();
-
-        /// Отрисовка курса
-        pen.setWidth(1);
-        p.setPen(pen);
-        if(!track.at(j).endPos.isNull())
-            p.drawLine(track.at(j).startPos, track.at(j).endPos);
-
     }
 
     /// Отрисовка расстояний от трасс до центров ПР и углов видимости ПР
@@ -150,9 +158,6 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
     {
         for(int j = 0; j < track.count(); ++j)
         {
-            /// Инкрементация количества измерений
-            ++area[i].target[j].countMeasure;
-
             /// Определение номера рассматриваемой трассы
             int num = area.at(i).target.at(j).num;
 
@@ -169,13 +174,6 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
             /// Расчет времени поражения ПР
             area[i].target[j].time = area.at(i).target.at(j).dist /
                                     (track.at(num).modV * qCos(area.at(i).target.at(j).angToV));
-
-            /// Условие окончания
-            if(area.at(i).target.at(j).time < 0 && idTimer != -1)
-            {
-                killTimer(_tEvent->timerId());
-                idTimer = -1;
-            }
             /// ------------------------------------------
 
             /// Расчет значений переменных с погрешностями
@@ -189,10 +187,13 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
             area[i].target[j].errDist = area.at(i).target.at(j).startDist -
                                         calcDistance(track.at(num).startPos, track.at(num).pos) * qCos(area.at(i).target.at(j).errAngToV);
 
-            /// Расчет времени поражения ПР
+            /// Расчет времени поражения ПР с погрешностью
             area[i].target[j].errTime = area.at(i).target.at(j).errDist /
                                         (track.at(num).errModV * qCos(area.at(i).target.at(j).errAngToV));
             /// ------------------------------------------
+
+            /// Инкрементация количества измерений
+            ++area[i].target[j].countMeasure;
         }
     }
     /// ==================================================
@@ -204,12 +205,12 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         /// Определение номера рассматриваемой трассы по первому ПР
         int num = area.at(0).target.at(j).num;
 
-        /// Поиск ближайшего ПР и определение номера рассматриваемой трассы в списке целей данного ПР
+        /// Поиск ближайшего по времени ПР и определение номера рассматриваемой трассы в списке целей данного ПР
         int nNearArea = 0;      /// Ближайший по времени с погрешностью ПР
         int nNearTarget = j;    /// Номер трассы в списке целей данного ПР
         for(int i = 1; i < area.count(); ++i)
         {
-            /// Определение цели по номеру
+            /// Определение трассы по номеру в спике целей рассматриваемого ПР
             int numTarget = -1;
             for(int j = 0; j < track.count(); ++j)
             {
@@ -225,11 +226,16 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         }
 
         /// Вычисление координат экстраполированного конца траектории
-        track[num].endPos = track.at(num).startPos +
-                            QPointF((area.at(nNearArea).target.at(nNearTarget).startDist /
-                                     qCos(area.at(nNearArea).target.at(nNearTarget).errAngToV)) * qSin(track.at(num).errAngV),
-                                    (area.at(nNearArea).target.at(nNearTarget).startDist /
-                                     qCos(area.at(nNearArea).target.at(nNearTarget).errAngToV)) * qCos(track.at(num).errAngV));
+        track[num].endPos = calcEndPos(track.at(num).startPos, area.at(nNearArea).target.at(nNearTarget).startDist,
+                                       area.at(nNearArea).target.at(nNearTarget).errAngToV, track.at(num).errModV,
+                                       area.at(nNearArea).critTime, track.at(num).errAngV);
+
+        /// Условие окончания
+        if(area.at(nNearArea).target.at(nNearTarget).errTime < area.at(nNearArea).critTime && idTimer != -1)
+        {
+            killTimer(_tEvent->timerId());
+            idTimer = -1;
+        }
     }
     /// ==================================================
 
@@ -240,9 +246,11 @@ void Painter::timerEvent(QTimerEvent *_tEvent)
         /// Сортировка целей по времени поражения ПР с погрешностью
         quickSortTargets(i, 0, area.at(i).target.count() - 1);
 
+        /// Вычисление погрешности времени поражения в текущий момент времени
+        area[i].diffTime = area.at(i).target.at(0).errTime - area.at(i).target.at(0).time;
+
         /// Вычисление суммы квадратов погрешностей времени поражения
-        area[i].sumDiffTime += (area.at(i).target.at(0).errTime - area.at(i).target.at(0).time) *
-                               (area.at(i).target.at(0).errTime - area.at(i).target.at(0).time);
+        area[i].sumDiffTime += area.at(i).diffTime * area.at(i).diffTime;
 
         /// Вычисление среднеквадратической погрешности времени поражения
         area[i].sigmaT = qSqrt(area.at(i).sumDiffTime / area.at(i).target.at(0).countMeasure);
@@ -269,6 +277,7 @@ void Painter::loadAreaPar()
         area[i].pos.setY(areaParameters->getPar(i, 1));
         area[i].radius = areaParameters->getPar(i, 2);
         area[i].critTime = areaParameters->getPar(i, 3);
+        area[i].radarRange = areaParameters->getPar(i, 4);
 
         /// Обнуление рекурентно использующейся переменной
         /// при подсчете среднеквадратической погрешности времени поражения
@@ -364,45 +373,14 @@ void Painter::swapTargets(const int _numArea, const int _numTarget1, const int _
 
 float Painter::calcDistance(const QPointF &_p1, const QPointF &_p2)
 {
-    return qSqrt((_p1.x() - _p2.x()) * (_p1.x() - _p2.x()) +
-                 (_p1.y() - _p2.y()) * (_p1.y() - _p2.y()));
+    return qSqrt((_p1.x() - _p2.x()) * (_p1.x() - _p2.x()) + (_p1.y() - _p2.y()) * (_p1.y() - _p2.y()));
 }
 
-float Painter::gaussDistribution(const float _mean, const float _dev)
+const QPointF Painter::calcEndPos(const QPointF &_startPos, const float _startDist, const float _errAngToV,
+                                  const float _errModV, const float _critTime, const float _errAngV)
 {
-    static bool ready = false;
-    static float second = 0.0;
-
-    if(ready)
-    {
-        ready = false;
-        return second * _dev + _mean;
-    }
-
-    float u, v, s;
-    do
-    {
-        u = 2.0 * ((float) qrand() / RAND_MAX) - 1.0;
-        v = 2.0 * ((float) qrand() / RAND_MAX) - 1.0;
-        s = u * u + v * v;
-    }
-    while(s > 1.0 || s == 0.0);
-
-    float r = qSqrt(-2.0 * qLn(s) / s);
-    second = r * u;
-
-    if(qAbs(second) < 1.5)
-        ready = true;
-
-    if(qAbs(r * v) < 1.5)
-        return r * v * _dev + _mean;
-
-    return gaussDistribution(_mean, _dev);
-}
-
-float Painter::uniformDistribution(const float _mean, const float _dev)
-{
-    return 2.0 * _dev * ((float) qrand() / RAND_MAX) - _dev + _mean;
+    return _startPos + QPointF((_startDist / qCos(_errAngToV) - _errModV * _critTime) * qSin(_errAngV),
+                               (_startDist / qCos(_errAngToV) - _errModV * _critTime) * qCos(_errAngV));
 }
 
 void Painter::calcTanPoints(const QPointF &_area, const QPointF &_track, const float _radius, QPointF &_p1, QPointF &_p2)
@@ -445,6 +423,43 @@ void Painter::calcTanPoints(const QPointF &_area, const QPointF &_track, const f
 
     _p1 += _area;
     _p2 += _area;
+}
+
+float Painter::uniformDistribution(const float _mean, const float _dev)
+{
+    return 2.0 * _dev * ((float) qrand() / RAND_MAX) - _dev + _mean;
+}
+
+float Painter::gaussDistribution(const float _mean, const float _dev)
+{
+    static bool ready = false;
+    static float second = 0.0;
+
+    if(ready)
+    {
+        ready = false;
+        return second * _dev + _mean;
+    }
+
+    float u, v, s;
+    do
+    {
+        u = 2.0 * ((float) qrand() / RAND_MAX) - 1.0;
+        v = 2.0 * ((float) qrand() / RAND_MAX) - 1.0;
+        s = u * u + v * v;
+    }
+    while(s > 1.0 || s == 0.0);
+
+    float r = qSqrt(-2.0 * qLn(s) / s);
+    second = r * u;
+
+    if(qAbs(second) < 1.5)
+        ready = true;
+
+    if(qAbs(r * v) < 1.5)
+        return r * v * _dev + _mean;
+
+    return gaussDistribution(_mean, _dev);
 }
 
 }
