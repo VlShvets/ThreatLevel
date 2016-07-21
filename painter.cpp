@@ -44,19 +44,29 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setCosmetic(true);
 
     /// Позиционные районы
-    pen.setColor(Qt::darkBlue);
-    p.setPen(pen);
     for(int i = 0; i < area.count(); ++i)
     {
         /// Отрисовка местоположения
         pen.setStyle(Qt::SolidLine);
+        pen.setColor(Qt::darkBlue);
         pen.setWidth(3);
         p.setPen(pen);
         p.drawEllipse(area.at(i).pos, area.at(i).radius, area.at(i).radius);
 
-        /// Отрисовка радиуса локации
+        /// Отрисовка критического времени при минимальной скорости
         pen.setStyle(Qt::DashLine);
+        pen.setColor(Qt::darkRed);
         pen.setWidth(1);
+        p.setPen(pen);
+        p.drawEllipse(area.at(i).pos, area.at(i).critTime * Track::minModV, area.at(i).critTime * Track::minModV);
+
+        /// Отрисовка критического времени при максимальной скорости
+        pen.setColor(Qt::darkGreen);
+        p.setPen(pen);
+        p.drawEllipse(area.at(i).pos, area.at(i).critTime * Track::maxModV, area.at(i).critTime * Track::maxModV);
+
+        /// Отрисовка района обнаружения
+        pen.setColor(Qt::darkBlue);
         p.setPen(pen);
         p.drawEllipse(area.at(i).pos, area.at(i).radarRange, area.at(i).radarRange);
 
@@ -70,7 +80,7 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     }
 
     /// Трассы
-    pen.setColor(Qt::darkGreen);
+    pen.setColor(Qt::darkCyan);
     pen.setStyle(Qt::SolidLine);
     for(int j = 0; j < track.count(); ++j)
     {

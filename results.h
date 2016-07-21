@@ -15,7 +15,7 @@ struct Area                 /// Позиционный район
     QPointF pos;            /// Координаты центра
     float radius;           /// Радиус
     float critTime;         /// Критическое время
-    float radarRange;       /// Радиус локации
+    float radarRange;       /// Радиус обнаружения
 
     float diffTime;         /// Погрешностей времени поражения в текущий момент времени
     float sumDiffTime;      /// Сумма квадратов погрешностей времени поражения
@@ -61,6 +61,9 @@ struct Track                /// Трасса
 
     float errVx;            /// Проекция вектора скорости с погрешностью на ось абсцисс
     float errVy;            /// Проекция вектора скорости с погрешностью на ось ординат
+
+    static const float minModV = 180.0;     /// Минимальное значение модуля вектора скорости
+    static const float maxModV = 250.0;     /// Максимальное значение модуля вектора скорости
 };
 
 class Results : public QWidget
