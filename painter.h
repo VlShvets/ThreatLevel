@@ -24,10 +24,6 @@ public:
     const float DELTAT = 10.0;      /// Константа времени
     const float WEIGHT = 0.9;       /// Весовой коэфициент сглаживания ( < 1.0)
 
-    /// Погрешности
-    const float ERRMODV = 30.0;     /// Погрешность модуля скорости
-    const float ERRANGV = 10.0;     /// Погрешность курса
-
     Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters, Results *_results, QWidget *_parent = 0);
     ~Painter();
 
@@ -41,29 +37,27 @@ protected:
     void paintEvent(QPaintEvent *_pEvent);
 
 private slots:
-    void timerEvent(QTimerEvent *_tEvent);
+    void timerEvent(QTimerEvent *);
 
 private:
-    void loadAreaPar();         /// Начальная инициализация параметров ПР
-    void loadTrackPar();        /// Начальная инициализация параметров трасс
-    void calcStaticPar();       /// Вычисление неизменяющихся параметров
+    void initAreaPar();         /// Начальная инициализация параметров ПР
+    void initTrackPar();        /// Начальная инициализация параметров трасс
+
+    int numOnCourseMinDistanceArea(const Track &_track);    /// Определение для трассы номера ближайшего по курсу позиционного района
 
     /// Быстрая сортировка целей по времени поражения с погрешностью определенного ПР
-    void quickSortTargets(const int _numArea, const int _first, const int _last);
-
-    /// Перестановка двух трасс в списке целей определенного ПР
-    void swapTargets(const int _numArea, const int _numTarget1, const int _numTarget2);
+    void quickSortTracks(const int _numArea, const int _first, const int _last);
 
     /// Вычисление расстояния между двумя точками
     static float calcDistance(const QPointF &_p1, const QPointF &_p2);
 
     /// Вычисление координат экстраполированного конца траектории
-    static const QPointF calcEndPos(const QPointF &_startPos, const float _startDist, const float _errAngToV,
-                                    const float _errModV,const float _critTime, const float _errAngV);
+    static const QPointF calcEndPos(const QPointF &_startPos, const float _startDist, const float _errAngCourseToPA,
+                                    const float _errSpeed, const float _initCritTime, const float _errCourse);
 
     /// Вычисление точек касания
-    static void calcTanPoints(const QPointF &_area, const QPointF &_track,
-                              const float _radius, QPointF &_p1, QPointF &_p2);
+    static void calcTanPoints(const QPointF &_area, const float _radius,
+                              const QPointF &_track, QPointF &_p1, QPointF &_p2);
 
     /// Равномерное распределение
     static float uniformDistribution(const float _mean, const float _dev);
@@ -71,14 +65,14 @@ private:
     /// Распределение Гаусса
     static float gaussDistribution(const float _mean, const float _dev);
 
-    AreaParameters *areaParameters;
-    TrackParameters *trackParameters;
-    Results *results;
+    QVector <Area> area;        /// Позиционные районы
+    QVector <Track> track;      /// Трассы
 
     int idTimer;                /// Номер таймера (-1 - нет таймера)
 
-    QVector <Area> area;        /// Позиционные районы
-    QVector <Track> track;      /// Трассы
+    AreaParameters *areaParameters;
+    TrackParameters *trackParameters;
+    Results *results;
 };
 
 void Painter::setIdTimer(int _idTimer)
