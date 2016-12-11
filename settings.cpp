@@ -5,6 +5,7 @@
 namespace ThreatLevel
 {
 
+/// Класс виджета настроек
 Settings::Settings(Painter *_painter, QWidget *parent) :
     QWidget(parent), painter(_painter), isStart(false)
 {
@@ -55,6 +56,7 @@ Settings::~Settings()
     delete lTimerInterval;
 }
 
+/// Запуск и остановка таймера
 void Settings::changeState()
 {
     if(isStart)
@@ -71,6 +73,7 @@ void Settings::changeState()
     isStart = !isStart;
 }
 
+/// Изменение интервала таймера
 void Settings::changeTimerInterval(int _interval)
 {
     if(isStart && painter->getIdTimer() != -1)

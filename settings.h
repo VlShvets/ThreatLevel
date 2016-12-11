@@ -14,20 +14,21 @@
 namespace ThreatLevel
 {
 
+/// Класс виджета настроек
 class Settings : public QWidget
 {
     Q_OBJECT
 
 public:
-    const int MAXTIMERINTERVAL = 10;    /// Максимальный интервал таймера
-    const int DEFTIMERINTERVAL = 1;     /// Интервал таймера по умолчанию
-
     explicit Settings(class Painter *_painter, QWidget *parent = 0);
     ~Settings();
 
 private slots:
-    void changeState();                         /// Запуск и остановка
-    void changeTimerInterval(int _interval);    /// Изменение интервала таймера
+    /// Запуск и остановка таймера
+    void changeState();
+
+    /// Изменение интервала таймера
+    void changeTimerInterval(int _interval);
 
 private:
     QLCDNumber *lTimerInterval;     /// Интервал таймера
@@ -35,7 +36,10 @@ private:
 
     class Painter *painter;
 
-    bool isStart;                   /// Флаг состояния кнопки    
+    bool isStart;                   /// Флаг состояния кнопки
+
+    const int MAX_TIMER_INTERVAL = 10;    /// Максимальный интервал таймера
+    const int DEF_TIMER_INTERVAL = 1;     /// Интервал таймера по умолчанию
 };
 
 }

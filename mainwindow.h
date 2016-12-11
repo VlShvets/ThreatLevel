@@ -14,18 +14,20 @@
 namespace ThreatLevel
 {
 
+/// Класс виджета главного окна
 class MainWindow : public QMainWindow
 {
 public:
-    MainWindow(QWidget *_parent = 0);
+    explicit MainWindow(QWidget *_parent = 0);
     ~MainWindow();
 
 private:
-    Results *results;
-    Painter *painter;
-    AreaParameters *areaParameters;
-    TrackParameters *trackParameters;
-    Settings *settings;
+    AreaParameters *areaParameters;     /// Виджет редактирования параметров позиционных районов
+    TrackParameters *trackParameters;   /// Виджет редактирования параметров трасс
+    GraphSumTrack *graphSumTrack;       /// Виджет графика количественного состава
+    Results *results;                   /// Виджет отображения результатов
+    Painter *painter;                   /// Виджет отрисовки трасс и позиционных районов
+    Settings *settings;                 /// Виджет настроек
 };
 
 }

@@ -3,6 +3,7 @@
 namespace ThreatLevel
 {
 
+/// Класс виджета редактирования параметров позиционных районов
 AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
 {
     QGridLayout *gridLayout = new QGridLayout(this);
@@ -10,9 +11,9 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     gridLayout->addWidget(new QLabel(QObject::tr("Количество ПР: ")), 0, 0, 1, 1);
 
     QSlider *sliderArea = new QSlider(Qt::Horizontal);
-    sliderArea->setRange(1, MAXNUMAREAS);
+    sliderArea->setRange(1, MAX_NUM_AREAS);
     sliderArea->setTickInterval(1);
-    sliderArea->setValue(DEFNUMAREAS);
+    sliderArea->setValue(DEF_NUM_AREAS);
     sliderArea->setTickPosition(QSlider::TicksAbove);
     sliderArea->setFixedWidth(100);
     gridLayout->addWidget(sliderArea, 0, 1, 1, 1);
@@ -20,21 +21,22 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     QLCDNumber *lNumberArea = new QLCDNumber(1);
     lNumberArea->setSegmentStyle(QLCDNumber::Flat);
     lNumberArea->setMode(QLCDNumber::Dec);
-    lNumberArea->display(DEFNUMAREAS);
+    lNumberArea->display(DEF_NUM_AREAS);
     lNumberArea->setFixedWidth(100);
     QObject::connect(sliderArea, SIGNAL(valueChanged(int)), lNumberArea, SLOT(display(int)));
     gridLayout->addWidget(lNumberArea, 0, 2, 1, 1);
 
     gridLayout->addWidget(new QLabel(QObject::tr("\tНачальные параметры позиционных районов:")), 1, 0, 1, 3);
 
-    tAreaPar = new QTableWidget(DEFNUMAREAS, 5, this);
-    tAreaPar->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" << "Радиус" << "T критическое" << "Радиус обнаружения");
+    tAreaPar = new QTableWidget(DEF_NUM_AREAS, 5, this);
+    tAreaPar->setHorizontalHeaderLabels(QStringList() << "Координата X" << "Координата Y" <<
+                                        "Радиус" << "T критическое" << "Радиус обнаружения");
     QObject::connect(sliderArea, SIGNAL(valueChanged(int)), this, SLOT(initPar(int)));
     gridLayout->addWidget(tAreaPar, 2, 0, 1, 3);
 
     this->setLayout(gridLayout);
 
-    initPar(DEFNUMAREAS);
+    initPar(DEF_NUM_AREAS);
 }
 
 AreaParameters::~AreaParameters()
@@ -42,6 +44,7 @@ AreaParameters::~AreaParameters()
     delete tAreaPar;
 }
 
+/// Начальная инициализация параметров ПР
 void AreaParameters::initPar(int _number)
 {
     tAreaPar->setRowCount(_number);

@@ -21,7 +21,8 @@ SOURCES += main.cpp\
     mainwindow.cpp \
     areaparameters.cpp \
     settings.cpp \
-    trackparameters.cpp
+    trackparameters.cpp \
+    graphsumtrack.cpp
 
 HEADERS  += \
     painter.h \
@@ -29,7 +30,8 @@ HEADERS  += \
     mainwindow.h \
     areaparameters.h \
     trackparameters.h \
-    settings.h
+    settings.h \
+    graphsumtrack.h
 
 unix {
     target.path = /usr/lib

@@ -11,32 +11,39 @@
 namespace ThreatLevel
 {
 
-class AreaParameters : public QWidget  /// Класс позиционных районов
+/// Класс виджета редактирования параметров позиционных районов
+class AreaParameters : public QWidget
 {
     Q_OBJECT
 
-public:    
-    const int MAXNUMAREAS = 5;  /// Максимальное количество ПР
-    const int DEFNUMAREAS = 1;  /// Количество ПР по умолчанию
-
+public:
     explicit AreaParameters(QWidget *parent = 0);
     ~AreaParameters();
 
-    inline int getCount() const;                        /// Получить количество ПР
-    inline float getPar(int _row, int _column) const;   /// Получить параметр ПР
+    /// Получить количество ПР
+    inline int getCount() const;
+
+    /// Получить параметр ПР по номеру строки и номеру столбца
+    inline float getPar(int _row, int _column) const;
 
 private slots:
-    void initPar(int _number);  /// Начальная инициализация параметров ПР
+    /// Начальная инициализация параметров ПР
+    void initPar(int _number);
 
 private:
-    QTableWidget *tAreaPar;     /// Таблица параметров ПР
+    QTableWidget *tAreaPar; /// Виджет таблицы параметров ПР
+
+    static const int MAX_NUM_AREAS = 5; /// Максимальное количество ПР
+    static const int DEF_NUM_AREAS = 1; /// Количество ПР по умолчанию
 };
 
+/// Получить количество ПР
 int AreaParameters::getCount() const
 {
     return tAreaPar->rowCount();
 }
 
+/// Получить параметр ПР по номеру строки и номеру столбца
 float AreaParameters::getPar(int _row, int _column) const
 {
     return tAreaPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
