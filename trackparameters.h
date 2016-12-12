@@ -44,10 +44,10 @@ private:
     static const int MAX_NUM_GROUPS = 10;           /// Максимальное количество групп
     static const int DEF_NUM_GROUPS = 5;            /// Количество групп по умолчанию
 
-    static const int MAX_TRACKS_IN_GROUP = 12;      /// Максимальное количество трасс в группе
-    static const int DEF_TRACKS_IN_GROUP = 1;       /// Количество трасс в группе по умолчанию
+    static const int MAX_TRACKS_IN_GROUP    = 12;   /// Максимальное количество трасс в группе
+    static const int DEF_TRACKS_IN_GROUP    = 1;    /// Количество трасс в группе по умолчанию
 
-    static const int DIST_BETWEEN_TRACKS = 6000;    /// Расстояние между трассами в группе
+    static const int DIST_BETWEEN_TRACKS    = 6000; /// Расстояние между трассами в группе
 };
 
 /// Получить количество трасс

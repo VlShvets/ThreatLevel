@@ -62,8 +62,14 @@ private:
     /// Расчет параметров связанных со временем поражения ПР
     void calcTimeParameters();
 
-    /// Расчет параметров связанных с количеством трасс
-    void calcCountParameters();
+    /// Расчет количества крылатых ракет
+    void calcCMcount();
+
+    /// Расчет количества баллистических целей
+    void calcBGcount();
+
+    /// Расчет количественного состава налёта
+    void calcTrackCount();
 
     /// Определение для трассы номера ближайшего по курсу позиционного района
     int numOnCourseMinDistanceArea(const Track &_track);
@@ -98,15 +104,15 @@ private:
     GraphSumTrack *graphSumTrack;       /// Виджет графика количественного состава налёта
     Results *results;                   /// Виджет отображения результатов
 
-    static const float DELTA_T = 10.0;              /// Константа времени
-    static const float WEIGHT = 0.9;                /// Весовой коэфициент сглаживания ( < 1.0)
+    static const float DELTA_T  = 10.0;                 /// Константа времени
+    static const float WEIGHT   = 0.9;                  /// Весовой коэфициент сглаживания ( < 1.0)
 
-    static const float ABS_MEASURE = 10000.0;       /// Масштаб оси абсцисс
-    static const float ORD_MEASURE = 10000.0;       /// Масштаб оси ординат
-    static const int DEF_ZOOM = 10;                 /// Масштаб отображения по умолчанию
+    static const float ABS_MEASURE  = 10000.0;          /// Масштаб оси абсцисс
+    static const float ORD_MEASURE  = 10000.0;          /// Масштаб оси ординат
+    static const int DEF_ZOOM   = 10;                   /// Масштаб отображения по умолчанию
 
-    static const float ACCURACY_TAN_POINT = 1e-06;  /// Точность вычисления точек соприкосновения касательных
-                                                    /// от текущего положения трассы до границы ПР
+    static const float ACCURACY_TAN_POINT   = 1e-06;    /// Точность вычисления точек соприкосновения касательных
+                                                        /// от текущего положения трассы до границы ПР
 };
 
 /// Установка таймера

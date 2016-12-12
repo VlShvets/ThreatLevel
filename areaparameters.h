@@ -33,8 +33,8 @@ private slots:
 private:
     QTableWidget *tAreaPar; /// Виджет таблицы параметров ПР
 
-    static const int MAX_NUM_AREAS = 5; /// Максимальное количество ПР
-    static const int DEF_NUM_AREAS = 1; /// Количество ПР по умолчанию
+    static const int MAX_NUM_AREAS  = 5;    /// Максимальное количество ПР
+    static const int DEF_NUM_AREAS  = 1;    /// Количество ПР по умолчанию
 };
 
 /// Получить количество ПР

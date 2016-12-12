@@ -31,15 +31,15 @@ private slots:
     void changeTimerInterval(int _interval);
 
 private:
-    QLCDNumber *lTimerInterval;     /// Интервал таймера
-    QPushButton *pStartStop;        /// Кнопка запуска и остановки
+    QLCDNumber *lTimerInterval; /// Интервал таймера
+    QPushButton *pStartStop;    /// Кнопка запуска и остановки
 
-    class Painter *painter;
+    class Painter *painter;     /// Виджет отрисовки трасс и позиционных районов
 
-    bool isStart;                   /// Флаг состояния кнопки
+    bool isStart;               /// Флаг состояния кнопки
 
-    const int MAX_TIMER_INTERVAL = 10;    /// Максимальный интервал таймера
-    const int DEF_TIMER_INTERVAL = 1;     /// Интервал таймера по умолчанию
+    static const int MAX_TIMER_INTERVAL = 10;   /// Максимальный интервал таймера
+    static const int DEF_TIMER_INTERVAL = 1;    /// Интервал таймера по умолчанию
 };
 
 }

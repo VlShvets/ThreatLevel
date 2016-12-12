@@ -152,8 +152,14 @@ void Painter::timerEvent(QTimerEvent *)
     /// Расчет параметров связанных со временем
     calcTimeParameters();
 
-    /// Расчет параметров связанных с количеством трасс
-    calcCountParameters();
+    /// Расчет количества крылатых ракет
+    calcCMcount();
+
+    /// Расчет количества баллистических целей
+    calcBGcount();
+
+    /// Расчет количественного состава налёта
+    calcTrackCount();
 
     /// Отображение графика количественного состава налета
     graphSumTrack->loadGraph(Area::sumTrackCount);
@@ -417,22 +423,17 @@ void Painter::calcTimeParameters()
     }
 }
 
-/// Расчет параметров связанных с количеством трасс
-void Painter::calcCountParameters()
+/// Расчет количества крылатых ракет
+void Painter::calcCMcount()
 {
     Area::sumCMcount = 0;
-    Area::sumBGcount = 0;
-    Area::sumTrackCount = 0;
     for(int i = 0; i < area.count(); ++i)
     {
-        /// Вычисление количества ассоциированных с ПР крылатых ракет и баллистических целей
+        /// Вычисление количества ассоциированных с ПР крылатых ракет
         area[i].CMcount = 0;
-        area[i].BGcount = 0;
         for(int j = 0; j < area.at(i).numTrack.count(); ++j)
         {
-            if(track.at(area.at(i).numTrack.at(j)).initBG)
-                ++area[i].BGcount;
-            else
+            if(!track.at(area.at(i).numTrack.at(j)).initBG)
                 ++area[i].CMcount;
         }
 
@@ -442,6 +443,26 @@ void Painter::calcCountParameters()
 
         /// Вычисление суммарного количества крылатых ракет
         Area::sumCMcount    += area.at(i).CMcount;
+    }
+
+    /// Вычисление максимального суммарного количества крылатых ракет
+    if(Area::maxSumCMcount < Area::sumCMcount)
+        Area::maxSumCMcount = Area::sumCMcount;
+}
+
+/// Расчет количества баллистических целей
+void Painter::calcBGcount()
+{
+    Area::sumBGcount = 0;
+    for(int i = 0; i < area.count(); ++i)
+    {
+        /// Вычисление количества ассоциированных с ПР баллистических целей
+        area[i].BGcount = 0;
+        for(int j = 0; j < area.at(i).numTrack.count(); ++j)
+        {
+            if(track.at(area.at(i).numTrack.at(j)).initBG)
+                ++area[i].BGcount;
+        }
 
         /// Вычисление максимального количества ассоциированных с ПР баллистических целей
         if(area.at(i).maxBGcount < area.at(i).BGcount)
@@ -449,22 +470,29 @@ void Painter::calcCountParameters()
 
         /// Вычисление суммарного количества баллистических целей
         Area::sumBGcount    += area.at(i).BGcount;
-
-        /// Вычисление максимального количества ассоциированных с ПР трасс
-        if(area.at(i).maxTrackCount < area.at(i).numTrack.count())
-            area[i].maxTrackCount   = area.at(i).numTrack.count();
-
-        /// Вычисление количественного состава налета по всем ПР
-        Area::sumTrackCount += area.at(i).numTrack.count();
     }
-
-    /// Вычисление максимального суммарного количества крылатых ракет
-    if(Area::maxSumCMcount < Area::sumCMcount)
-        Area::maxSumCMcount = Area::sumCMcount;
 
     /// Вычисление максимального суммарного количества баллистических целей
     if(Area::maxSumBGcount < Area::sumBGcount)
         Area::maxSumBGcount = Area::sumBGcount;
+}
+
+/// Расчет количественного состава налёта
+void Painter::calcTrackCount()
+{
+    Area::sumTrackCount = 0;
+    for(int i = 0; i < area.count(); ++i)
+    {
+        /// Вычисление количественного состава налета по ПР
+        area[i].trackCount = area.at(i).CMcount + Track::WEIGHT_COEF_BG * area.at(i).BGcount;
+
+        /// Вычисление максимального количественного состава налета по ПР
+        if(area.at(i).maxTrackCount < area.at(i).trackCount)
+            area[i].maxTrackCount   = area.at(i).trackCount;
+
+        /// Вычисление количественного состава налета по всем ПР
+        Area::sumTrackCount += area.at(i).trackCount;
+    }
 
     /// Вычисление максимального количественного состава налета по всем ПР
     if(Area::maxSumTrackCount < Area::sumTrackCount)
