@@ -28,13 +28,13 @@ public:
 
 private slots:
     /// Начальная инициализация параметров ПР
-    void initPar(int _number);
+    void initPar(int _count);
 
 private:
-    QTableWidget *tAreaPar; /// Виджет таблицы параметров ПР
+    QTableWidget    *tAreaPar; /// Виджет таблицы параметров ПР
 
-    static const int MAX_NUM_AREAS  = 5;    /// Максимальное количество ПР
-    static const int DEF_NUM_AREAS  = 1;    /// Количество ПР по умолчанию
+    static const int    MAX_COUNT_AREAS = 5;    /// Максимальное количество ПР
+    static const int    DEF_COUNT_AREAS = 5;    /// Количество ПР по умолчанию
 };
 
 /// Получить количество ПР

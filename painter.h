@@ -94,8 +94,8 @@ private:
     /// Распределение Гаусса
     static float gaussDistribution(const float _mean, const float _dev);
 
-    QVector <Area> area;    /// Позиционные районы
-    QVector <Track> track;  /// Трассы
+    QVector <Area> area;    /// Массив позиционных районов
+    QVector <Track> track;  /// Массив трасс
 
     int idTimer;            /// Номер таймера (-1 - нет таймера)
 
@@ -104,14 +104,14 @@ private:
     GraphSumTrack *graphSumTrack;       /// Виджет графика количественного состава налёта
     Results *results;                   /// Виджет отображения результатов
 
-    static const float DELTA_T  = 10.0;                 /// Константа времени
-    static const float WEIGHT   = 0.9;                  /// Весовой коэфициент сглаживания ( < 1.0)
+    static constexpr float DELTA_T  = 10.0;                 /// Константа времени
+    static constexpr float WEIGHT   = 0.9;                  /// Весовой коэфициент сглаживания ( < 1.0)
 
-    static const float ABS_MEASURE  = 10000.0;          /// Масштаб оси абсцисс
-    static const float ORD_MEASURE  = 10000.0;          /// Масштаб оси ординат
+    static constexpr float ABS_MEASURE  = 10000.0;          /// Масштаб оси абсцисс
+    static constexpr float ORD_MEASURE  = 10000.0;          /// Масштаб оси ординат
     static const int DEF_ZOOM   = 10;                   /// Масштаб отображения по умолчанию
 
-    static const float ACCURACY_TAN_POINT   = 1e-06;    /// Точность вычисления точек соприкосновения касательных
+    static constexpr float ACCURACY_TAN_POINT   = 1e-06;    /// Точность вычисления точек соприкосновения касательных
                                                         /// от текущего положения трассы до границы ПР
 };
 

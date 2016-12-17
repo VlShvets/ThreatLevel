@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *_parent)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
 #endif
 
-    this->setWindowTitle(QObject::tr("Определение уровня угроз"));
+    this->setWindowTitle(tr("Определение уровня угроз"));
 
     areaParameters = new AreaParameters;
     trackParameters = new TrackParameters;
@@ -50,6 +50,7 @@ MainWindow::MainWindow(QWidget *_parent)
     dGraphSumTrack->setWidget(graphSumTrack);
     dGraphSumTrack->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dGraphSumTrack->setFeatures(QDockWidget::DockWidgetMovable);
+    dGraphSumTrack->setMinimumWidth(650);
     dGraphSumTrack->setMinimumHeight(300);
     addDockWidget(Qt::RightDockWidgetArea, dGraphSumTrack);
 
@@ -58,6 +59,8 @@ MainWindow::MainWindow(QWidget *_parent)
     dResults->setWidget(results);
     dResults->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     dResults->setFeatures(QDockWidget::DockWidgetMovable);
+    dResults->setMinimumWidth(650);
+    dResults->setMinimumHeight(300);
     addDockWidget(Qt::RightDockWidgetArea, dResults);
 }
 

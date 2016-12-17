@@ -13,14 +13,14 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QSplitter());
 
-    QPushButton *pReStart = new QPushButton(QObject::tr("Начать с начала"));
+    QPushButton *pReStart = new QPushButton(tr("Начать с начала"));
     pReStart->setFixedWidth(200);
     QObject::connect(pReStart, SIGNAL(clicked()), painter, SLOT(reStart()));
     hLayout->addWidget(pReStart);
 
     hLayout->addWidget(new QSplitter());
 
-    hLayout->addWidget(new QLabel(QObject::tr("Интервал таймера (100 / X):")));
+    hLayout->addWidget(new QLabel(tr("Интервал таймера (100 / X):")));
 
     QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
     sTimerInterval->setRange(1, MAX_TIMER_INTERVAL);

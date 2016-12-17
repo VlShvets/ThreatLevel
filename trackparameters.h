@@ -20,46 +20,75 @@ public:
     explicit TrackParameters(QWidget *parent = 0);
     ~TrackParameters();
 
-    /// Получить количество трасс
-    inline int getCount() const;
+    /// Получить количество КР
+    inline int getCMCount() const;
 
-    /// Получить параметр трассы по номеру строки и номеру столбца
-    inline float getPar(int _row, int _column) const;
+    /// Получить параметр КР по номеру строки и номеру столбца
+    inline float getCMPar(int _row, int _column) const;
+
+    /// Получить количество БЦ
+    inline int getBGCount() const;
+
+    /// Получить параметр БЦ по номеру строки и номеру столбца
+    inline float getBGPar(int _row, int _column) const;
 
 private slots:
-    /// Изменение количества групп
-    void numGroupsChanged(int _num);
+    /// Изменение количества групп КР
+    void countGroupsOfCMChanged(int _count);
 
-    /// Изменение количества трасс в группе
-    void numTracksInGroupChanged(int _num);
+    /// Изменение количества КР в группе
+    void countCMinGroupChanged(int _count);
+
+    /// Изменение количества БЦ
+    void countBGChanged(int _count);
 
 private:
-    /// Начальная инициализация параметров трасс
-    void initPar(int _nGroups, int _nTracksInGroup);
+    /// Начальная инициализация параметров КР
+    void initCMPar(int _countGroupsOfCM, int _countCMinGroup);
 
-    QLCDNumber *lNumGroups;     /// Виджет отображения количества групп
-    QLCDNumber *lTracksInGroup; /// Виджет отображения количества трасс в группе
-    QTableWidget *tTrackPar;    /// Виджет таблицы параметров трасс
+    /// Начальная инициализация параметров БЦ
+    void initBGPar(int _countBG);
 
-    static const int MAX_NUM_GROUPS = 10;           /// Максимальное количество групп
-    static const int DEF_NUM_GROUPS = 5;            /// Количество групп по умолчанию
+    QLCDNumber      *lCountGroupsOfCM;  /// Виджет отображения количества групп КР
+    QLCDNumber      *lCountCMinGroup;   /// Виджет отображения количества КР в группе
+    QTableWidget    *tCMPar;            /// Виджет таблицы параметров КР
+    QLCDNumber      *lCountBG;          /// Виджет отображения количества БЦ
+    QTableWidget    *tBGPar;            /// Виджет таблицы параметров БЦ
 
-    static const int MAX_TRACKS_IN_GROUP    = 12;   /// Максимальное количество трасс в группе
-    static const int DEF_TRACKS_IN_GROUP    = 1;    /// Количество трасс в группе по умолчанию
+    static const int    MAX_COUNT_GROUPS_OF_CM  = 10;   /// Максимальное количество групп КР
+    static const int    DEF_COUNT_GROUPS_OF_CM  = 5;    /// Количество групп КР по умолчанию
 
-    static const int DIST_BETWEEN_TRACKS    = 6000; /// Расстояние между трассами в группе
+    static const int    MAX_COUNT_CM_IN_GROUP   = 12;   /// Максимальное количество КР в группе
+    static const int    DEF_COUNT_CM_IN_GROUP   = 1;    /// Количество КР в группе по умолчанию
+
+    static const int    DIST_BETWEEN_TRACKS    = 6000;  /// Расстояние между КР в группе
+
+    static const int    MAX_COUNT_BG            = 5;    /// Максимальное количество БЦ
+    static const int    DEF_COUNT_BG            = 2;    /// Количество БЦ по умолчанию
 };
 
-/// Получить количество трасс
-int TrackParameters::getCount() const
+/// Получить количество КР
+int TrackParameters::getCMCount() const
 {
-    return tTrackPar->rowCount();
+    return tCMPar->rowCount();
 }
 
-/// Получить параметр по номеру строки и номеру столбца
-float TrackParameters::getPar(int _row, int _column) const
+/// Получить параметр КР по номеру строки и номеру столбца
+float TrackParameters::getCMPar(int _row, int _column) const
 {
-    return tTrackPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
+    return tCMPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
+}
+
+/// Получить количество БЦ
+int TrackParameters::getBGCount() const
+{
+    return tBGPar->rowCount();
+}
+
+/// Получить параметр БЦ по номеру строки и номеру столбца
+float TrackParameters::getBGPar(int _row, int _column) const
+{
+    return tBGPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
 }
 
 }
