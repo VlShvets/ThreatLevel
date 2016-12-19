@@ -9,6 +9,7 @@
 
 #include "area.h"
 #include "track.h"
+#include "trackgraph.h"
 
 namespace ThreatLevel
 {
@@ -19,7 +20,7 @@ class Results : public QWidget
     Q_OBJECT
 
 public:
-    explicit            Results(QWidget *parent = 0);
+    explicit            Results(TrackGraph *_trackGraph, QWidget *parent = 0);
     ~Results();
 
     /// Загрузка результатов
@@ -28,11 +29,17 @@ public:
     /// Очистка таблицы результатов
     void                resetTable();
 
+private slots:
+    /// Выбор строки в таблице
+    void tableSelectionChanged(QItemSelection, QItemSelection);
+
 private:
     QLCDNumber          *lcdMaxSumTrack;        /// Виджет отображающий максимимальный количественный состав налета
     QTableWidget        *tResults;              /// Виджет отображения результатов
 
     static const int    LCD_DIGIT_COUNT = 4;    /// Число цифр в поле отображения максимального количественного состава налета
+
+    TrackGraph          *trackGraph;            /// Виджет графика количественного состава налёта
 };
 
 }

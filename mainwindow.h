@@ -24,7 +24,7 @@ public:
 private:
     AreaParameters  *areaParameters;    /// Виджет редактирования параметров позиционных районов
     TrackParameters *trackParameters;   /// Виджет редактирования параметров трасс
-    GraphSumTrack   *graphSumTrack;     /// Виджет графика количественного состава
+    TrackGraph      *trackGraph;        /// Виджет графика количественного состава
     Results         *results;           /// Виджет отображения результатов
     Painter         *painter;           /// Виджет отрисовки трасс и позиционных районов
     Settings        *settings;          /// Виджет настроек

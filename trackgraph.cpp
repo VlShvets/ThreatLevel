@@ -1,10 +1,10 @@
-#include "graphsumtrack.h"
+#include "trackgraph.h"
 
 namespace ThreatLevel
 {
 
 /// Класс виджета графика количественного состава налёта
-GraphSumTrack::GraphSumTrack(QWidget *_parent) : Grapher2D(_parent)
+TrackGraph::TrackGraph(QWidget *_parent) : Grapher2D(_parent), numArea(0)
 {
     setCSOrdMeasure(ORD_MEASURE);
     setCSAngles(false, true, false, false);
@@ -15,32 +15,43 @@ GraphSumTrack::GraphSumTrack(QWidget *_parent) : Grapher2D(_parent)
     setCSZoomCenter(true);
 }
 
-GraphSumTrack::~GraphSumTrack()
+TrackGraph::~TrackGraph()
 {
 }
 
 /// Загрузка количественного состава налета
-void GraphSumTrack::loadGraph(const int _sumTrackCount)
+void TrackGraph::loadTrackCount(const int _numArea, const int _trackCount)
 {
     /// Добавление количественного состава налета в список
-    sumTrack.push_front(_sumTrackCount);
+    trackCount[_numArea].push_front(_trackCount);
 
     /// Проверка переполнения списка
-    if(sumTrack.count() > MAX_SUM_TRACKS)
-        sumTrack.removeLast();
+    if(trackCount[_numArea].count() > MAX_SUM_TRACKS)
+        trackCount[_numArea].removeLast();
+
+    repaint();
+}
+
+void TrackGraph::showGraph(const int _numArea)
+{
+    if(trackCount.contains(_numArea))
+        numArea = _numArea;
 
     repaint();
 }
 
 /// Очистка графика количественного состава налёта
-void GraphSumTrack::resetGraph()
+void TrackGraph::resetGraph()
 {
-    sumTrack.clear();
+    QMap <int, QVector <int> >::iterator count = trackCount.begin();
+    for(; count != trackCount.end(); ++count)
+        count.value().clear();
+    trackCount.clear();
 
     repaint();
 }
 
-void GraphSumTrack::paintEvent(QPaintEvent *_pEvent)
+void TrackGraph::paintEvent(QPaintEvent *_pEvent)
 {
     Grapher2D::paintEvent(_pEvent);
 
@@ -56,8 +67,13 @@ void GraphSumTrack::paintEvent(QPaintEvent *_pEvent)
     pen.setWidth(3);
     p.setPen(pen);
 
-    for(int i = sumTrack.count() - 1; i > 0; --i)
-        p.drawLine(QPointF(- i - SHIFT, sumTrack.at(i)), QPointF(- i + 1 - SHIFT, sumTrack.at(i - 1)));
+    for(int i = trackCount[numArea].count() - 1; i > 0; --i)
+    {
+        p.drawLine(QPointF(- i      - SHIFT, trackCount[numArea].at(i)),
+                   QPointF(- i + 1  - SHIFT, trackCount[numArea].at(i - 1)));
+    }
+
+    p.end();
 }
 
 }

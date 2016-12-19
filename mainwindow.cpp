@@ -17,9 +17,9 @@ MainWindow::MainWindow(QWidget *_parent)
 
     areaParameters = new AreaParameters;
     trackParameters = new TrackParameters;
-    graphSumTrack = new GraphSumTrack;
-    results = new Results;
-    painter = new Painter(areaParameters, trackParameters, graphSumTrack, results);
+    trackGraph = new TrackGraph;
+    results = new Results(trackGraph);
+    painter = new Painter(areaParameters, trackParameters, results);
     settings = new Settings(painter);
 
     /// Виджет отрисовки трасс и позиционных районов
@@ -28,38 +28,43 @@ MainWindow::MainWindow(QWidget *_parent)
     /// Виджет настроек
     QToolBar *tSettings = new QToolBar(this);
     tSettings->addWidget(settings);
+    tSettings->setWindowTitle(tr("Панель управления"));
     tSettings->setMovable(false);
     addToolBar(tSettings);
 
     /// Виджет редактирования параметров позиционных районов
     QDockWidget *dAreaParameters = new QDockWidget(this);
     dAreaParameters->setWidget(areaParameters);
-    dAreaParameters->setAllowedAreas(Qt::LeftDockWidgetArea);
-    dAreaParameters->setFeatures(QDockWidget::DockWidgetMovable);
+    dAreaParameters->setWindowTitle(tr("Параметры ПР"));
+    dAreaParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dAreaParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dAreaParameters->setMinimumHeight(300);
     addDockWidget(Qt::LeftDockWidgetArea, dAreaParameters);
 
     /// Виджет редактирования параметров трасс
     QDockWidget *dTrackParameters = new QDockWidget(this);
     dTrackParameters->setWidget(trackParameters);
-    dTrackParameters->setAllowedAreas(Qt::LeftDockWidgetArea);
-    dTrackParameters->setFeatures(QDockWidget::DockWidgetMovable);
+    dTrackParameters->setWindowTitle(tr("Параметры трасс"));
+    dTrackParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dTrackParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dTrackParameters->setMinimumHeight(300);
     addDockWidget(Qt::LeftDockWidgetArea, dTrackParameters);
 
     /// Виджет графика количественного состава
-    QDockWidget *dGraphSumTrack = new QDockWidget(this);
-    dGraphSumTrack->setWidget(graphSumTrack);
-    dGraphSumTrack->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dGraphSumTrack->setFeatures(QDockWidget::DockWidgetMovable);
-    dGraphSumTrack->setMinimumWidth(650);
-    dGraphSumTrack->setMinimumHeight(300);
-    addDockWidget(Qt::RightDockWidgetArea, dGraphSumTrack);
+    QDockWidget *dTrackGraph = new QDockWidget(this);
+    dTrackGraph->setWidget(trackGraph);
+    dTrackGraph->setWindowTitle(tr("График количественного состава налета"));
+    dTrackGraph->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dTrackGraph->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dTrackGraph->setMinimumHeight(300);
+    addDockWidget(Qt::RightDockWidgetArea, dTrackGraph);
 
     /// Виджет отображения результатов
     QDockWidget *dResults = new QDockWidget(this);
     dResults->setWidget(results);
-    dResults->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    dResults->setFeatures(QDockWidget::DockWidgetMovable);
-    dResults->setMinimumWidth(650);
+    dResults->setWindowTitle(tr("Таблица результатов"));
+    dResults->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dResults->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dResults->setMinimumHeight(300);
     addDockWidget(Qt::RightDockWidgetArea, dResults);
 }
@@ -68,10 +73,10 @@ MainWindow::~MainWindow()
 {
     delete settings;
     delete painter;
+    delete results;
     delete areaParameters;
     delete trackParameters;
-    delete results;
-    delete graphSumTrack;
+    delete trackGraph;
 }
 
 }

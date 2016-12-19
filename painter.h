@@ -8,7 +8,6 @@
 #include "areaparameters.h"
 #include "trackparameters.h"
 #include "results.h"
-#include "graphsumtrack.h"
 
 namespace ThreatLevel
 {
@@ -24,7 +23,7 @@ class Painter : public Grapher2D
 
 public:
     explicit                Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters,
-                                    GraphSumTrack *_graphSumTrack, Results *_results, QWidget *_parent = 0);
+                                    Results *_results, QWidget *_parent = 0);
     ~Painter();
 
     /// Установка таймера
@@ -59,7 +58,10 @@ private:
     /// Расчет времени поражения ПР
     void                    calcErrTime();
 
-    /// Расчет параметров связанных со временем поражения ПР
+    /// Сброс трасс
+    void                    resetTracks();
+
+    /// Расчет среднеквадратической разности времени поражения с погрешностью и точного времени поражения
     void                    calcTimeParameters();
 
     /// Расчет количества крылатых ракет
@@ -75,14 +77,13 @@ private:
     int                     numOnCourseMinDistanceArea(const Track &_track);
 
     /// Быстрая сортировка целей по времени поражения с погрешностью определенного ПР
-    void                    quickSortTracks(const int _numArea, const int _first, const int _last);
+    void                    quickSortTracks(QVector <int> &_numTrack, const int _first, const int _last);
+
+    /// Вычисление координат экстраполированного конца траектории
+    static const QPointF    calcEndPos(const Track &_track, const Area &_area);
 
     /// Вычисление расстояния между двумя точками
     static float            calcDistance(const QPointF &_p1, const QPointF &_p2);
-
-    /// Вычисление координат экстраполированного конца траектории
-    static const QPointF    calcEndPos(const QPointF &_startPos, const float _startDist, const float _errAngCourseToPA,
-                                       const float _errSpeed, const float _initCritTime, const float _errCourse);
 
     /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
     static void             calcTanPoints(const QPointF &_area, const float _radius,
@@ -101,17 +102,16 @@ private:
 
     AreaParameters          *areaParameters;                /// Виджет редактирования параметров ПР
     TrackParameters         *trackParameters;               /// Виджет редактирования параметров трасс
-    GraphSumTrack           *graphSumTrack;                 /// Виджет графика количественного состава налёта
     Results                 *results;                       /// Виджет отображения результатов
 
     static const float      DELTA_T             = 10.0;     /// Константа времени
-    static const float      WEIGHT              = 0.9;      /// Весовой коэфициент сглаживания ( < 1.0)
+    static const float      SMOOTH              = 0.9;      /// Весовой коэфициент сглаживания ( < 1.0)
 
     static const float      ABS_MEASURE         = 10000.0;  /// Масштаб оси абсцисс
     static const float      ORD_MEASURE         = 10000.0;  /// Масштаб оси ординат
     static const int        DEF_ZOOM            = 10;       /// Масштаб отображения по умолчанию
 
-    static const float      ACCURACY_TAN_POINT  = 1e-06;    /// Точность вычисления точек соприкосновения касательных
+    static constexpr float      ACCURACY_TAN_POINT  = 1e-06;    /// Точность вычисления точек соприкосновения касательных
                                                             /// от текущего положения трассы до границы ПР
 };
 

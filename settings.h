@@ -36,10 +36,10 @@ private:
 
     class Painter       *painter;                   /// Виджет отрисовки трасс и позиционных районов
 
-    bool                isStart;                    /// Флаг состояния кнопки
+    bool                isStart;                    /// Флаг состояния таймера
 
-    static const int    MAX_TIMER_INTERVAL  = 10;   /// Максимальный интервал таймера
-    static const int    DEF_TIMER_INTERVAL  = 1;    /// Интервал таймера по умолчанию
+    static const int    TIMER_MAX_INTERVAL  = 10;   /// Максимальный интервал таймера
+    static const int    TIMER_DEF_INTERVAL  = 1;    /// Интервал таймера по умолчанию
 };
 
 }

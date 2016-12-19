@@ -13,7 +13,7 @@ struct Area
     QPointF         initPos;            /// Координаты центра
     float           initRadius;         /// Пространственный радиус
     float           initCritTime;       /// Критическое время
-    float           initRadarRange;     /// Радиус обнаружения
+    float           initDetectionRange; /// Радиус обнаружения
 
     /// Ассоциированные с ПР трассы
     QVector <int>   numTrack;           /// Массив номеров ассоциированных с ПР трасс

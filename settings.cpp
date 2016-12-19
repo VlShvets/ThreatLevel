@@ -23,9 +23,9 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
     hLayout->addWidget(new QLabel(tr("Интервал таймера (100 / X):")));
 
     QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
-    sTimerInterval->setRange(1, MAX_TIMER_INTERVAL);
+    sTimerInterval->setRange(1, TIMER_MAX_INTERVAL);
     sTimerInterval->setTickInterval(1);
-    sTimerInterval->setValue(DEF_TIMER_INTERVAL);
+    sTimerInterval->setValue(TIMER_DEF_INTERVAL);
     sTimerInterval->setTickPosition(QSlider::TicksAbove);
     QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), this, SLOT(changeTimerInterval(int)));
     hLayout->addWidget(sTimerInterval);
@@ -33,7 +33,7 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
     lTimerInterval = new QLCDNumber(2);
     lTimerInterval->setSegmentStyle(QLCDNumber::Flat);
     lTimerInterval->setMode(QLCDNumber::Dec);
-    lTimerInterval->display(DEF_TIMER_INTERVAL);
+    lTimerInterval->display(TIMER_DEF_INTERVAL);
     QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), lTimerInterval, SLOT(display(int)));
     hLayout->addWidget(lTimerInterval);
 

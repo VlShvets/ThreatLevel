@@ -162,7 +162,7 @@ void TrackParameters::initCMPar(int _countGroupsOfCM, int _countCMinGroup)
             tCMPar->setItem(_countGroupsOfCM * i + 6, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 7)));
             tCMPar->setItem(_countGroupsOfCM * i + 6, 1, new QTableWidgetItem(QString::number(-800000.0 - CM_IN_GROUP_DISTANCE * (i / 3))));
             tCMPar->setItem(_countGroupsOfCM * i + 6, 2, new QTableWidgetItem(QString::number(-800000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(M_PI_4 + M_PI / 36.0))));
+            tCMPar->setItem(_countGroupsOfCM * i + 6, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.6 * M_PI_4 + M_PI / 36.0))));
             tCMPar->setItem(_countGroupsOfCM * i + 6, 4, new QTableWidgetItem(QString::number(250.0)));
             tCMPar->setItem(_countGroupsOfCM * i + 6, 5, new QTableWidgetItem(QString::number(0.0)));
 
@@ -200,7 +200,7 @@ void TrackParameters::initCMPar(int _countGroupsOfCM, int _countCMinGroup)
             tCMPar->setItem(_countGroupsOfCM * i + 2, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 3)));
             tCMPar->setItem(_countGroupsOfCM * i + 2, 1, new QTableWidgetItem(QString::number(600000.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
             tCMPar->setItem(_countGroupsOfCM * i + 2, 2, new QTableWidgetItem(QString::number(-600000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.0 * M_PI_4 +
+            tCMPar->setItem(_countGroupsOfCM * i + 2, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.25 * M_PI_4 +
                                                                                                                 M_PI / 36.0))));
             tCMPar->setItem(_countGroupsOfCM * i + 2, 4, new QTableWidgetItem(QString::number(215.0)));
             tCMPar->setItem(_countGroupsOfCM * i + 2, 5, new QTableWidgetItem(QString::number(0.0)));

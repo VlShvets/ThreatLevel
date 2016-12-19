@@ -15,7 +15,7 @@ int Area::trackMaxSumCount;
 int Track::numTrackMinErrTime;
 
 /// Класс виджета отображения результатов
-Results::Results(QWidget *parent) : QWidget(parent)
+Results::Results(TrackGraph *_trackGraph, QWidget *parent) : QWidget(parent), trackGraph(_trackGraph)
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 
@@ -30,7 +30,11 @@ Results::Results(QWidget *parent) : QWidget(parent)
     vLayout->addLayout(hLayout);
 
     tResults = new QTableWidget(this);
-    tResults->setSelectionMode(QAbstractItemView::NoSelection);
+    tResults->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    tResults->setSelectionMode(QAbstractItemView::SingleSelection);
+    tResults->setSelectionBehavior(QAbstractItemView::SelectRows);
+    QObject::connect(tResults->selectionModel(), SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+                     this                      , SLOT(tableSelectionChanged(QItemSelection, QItemSelection)));
     vLayout->addWidget(tResults);
 
     this->setLayout(vLayout);
@@ -84,6 +88,9 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
         tResults->setItem(i, 7, new QTableWidgetItem(QString::number(area.value().rmsDiffTime)));
         tResults->item(i, 7)->setBackgroundColor(QColor(255, 0, 0, 25));
 
+        /// Отправка количественного состава налета по ПР на график
+        trackGraph->loadTrackCount((int) area.key(), area.value().trackCount);
+
         /// Время поражения ПР с погрешностью и номер трассы
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
@@ -127,7 +134,10 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
     tResults->setItem(_areas.count(), 8, new QTableWidgetItem(QString::number(_tracks[Track::numTrackMinErrTime].errTime)));
     tResults->item(_areas.count(), 8)->setBackgroundColor(QColor(255, 0, 0, 25));
 
-    /// Максимальный количественный состав налета
+    /// Отправка количественного состава налета по всем ПР на график
+    trackGraph->loadTrackCount(0, Area::trackSumCount);
+
+    /// Отображение числа количественного состава налета по всем ПР
     lcdMaxSumTrack->display(Area::trackSumCount);
 }
 
@@ -136,6 +146,13 @@ void Results::resetTable()
 {
     tResults->setRowCount(0);
     tResults->setColumnCount(0);
+
+    trackGraph->resetGraph();
+}
+
+void Results::tableSelectionChanged(QItemSelection, QItemSelection)
+{
+    trackGraph->showGraph(tResults->selectedItems().first()->text().toInt());
 }
 
 }
