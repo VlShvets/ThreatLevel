@@ -31,7 +31,9 @@ HEADERS  += \
     areaparameters.h \
     trackparameters.h \
     settings.h \
-    graphsumtrack.h
+    graphsumtrack.h \
+    area.h \
+    track.h
 
 unix {
     target.path = /usr/lib

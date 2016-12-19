@@ -17,24 +17,24 @@ class AreaParameters : public QWidget
     Q_OBJECT
 
 public:
-    explicit AreaParameters(QWidget *parent = 0);
+    explicit            AreaParameters(QWidget *parent = 0);
     ~AreaParameters();
 
     /// Получить количество ПР
-    inline int getCount() const;
+    inline int          getCount() const;
 
     /// Получить параметр ПР по номеру строки и номеру столбца
-    inline float getPar(int _row, int _column) const;
+    inline float        getPar(int _row, int _column) const;
 
 private slots:
     /// Начальная инициализация параметров ПР
-    void initPar(int _count);
+    void                initPar(int _count);
 
 private:
-    QTableWidget    *tAreaPar; /// Виджет таблицы параметров ПР
+    QTableWidget        *tAreaPar;              /// Виджет таблицы параметров ПР
 
-    static const int    MAX_COUNT_AREAS = 5;    /// Максимальное количество ПР
-    static const int    DEF_COUNT_AREAS = 5;    /// Количество ПР по умолчанию
+    static const int    AREAS_MAX_COUNT = 5;    /// Максимальное количество ПР
+    static const int    AREAS_DEF_COUNT = 5;    /// Количество ПР по умолчанию
 };
 
 /// Получить количество ПР

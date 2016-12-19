@@ -19,10 +19,12 @@ Painter::Painter(AreaParameters *_areaParameters, TrackParameters *_trackParamet
 
 Painter::~Painter()
 {
-    for(int i = 0; i < area.count(); ++i)
-        area[i].numTrack.clear();
-    area.clear();
-    track.clear();
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
+        area.value().numTrack.clear();
+
+    areas.clear();
+    tracks.clear();
 }
 
 /// Перезапуск
@@ -49,23 +51,24 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setCosmetic(true);
 
     /// Позиционные районы
-    for(int i = 0; i < area.count(); ++i)
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
     {
         /// Отрисовка местоположения
         pen.setStyle(Qt::SolidLine);
         pen.setColor(Qt::darkBlue);
         pen.setWidth(3);
         p.setPen(pen);
-        p.drawEllipse(area.at(i).initPos, area.at(i).initRadius,
-                      area.at(i).initRadius);
+        p.drawEllipse(area.value().initPos, area.value().initRadius,
+                      area.value().initRadius);
 
         /// Проверка имеющихся ассоциированных трасс
-        if(!area.at(i).numTrack.isEmpty())
+        if(!area.value().numTrack.isEmpty())
         {
             p.save();
             p.setBrush(QBrush(QColor(255, 0, 0, 50)));
-            p.drawEllipse(area.at(i).initPos, area.at(i).initRadius,
-                          area.at(i).initRadius);
+            p.drawEllipse(area.value().initPos, area.value().initRadius,
+                          area.value().initRadius);
             p.restore();
         }
 
@@ -74,37 +77,38 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         pen.setColor(Qt::darkRed);
         pen.setWidth(1);
         p.setPen(pen);
-        p.drawEllipse(area.at(i).initPos, area.at(i).initCritTime * Track::MIN_SPEED,
-                                          area.at(i).initCritTime * Track::MIN_SPEED);
+        p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MIN_SPEED,
+                      area.value().initCritTime * Track::MIN_SPEED);
 
         /// Отрисовка критического времени при максимальной скорости
         pen.setColor(Qt::darkGreen);
         p.setPen(pen);
-        p.drawEllipse(area.at(i).initPos, area.at(i).initCritTime * Track::MAX_SPEED,
-                                          area.at(i).initCritTime * Track::MAX_SPEED);
+        p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MAX_SPEED,
+                      area.value().initCritTime * Track::MAX_SPEED);
 
         /// Отрисовка района обнаружения
         pen.setColor(Qt::darkBlue);
         p.setPen(pen);
-        p.drawEllipse(area.at(i).initPos, area.at(i).initRadarRange,
-                                          area.at(i).initRadarRange);
+        p.drawEllipse(area.value().initPos, area.value().initRadarRange,
+                      area.value().initRadarRange);
 
         /// Отображение номера
         p.save();
         p.resetTransform();
         p.translate(width() / 2.0 + getCSAbsShift(), height() / 2.0 + getCSOrdShift());
-        p.drawText(area.at(i).initPos.x() * getCSAbsScale() - 20,
-                   area.at(i).initPos.y() * getCSOrdScale() - 5, QString::number(area.at(i).num + 1));
+        p.drawText(area.value().initPos.x() * getCSAbsScale() - 20,
+                   area.value().initPos.y() * getCSOrdScale() - 5, QString::number(area.key()));
         p.restore();
     }
 
     /// Трассы
     pen.setStyle(Qt::SolidLine);
-    for(int j = 0; j < track.count(); ++j)
+    QMap <int, Track>::iterator track = tracks.begin();
+    for(; track != tracks.end(); ++track)
     {
-        if(!track.at(j).isEmpty)
+        if(!track.value().isReset)
         {
-            if(track.at(j).isBG)
+            if(track.value().isBG)
                 pen.setColor(Qt::darkMagenta);
             else
                 pen.setColor(Qt::darkCyan);
@@ -112,46 +116,46 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
             /// Отрисовка местоположения
             pen.setWidth(6);
             p.setPen(pen);
-            p.drawPoint(track.at(j).pos);
+            p.drawPoint(track.value().pos);
 
             /// Отрисовка курса
             pen.setWidth(1);
             p.setPen(pen);
-            if(!track.at(j).startPos.isNull() &&
-               !track.at(j).finalPos.isNull())
+            if(!track.value().startPos.isNull() &&
+               !track.value().finalPos.isNull())
             {
-                p.drawLine(track.at(j).startPos, track.at(j).finalPos);
+                p.drawLine(track.value().startPos, track.value().finalPos);
             }
 
             /// Отображение номера
             p.save();
             p.resetTransform();
             p.translate(width() / 2.0 + getCSAbsShift(), height() / 2.0 + getCSOrdShift());
-            p.drawText(track.at(j).pos.x() * getCSAbsScale() - 20,
-                       track.at(j).pos.y() * getCSOrdScale() - 5, QString::number(track.at(j).initNum));
+            p.drawText(track.value().pos.x() * getCSAbsScale() - 20,
+                       track.value().pos.y() * getCSOrdScale() - 5, QString::number(track.key()));
             p.restore();
         }
     }
 
     /// Отрисовка кратчайших расстояний и касательных от текущего положения трасс до ПР
-    for(int j = 0; j < track.count(); ++j)
+    for(track = tracks.begin(); track != tracks.end(); ++track)
     {
-        if(!track.at(j).isEmpty)
+        if(!track.value().isReset)
         {
-            if(track.at(j).numArea != -1)
+            if(track.value().numArea != -1)
             {
                 /// Отрисовка кратчайшего расстояния от текущего положения трассы до центра ПР
-//                pen.setColor(Qt::darkRed);
-//                p.setPen(pen);
-//                p.drawLine(track.at(j).pos, area.at(track.at(j).numArea).initPos);
+                pen.setColor(Qt::darkRed);
+                p.setPen(pen);
+//                p.drawLine(track.value().pos, areas[track.value().numArea].initPos);
 
                 /// Отрисовка касательных от текущего положения трассы до границы ПР
                 pen.setColor(Qt::darkBlue);
                 p.setPen(pen);
-                if(!track.at(j).tanPoint1.isNull())
-                    p.drawLine(track.at(j).pos, track.at(j).tanPoint1);
-                if(!track.at(j).tanPoint2.isNull())
-                    p.drawLine(track.at(j).pos, track.at(j).tanPoint2);
+                if(!track.value().tanPoint1.isNull())
+                    p.drawLine(track.value().pos, track.value().tanPoint1);
+                if(!track.value().tanPoint2.isNull())
+                    p.drawLine(track.value().pos, track.value().tanPoint2);
             }
         }
     }
@@ -183,182 +187,166 @@ void Painter::timerEvent(QTimerEvent *)
     calcTrackCount();
 
     /// Отображение графика количественного состава налета
-    graphSumTrack->loadGraph(Area::sumTrackCount);
+    graphSumTrack->loadGraph(Area::trackSumCount);
 
     /// Отображение результатов вычислений
-    results->loadTable(area, track);
+    results->loadTable(areas, tracks);
 
     repaint();
 }
 
 void Painter::initAreaPar()
 {
-    area.resize(areaParameters->getCount());
+    areas.clear();
 
-    for(int i = 0; i < area.count(); ++i)
+    /// Загрузка параметров ПР
+    for(int i = 0; i < areaParameters->getCount(); ++i)
     {
-        /// Присвоение позиционному району номера
-        area[i].num = i;
+        /// Определение номера ПР
+        int num                     = (int) areaParameters->getPar(i, 0);
 
         /// Загрузка начальных данных из таблицы
-        area[i].initPos.setX(areaParameters->getPar(i, 0));
-        area[i].initPos.setY(areaParameters->getPar(i, 1));
-        area[i].initRadius = areaParameters->getPar(i, 2);
-        area[i].initCritTime = areaParameters->getPar(i, 3);
-        area[i].initRadarRange = areaParameters->getPar(i, 4);
+        areas[num].initPos.setX(areaParameters->getPar(i, 1));
+        areas[num].initPos.setY(areaParameters->getPar(i, 2));
+        areas[num].initRadius       = areaParameters->getPar(i, 3);
+        areas[num].initCritTime     = areaParameters->getPar(i, 4);
+        areas[num].initRadarRange   = areaParameters->getPar(i, 5);
+    }
 
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
+    {
         /// Обнуление списка номеров ассоциированных с ПР трасс
-        area[i].numTrack.clear();
+        area.value().numTrack.clear();
 
         /// Обнуление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
-        area[i].sumDiffTime = 0.0;
+        area.value().sumDiffTime    = 0.0;
 
         /// Обнуление среднеквадратической разности времени поражения с погрешностью и точного времени поражения
-        area[i].rmsDiffTime = 0.0;
+        area.value().rmsDiffTime    = 0.0;
 
         /// Обнуление максимального количества ассоциированных с ПР крылатых ракет
-        area[i].maxCMcount = 0;
-
-        /// Обнуление максимального суммарного количества крылатых ракет
-        Area::maxSumCMcount = 0;
+        area.value().CMMaxCount     = 0;
 
         /// Обнуление максимального количества ассоциированных с ПР баллистических целей
-        area[i].maxBGcount = 0;
-
-        /// Обнуление максимального суммарного количества баллистических целей
-        Area::maxSumBGcount = 0;
+        area.value().BGMaxCount     = 0;
 
         /// Обнуление максимального количества ассоциированных с ПР трасс
-        area[i].maxTrackCount = 0;
-
-        /// Обнуление максимального количественного состава налета по всем ПР
-        Area::maxSumTrackCount = 0;
+        area.value().trackMaxCount  = 0;
     }
+
+    /// Обнуление максимального суммарного количества крылатых ракет
+    Area::CMMaxSumCount     = 0;
+
+    /// Обнуление максимального суммарного количества баллистических целей
+    Area::BGMaxSumCount     = 0;
+
+    /// Обнуление максимального количественного состава налета по всем ПР
+    Area::trackMaxSumCount  = 0;
 }
 
 void Painter::initTrackPar()
 {
-    /// Определение максимального номера трасс
-    int maxNumber = 0;
-    for(int j = 0; j < trackParameters->getCMCount(); ++j)
-    {
-        int number = (int) trackParameters->getCMPar(j, 0);
-        if(maxNumber < number)
-            maxNumber = number;
-    }
-    for(int j = 0; j < trackParameters->getBGCount(); ++j)
-    {
-        int number = (int) trackParameters->getBGPar(j, 0);
-        if(maxNumber < number)
-            maxNumber = number;
-    }
-
-    /// Изменение размера массива трасс
-    track.clear();
-    for(int j = 0; j < maxNumber + 1; ++j)
-    {
-        track.push_back(Track());
-        track.last().isEmpty = true;
-    }
+    tracks.clear();
 
     /// Загрузка параметров КР
     for(int j = 0; j < trackParameters->getCMCount(); ++j)
     {
+        /// Определение номера трассы
         int num = (int) trackParameters->getCMPar(j, 0);
-        track[num].isEmpty = false;
+        tracks[num].isReset             = false;
+        tracks[num].isBG                = false;
 
         /// Загрузка начальных данных из таблицы
-        track[num].initNum          = num;
-        track[num].initStartPos.setX(trackParameters->getCMPar(j, 1));
-        track[num].initStartPos.setY(trackParameters->getCMPar(j, 2));
-        track[num].initFinalPos     = QPointF();
-        track[num].initCourse       = qDegreesToRadians(trackParameters->getCMPar(j, 3));
-        track[num].initSpeed        = trackParameters->getCMPar(j, 4);
-        track[num].initAcceleration = trackParameters->getCMPar(j, 5);
+        tracks[num].initStartPos.setX(trackParameters->getCMPar(j, 1));
+        tracks[num].initStartPos.setY(trackParameters->getCMPar(j, 2));
+        tracks[num].initFinalPos        = QPointF();
+        tracks[num].initCourse          = qDegreesToRadians(trackParameters->getCMPar(j, 3));
+        tracks[num].initSpeed           = trackParameters->getCMPar(j, 4);
+        tracks[num].initAcceleration    = trackParameters->getCMPar(j, 5);
     }
 
     /// Загрузка параметров БЦ
     for(int j = 0; j < trackParameters->getBGCount(); ++j)
     {
-        int num = (int) trackParameters->getBGPar(j, 0);
-        track[num].isEmpty = false;
-        track[num].isBG = true;
+        /// Определение номера трассы
+        int num                         = (int) trackParameters->getBGPar(j, 0);
+        tracks[num].isReset             = false;
+        tracks[num].isBG                = true;
 
         /// Загрузка начальных данных из таблицы
-        track[num].initNum          = num;
-        track[num].initStartPos.setX(trackParameters->getBGPar(j, 1));
-        track[num].initStartPos.setY(trackParameters->getBGPar(j, 2));
-        track[num].initFinalPos.setX(trackParameters->getBGPar(j, 3));
-        track[num].initFinalPos.setY(trackParameters->getBGPar(j, 4));
-        track[num].initCourse       = M_PI_2 - qAtan2(track.at(num).initFinalPos.y() - track.at(num).initStartPos.y(),
-                                                      track.at(num).initFinalPos.x() - track.at(num).initStartPos.x());
-        track[num].initSpeed        = trackParameters->getBGPar(j, 5);
-        track[num].initAcceleration = trackParameters->getBGPar(j, 6);
+        tracks[num].initStartPos.setX(trackParameters->getBGPar(j, 1));
+        tracks[num].initStartPos.setY(trackParameters->getBGPar(j, 2));
+        tracks[num].initFinalPos.setX(trackParameters->getBGPar(j, 3));
+        tracks[num].initFinalPos.setY(trackParameters->getBGPar(j, 4));
+        tracks[num].initCourse          = M_PI_2 - qAtan2(tracks[num].initFinalPos.y() - tracks[num].initStartPos.y(),
+                                                          tracks[num].initFinalPos.x() - tracks[num].initStartPos.x());
+        tracks[num].initSpeed           = trackParameters->getBGPar(j, 5);
+        tracks[num].initAcceleration    = trackParameters->getBGPar(j, 6);
     }
 
-    for(int j = 0; j < track.count(); ++j)
+    QMap <int, Track>::iterator track = tracks.begin();
+    for(; track != tracks.end(); ++track)
     {
-        if(!track.at(j).isEmpty)
-        {
-            /// Присвоение текущим координатам начальных координат траектории
-            track[j].pos    = track.at(j).initStartPos;
+        /// Присвоение текущим координатам начальных координат траектории
+        track.value().pos           = track.value().initStartPos;
 
-            /// Присвоение текущей скорости начальной скорости
-            track[j].speed  = track.at(j).initSpeed;
+        /// Присвоение текущей скорости начальной скорости
+        track.value().speed         = track.value().initSpeed;
 
-            /// Очистка номера ассоциированного ПР
-            track[j].numArea    = -1;
+        /// Очистка номера ассоциированного ПР
+        track.value().numArea       = -1;
 
-            /// Обнуление количества измерений
-            track[j].amtMeasure = 0;
+        /// Обнуление количества измерений
+        track.value().amtMeasure    = 0;
 
-            /// Обнуление координат начальной точки и экстраполированного конца траектории
-            track[j].startPos   = QPointF();
-            track[j].finalPos   = QPointF();
+        /// Обнуление координат начальной точки и экстраполированного конца траектории
+        track.value().startPos      = QPointF();
+        track.value().finalPos      = QPointF();
 
-            /// Обнуление рекурентно использующихся при сглаживании погрешностей переменных
-            track[j].errVx  = 0.0;
-            track[j].errVy  = 0.0;
-        }
+        /// Обнуление рекурентно использующихся при сглаживании погрешностей переменных
+        track.value().errVx         = 0.0;
+        track.value().errVy         = 0.0;
     }
 }
 
 /// Движение трасс
 void Painter::trackMovement()
 {
-    for(int j = 0; j < track.count(); ++j)
+    QMap <int, Track>::iterator track = tracks.begin();
+    for(; track != tracks.end(); ++track)
     {
-        if(!track.at(j).isEmpty)
+        if(!track.value().isReset)
         {
             /// Точные значения
-            track[j].speed  += track.at(j).initAcceleration * DELTA_T;
-            if(track.at(j).speed < 0.0)
-                track[j].speed = 0.0;
-            track[j].pos    += QPointF(track.at(j).speed * qSin(track.at(j).initCourse),
-                                       track.at(j).speed * qCos(track.at(j).initCourse)) * DELTA_T;
+            track.value().speed += track.value().initAcceleration * DELTA_T;
+            if(track.value().speed < 0.0)
+                track.value().isReset = true;
+            track.value().pos   += QPointF(track.value().speed * qSin(track.value().initCourse),
+                                           track.value().speed * qCos(track.value().initCourse))    * DELTA_T;
 
             /// Внесение погрешностей
-            track[j].errCourse  = track.at(j).initCourse + qDegreesToRadians(uniformDistribution(0, Track::ERR_COURSE));
-            track[j].errSpeed   = track.at(j).speed + gaussDistribution(0, Track::ERR_SPEED);
+            track.value().errCourse = track.value().initCourse + qDegreesToRadians(uniformDistribution(0, Track::ERR_COURSE));
+            track.value().errSpeed  = track.value().speed + gaussDistribution(0, Track::ERR_SPEED);
 
             /// Сглаживание проекции вектора скорости на ось абсцисс
-            if(track.at(j).errVx == 0.0)
-                track[j].errVx  = track.at(j).errSpeed * qSin(track.at(j).errCourse);
+            if(track.value().errVx == 0.0)
+                track.value().errVx = track.value().errSpeed * qSin(track.value().errCourse);
             else
-                track[j].errVx  = track.at(j).errVx                                      * WEIGHT +
-                                 (track.at(j).errSpeed * qSin(track.at(j).errCourse))    * (1.0 - WEIGHT);
+                track.value().errVx = track.value().errVx                                           * WEIGHT +
+                                     (track.value().errSpeed * qSin(track.value().errCourse))       * (1.0 - WEIGHT);
 
             /// Сглаживание проекции вектора скорости на ось ординат
-            if(track.at(j).errVy == 0.0)
-                track[j].errVy  = track.at(j).errSpeed * qCos(track.at(j).errCourse);
+            if(track.value().errVy == 0.0)
+                track.value().errVy = track.value().errSpeed * qCos(track.value().errCourse);
             else
-                track[j].errVy  = track.at(j).errVy                                      * WEIGHT +
-                                 (track.at(j).errSpeed * qCos(track.at(j).errCourse))    * (1.0 - WEIGHT);
+                track.value().errVy = track.value().errVy                                           * WEIGHT +
+                                     (track.value().errSpeed * qCos(track.value().errCourse))       * (1.0 - WEIGHT);
 
             /// Возврат к курсу и скорости
-            track[j].errCourse  = qAtan2(track.at(j).errVx, track.at(j).errVy);
-            track[j].errSpeed   = qSqrt(track.at(j).errVx * track.at(j).errVx +
-                                        track.at(j).errVy * track.at(j).errVy);
+            track.value().errCourse  = qAtan2(track.value().errVx, track.value().errVy);
+            track.value().errSpeed   = qSqrt(track.value().errVx * track.value().errVx +
+                                             track.value().errVy * track.value().errVy);
         }
     }
 }
@@ -366,53 +354,54 @@ void Painter::trackMovement()
 /// Ассоциация трасс с позиционными районами
 void Painter::associationTrackArea()
 {
-    for(int j = 0; j < track.count(); ++j)
+    QMap <int, Track>::iterator track = tracks.begin();
+    for(; track != tracks.end(); ++track)
     {
-        if(!track.isEmpty())
+        if(!track.value().isReset)
         {
             /// Определение для трассы номера ближайшего по курсу позиционного района
-            float numArea   = numOnCourseMinDistanceArea(track.at(j));
+            float numArea   = numOnCourseMinDistanceArea(track.value());
 
-            if(track.at(j).numArea != numArea)
+            if(track.value().numArea != numArea)
             {
                 /// Трасса была ассоциированна с ПР
-                if(track.at(j).numArea != -1)
+                if(track.value().numArea != -1)
                 {
                     /// Удаление номера трассы из списка номеров ассоциированных с ПР трасс
-                    if(area.at(track.at(j).numArea).numTrack.contains(j))
-                        area[track.at(j).numArea].numTrack.removeOne(j);
+                    if(areas[track.value().numArea].numTrack.contains(track.key()))
+                        areas[track.value().numArea].numTrack.removeOne(track.key());
                 }
                 /// Трасса не была ассоциированная с ПР
                 else
                 {
                     /// Задание координат начальной точки траектории
-                    if(track[j].startPos.isNull())
-                        track[j].startPos   = track.at(j).pos;
+                    if(track.value().startPos.isNull())
+                        track.value().startPos  = track.value().pos;
                 }
 
                 /// Изменение номера ассоциированного ПР
-                track[j].numArea    = numArea;
+                track.value().numArea   = numArea;
 
                 /// Трасса стала ассоциированна с новым ПР
-                if(track.at(j).numArea != -1)
+                if(track.value().numArea != -1)
                 {
                     /// Добавление номера трассы в список номеров ассоциированных с ПР трасс
-                    if(!area.at(track.at(j).numArea).numTrack.contains(j))
-                        area[track.at(j).numArea].numTrack.push_back(j);
+                    if(!areas[track.value().numArea].numTrack.contains(track.key()))
+                        areas[track.value().numArea].numTrack.push_back(track.key());
 
                     /// Определение расстояния от начальной точки траектории до центра ПР
-                    track[j].startDist  = calcDistance(track.at(j).startPos, area.at(track.at(j).numArea).initPos);
+                    track.value().startDist = calcDistance(track.value().startPos, areas[track.value().numArea].initPos);
 
                     /// Определение угла между курсом и прямой от начальной точки траектории до центра ПР
-                    track[j].angCourseToPA  = track.at(j).initCourse -
-                                              qAtan2(area.at(track.at(j).numArea).initPos.x() - track.at(j).startPos.x(),
-                                                     area.at(track.at(j).numArea).initPos.y() - track.at(j).startPos.y());
+                    track.value().angCourseToPA = track.value().initCourse -
+                                                  qAtan2(areas[track.value().numArea].initPos.x() - track.value().startPos.x(),
+                                                         areas[track.value().numArea].initPos.y() - track.value().startPos.y());
                 }
                 /// Трасса перестала быть ассоциирована с ПР
                 else
                 {
                     /// Очистка координат экстраполированного конца траектории
-                    track[j].finalPos   = QPointF();
+                    track.value().finalPos  = QPointF();
                 }
             }
         }
@@ -422,53 +411,54 @@ void Painter::associationTrackArea()
 /// Расчет времени поражения ПР
 void Painter::calcErrTime()
 {
-    for(int j = 0; j < track.count(); ++j)
+    QMap <int, Track>::iterator track = tracks.begin();
+    for(; track != tracks.end(); ++track)
     {
-        if(!track.isEmpty())
+        if(!track.value().isReset)
         {
-            int numArea = track.at(j).numArea;
+            int numArea = track.value().numArea;
             if(numArea != -1)
             {
                 /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
-//                calcTanPoints(area.at(numArea).initPos, area.at(numArea).initRadius,
-//                              track.at(j).pos, track[j].tanPoint1, track[j].tanPoint2);
+//                calcTanPoints(areas[numArea].initPos, areas[numArea].initRadius,
+//                              track.value().pos, track.value().tanPoint1, track.value().tanPoint2);
 
                 /// Расчет точных значений переменных
                 /// ------------------------------------------
 
                 /// Вычисление расстояния между проекцией трассы на прямую от начальной точки траектории до центра ПР
                 /// и центром ПР
-                track[j].dist   = track.at(j).startDist -
-                                  calcDistance(track.at(j).startPos, track.at(j).pos) * qCos(track.at(j).angCourseToPA);
+                track.value().dist  = track.value().startDist -
+                                      calcDistance(track.value().startPos, track.value().pos) * qCos(track.value().angCourseToPA);
 
                 /// Расчет времени поражения ПР
-                track[j].time   = track.at(j).dist / (track.at(j).speed * qCos(track.at(j).angCourseToPA));
+                track.value().time  = track.value().dist / (track.value().speed * qCos(track.value().angCourseToPA));
                 /// ------------------------------------------
 
                 /// Расчет значений переменных с погрешностями
                 /// ------------------------------------------
 
                 /// Определение угла между курсом и прямой от начальной точки траектории до центра ПР с погрешностью
-                track[j].errAngCourseToPA   = track.at(j).errCourse -
-                                              qAtan2(area.at(numArea).initPos.x() - track.at(j).startPos.x(),
-                                                     area.at(numArea).initPos.y() - track.at(j).startPos.y());
+                track.value().errAngCourseToPA  = track.value().errCourse -
+                                                  qAtan2(areas[numArea].initPos.x() - track.value().startPos.x(),
+                                                         areas[numArea].initPos.y() - track.value().startPos.y());
 
                 /// Вычисление расстояние между проекцией трассы на прямую от начальной точки траектории до центра ПР
                 /// и центром ПР с погрешностью
-                track[j].errDist    = track.at(j).startDist -
-                                      calcDistance(track.at(j).startPos, track.at(j).pos) * qCos(track.at(j).errAngCourseToPA);
+                track.value().errDist   = track.value().startDist -
+                                          calcDistance(track.value().startPos, track.value().pos) * qCos(track.value().errAngCourseToPA);
 
                 /// Расчет времени поражения ПР с погрешностью
-                track[j].errTime    = track.at(j).errDist /
-                                     (track.at(j).errSpeed * qCos(track.at(j).errAngCourseToPA));
+                track.value().errTime   = track.value().errDist /
+                                          (track.value().errSpeed * qCos(track.value().errAngCourseToPA));
                 /// ------------------------------------------
 
                 /// Вычисление координат экстраполированного конца траектории
-                track[j].finalPos   = calcEndPos(track.at(j).startPos, track.at(j).startDist, track.at(j).errAngCourseToPA,
-                                                 track.at(j).errSpeed, area.at(numArea).initCritTime, track.at(j).errCourse);
+                track.value().finalPos  = calcEndPos(track.value().startPos, track.value().startDist, track.value().errAngCourseToPA,
+                                                     track.value().errSpeed, areas[numArea].initCritTime, track.value().errCourse);
 
                 /// Инкрементация количества измерений
-                ++track[j].amtMeasure;
+                ++track.value().amtMeasure;
             }
         }
     }
@@ -478,27 +468,28 @@ void Painter::calcErrTime()
 void Painter::calcTimeParameters()
 {
     Track::numTrackMinErrTime   = -1;
-    for(int i = 0; i < area.count(); ++i)
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
     {
-        if(!area.at(i).numTrack.isEmpty())
+        if(!area.value().numTrack.isEmpty())
         {
             /// Сортировка целей по времени поражения ПР с погрешностью
-            quickSortTracks(i, 0, area.at(i).numTrack.count() - 1);
+            quickSortTracks(area.key(), 0, area.value().numTrack.count() - 1);
 
             /// Вычисление разности времени поражения с погрешностью и точного времени поражения в текущий момент времени
-            area[i].diffTime    = track.at(area.at(i).numTrack.at(0)).errTime - track.at(area.at(i).numTrack.at(0)).time;
+            area.value().diffTime       = tracks[area.value().numTrack.at(0)].errTime - tracks[area.value().numTrack.at(0)].time;
 
             /// Вычисление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
-            area[i].sumDiffTime += area.at(i).diffTime * area.at(i).diffTime;
+            area.value().sumDiffTime    += area.value().diffTime * area.value().diffTime;
 
             /// Вычисление среднеквадратической разности времени поражения с погрешностью и точного времени поражения
-            area[i].rmsDiffTime = qSqrt(area.at(i).sumDiffTime / track.at(area.at(i).numTrack.at(0)).amtMeasure);
+            area.value().rmsDiffTime    = qSqrt(area.value().sumDiffTime / tracks[area.value().numTrack.at(0)].amtMeasure);
 
             /// Определение номера трассы с минимальным временем поражения ПР с погрешностью
             if(Track::numTrackMinErrTime == -1 ||
-               track.at(Track::numTrackMinErrTime).errTime > track.at(area.at(i).numTrack.at(0)).errTime)
+               tracks[Track::numTrackMinErrTime].errTime > tracks[area.value().numTrack.at(0)].errTime)
             {
-                Track::numTrackMinErrTime   = area.at(i).numTrack.at(0);
+                Track::numTrackMinErrTime   = area.value().numTrack.at(0);
             }
         }
     }
@@ -507,77 +498,80 @@ void Painter::calcTimeParameters()
 /// Расчет количества крылатых ракет
 void Painter::calcCMcount()
 {
-    Area::sumCMcount = 0;
-    for(int i = 0; i < area.count(); ++i)
+    Area::CMSumCount    = 0;
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
     {
         /// Вычисление количества ассоциированных с ПР крылатых ракет
-        area[i].CMcount = 0;
-        for(int j = 0; j < area.at(i).numTrack.count(); ++j)
+        area.value().CMCount = 0;
+        for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
-            if(!track.at(area.at(i).numTrack.at(j)).isBG)
-                ++area[i].CMcount;
+            if(!tracks[area.value().numTrack.at(j)].isBG)
+                ++area.value().CMCount;
         }
 
         /// Вычисление максимального количества ассоциированных с ПР крылатых ракет
-        if(area.at(i).maxCMcount < area.at(i).CMcount)
-            area[i].maxCMcount  = area.at(i).CMcount;
+        if(area.value().CMMaxCount < area.value().CMCount)
+            area.value().CMMaxCount = area.value().CMCount;
 
         /// Вычисление суммарного количества крылатых ракет
-        Area::sumCMcount    += area.at(i).CMcount;
+        Area::CMSumCount    += area.value().CMCount;
     }
 
     /// Вычисление максимального суммарного количества крылатых ракет
-    if(Area::maxSumCMcount < Area::sumCMcount)
-        Area::maxSumCMcount = Area::sumCMcount;
+    if(Area::CMMaxSumCount < Area::CMSumCount)
+        Area::CMMaxSumCount = Area::CMSumCount;
 }
 
 /// Расчет количества баллистических целей
 void Painter::calcBGcount()
 {
-    Area::sumBGcount = 0;
-    for(int i = 0; i < area.count(); ++i)
+    Area::BGSumCount = 0;
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
     {
         /// Вычисление количества ассоциированных с ПР баллистических целей
-        area[i].BGcount = 0;
-        for(int j = 0; j < area.at(i).numTrack.count(); ++j)
+        area.value().BGCount = 0;
+        for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
-            if(track.at(area.at(i).numTrack.at(j)).isBG)
-                ++area[i].BGcount;
+            if(tracks[area.value().numTrack.at(j)].isBG)
+                ++area.value().BGCount;
         }
 
         /// Вычисление максимального количества ассоциированных с ПР баллистических целей
-        if(area.at(i).maxBGcount < area.at(i).BGcount)
-            area[i].maxBGcount  = area.at(i).BGcount;
+        if(area.value().BGMaxCount < area.value().BGCount)
+            area.value().BGMaxCount = area.value().BGCount;
 
         /// Вычисление суммарного количества баллистических целей
-        Area::sumBGcount    += area.at(i).BGcount;
+        Area::BGSumCount    += area.value().BGCount;
     }
 
     /// Вычисление максимального суммарного количества баллистических целей
-    if(Area::maxSumBGcount < Area::sumBGcount)
-        Area::maxSumBGcount = Area::sumBGcount;
+    if(Area::BGMaxSumCount < Area::BGSumCount)
+        Area::BGMaxSumCount = Area::BGSumCount;
 }
 
 /// Расчет количественного состава налёта
 void Painter::calcTrackCount()
 {
-    Area::sumTrackCount = 0;
-    for(int i = 0; i < area.count(); ++i)
+    Area::trackSumCount = 0;
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
     {
         /// Вычисление количественного состава налета по ПР
-        area[i].trackCount = area.at(i).CMcount + Track::WEIGHT_COEF_BG * area.at(i).BGcount;
+        area.value().trackCount = area.value().CMCount + Track::BG_WEIGHT_COEF * area.value().BGCount;
 
         /// Вычисление максимального количественного состава налета по ПР
-        if(area.at(i).maxTrackCount < area.at(i).trackCount)
-            area[i].maxTrackCount   = area.at(i).trackCount;
+        if(area.value().trackMaxCount < area.value().trackCount)
+            area.value().trackMaxCount  = area.value().trackCount;
 
         /// Вычисление количественного состава налета по всем ПР
-        Area::sumTrackCount += area.at(i).trackCount;
+        Area::trackSumCount += area.value().trackCount;
     }
 
     /// Вычисление максимального количественного состава налета по всем ПР
-    if(Area::maxSumTrackCount < Area::sumTrackCount)
-        Area::maxSumTrackCount  = Area::sumTrackCount;
+    if(Area::trackMaxSumCount < Area::trackSumCount)
+        Area::trackMaxSumCount  = Area::trackSumCount;
 }
 
 /// Определение для трассы номера ближайшего по курсу позиционного района
@@ -585,51 +579,54 @@ int Painter::numOnCourseMinDistanceArea(const Track &_track)
 {
     int numArea = -1;           /// Номер ближайшего по курсу ПР
 
-    float tempDistance;         /// Расстояние от трассы до ПР
-    bool isDetected = false;    /// Флаг обнаружения цели
-
     /// Определение попадания в зону обнаружения
-    for(int i = 0; i < area.count(); ++i)
+    bool isDetected = false;    /// Флаг попадания в зону обнаружения
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
     {
-        tempDistance = calcDistance(_track.pos, area.at(i).initPos);
-
-        if(_track.errSpeed * area.at(i).initCritTime < tempDistance &&
-                               area.at(i).initRadius < tempDistance &&
-                                                       tempDistance < area.at(i).initRadarRange)
+        if(calcDistance(_track.pos, area.value().initPos) < area.value().initRadarRange)
         {
             isDetected = true;
+            break;
         }
     }
 
+    /// Трасса в зоне обнаружения
     if(isDetected)
     {
         /// Баллистическая цель
         if(_track.isBG)
         {
-            for(int i = 0; i < area.count(); ++i)
+            for(area = areas.begin(); area != areas.end(); ++area)
             {
-                if(calcDistance(area.at(i).initPos, _track.initFinalPos) < area.at(i).initRadius)
-                    numArea = i;
+                if(calcDistance(area.value().initPos, _track.initFinalPos) < area.value().initRadius)
+                {
+                    numArea = area.key();
+                    break;
+                }
             }
         }
         /// Крылатая ракета
         else
         {
-            float minDistanceOnCourse;  /// Расстояние от трассы до ближайшего по курсу ПР
+            float distanceOnCourse;     /// Расстояние от трассы до ПР по курсу
+            float minDistanceOnCourse;  /// Расстояние от трассы до ближайшего ПР по курсу
 
-            for(int i = 0; i < area.count(); ++i)
+            for(area = areas.begin(); area != areas.end(); ++area)
             {
+                distanceOnCourse = calcDistance(_track.pos, area.value().initPos);
+
                 /// Определение попадания курса в границы ПР
-                if(qAbs(_track.errCourse - qAtan2(area.at(i).initPos.x() - _track.pos.x(),
-                                                  area.at(i).initPos.y() - _track.pos.y())) <
-                        qAbs(qAsin(area.at(i).initRadius / tempDistance)))
+                if(qAbs(_track.errCourse - qAtan2(area.value().initPos.x() - _track.pos.x(),
+                                                  area.value().initPos.y() - _track.pos.y())) <
+                   qAbs(qAsin(area.value().initRadius / distanceOnCourse)))
                 {
                     /// Определение минимальной дистанции
                     if(numArea == -1 ||
-                       minDistanceOnCourse > tempDistance)
+                       minDistanceOnCourse > distanceOnCourse)
                     {
-                        numArea             = i;
-                        minDistanceOnCourse = tempDistance;
+                        numArea             = area.key();
+                        minDistanceOnCourse = distanceOnCourse;
                     }
                 }
             }
@@ -644,20 +641,20 @@ void Painter::quickSortTracks(const int _numArea, const int _first, const int _l
 {
     int i   = _first;
     int j   = _last;
-    float x = track.at(area.at(_numArea).numTrack.at((_first + _last) / 2.0)).errTime;
+    float x = tracks[areas[_numArea].numTrack.at((_first + _last) / 2.0)].errTime;
 
     do
     {
-        while(track.at(area.at(_numArea).numTrack.at(i)).errTime < x) i++;
-        while(track.at(area.at(_numArea).numTrack.at(j)).errTime > x) j--;
+        while(tracks[areas[_numArea].numTrack.at(i)].errTime < x) i++;
+        while(tracks[areas[_numArea].numTrack.at(j)].errTime > x) j--;
 
         if(i <= j)
         {
-            if(track.at(area.at(_numArea).numTrack.at(i)).errTime > track.at(area.at(_numArea).numTrack.at(j)).errTime)
+            if(tracks[areas[_numArea].numTrack.at(i)].errTime > tracks[areas[_numArea].numTrack.at(j)].errTime)
             {
-                int tempNumTrack = area.at(_numArea).numTrack.at(i);
-                area[_numArea].numTrack[i] = area.at(_numArea).numTrack.at(j);
-                area[_numArea].numTrack[j] = tempNumTrack;
+                int tempNumTrack = areas[_numArea].numTrack.at(i);
+                areas[_numArea].numTrack[i] = areas[_numArea].numTrack.at(j);
+                areas[_numArea].numTrack[j] = tempNumTrack;
             }
             i++;
             j--;

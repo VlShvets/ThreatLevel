@@ -17,54 +17,53 @@ class TrackParameters : public QWidget
     Q_OBJECT
 
 public:
-    explicit TrackParameters(QWidget *parent = 0);
+    explicit            TrackParameters(QWidget *parent = 0);
     ~TrackParameters();
 
     /// Получить количество КР
-    inline int getCMCount() const;
+    inline int          getCMCount() const;
 
     /// Получить параметр КР по номеру строки и номеру столбца
-    inline float getCMPar(int _row, int _column) const;
+    inline float        getCMPar(int _row, int _column) const;
 
     /// Получить количество БЦ
-    inline int getBGCount() const;
+    inline int          getBGCount() const;
 
     /// Получить параметр БЦ по номеру строки и номеру столбца
-    inline float getBGPar(int _row, int _column) const;
+    inline float        getBGPar(int _row, int _column) const;
 
 private slots:
     /// Изменение количества групп КР
-    void countGroupsOfCMChanged(int _count);
+    void                groupsOfCMCountChanged(int _count);
 
     /// Изменение количества КР в группе
-    void countCMinGroupChanged(int _count);
+    void                CMInGroupCountChanged(int _count);
 
     /// Изменение количества БЦ
-    void countBGChanged(int _count);
+    void                BGCountChanged(int _count);
 
 private:
     /// Начальная инициализация параметров КР
-    void initCMPar(int _countGroupsOfCM, int _countCMinGroup);
+    void                initCMPar(int _countGroupsOfCM, int _countCMinGroup);
 
     /// Начальная инициализация параметров БЦ
-    void initBGPar(int _countBG);
+    void                initBGPar(int _countBG);
 
-    QLCDNumber      *lCountGroupsOfCM;  /// Виджет отображения количества групп КР
-    QLCDNumber      *lCountCMinGroup;   /// Виджет отображения количества КР в группе
-    QTableWidget    *tCMPar;            /// Виджет таблицы параметров КР
-    QLCDNumber      *lCountBG;          /// Виджет отображения количества БЦ
-    QTableWidget    *tBGPar;            /// Виджет таблицы параметров БЦ
+    QLCDNumber          *lGroupsOfCMCount;              /// Виджет отображения количества групп КР
+    QLCDNumber          *lCMInGroupCount;               /// Виджет отображения количества КР в группе
+    QTableWidget        *tCMPar;                        /// Виджет таблицы параметров КР
+    QLCDNumber          *lBGCount;                      /// Виджет отображения количества БЦ
+    QTableWidget        *tBGPar;                        /// Виджет таблицы параметров БЦ
 
-    static const int    MAX_COUNT_GROUPS_OF_CM  = 10;   /// Максимальное количество групп КР
-    static const int    DEF_COUNT_GROUPS_OF_CM  = 5;    /// Количество групп КР по умолчанию
+    static const int    GROUPS_OF_CM_MAX_COUNT  = 10;   /// Максимальное количество групп КР
+    static const int    GROUPS_OF_CM_DEF_COUNT  = 5;    /// Количество групп КР по умолчанию
 
-    static const int    MAX_COUNT_CM_IN_GROUP   = 12;   /// Максимальное количество КР в группе
-    static const int    DEF_COUNT_CM_IN_GROUP   = 1;    /// Количество КР в группе по умолчанию
+    static const int    CM_IN_GROUP_MAX_COUNT   = 12;   /// Максимальное количество КР в группе
+    static const int    CM_IN_GROUP_DEF_COUNT   = 1;    /// Количество КР в группе по умолчанию
+    static const int    CM_IN_GROUP_DISTANCE    = 6000; /// Расстояние между КР в группе
 
-    static const int    DIST_BETWEEN_TRACKS    = 6000;  /// Расстояние между КР в группе
-
-    static const int    MAX_COUNT_BG            = 5;    /// Максимальное количество БЦ
-    static const int    DEF_COUNT_BG            = 2;    /// Количество БЦ по умолчанию
+    static const int    BG_MAX_COUNT            = 5;    /// Максимальное количество БЦ
+    static const int    BG_DEF_COUNT            = 2;    /// Количество БЦ по умолчанию
 };
 
 /// Получить количество КР
