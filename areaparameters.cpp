@@ -23,7 +23,8 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     lNumberArea->setMode(QLCDNumber::Dec);
     lNumberArea->display(AREAS_DEF_COUNT);
     lNumberArea->setFixedWidth(100);
-    QObject::connect(sliderArea, SIGNAL(valueChanged(int)), lNumberArea, SLOT(display(int)));
+    QObject::connect(sliderArea, SIGNAL(valueChanged(int)), lNumberArea,    SLOT(display(int)));
+    QObject::connect(sliderArea, SIGNAL(valueChanged(int)), this,           SLOT(initPar(int)));
     gridLayout->addWidget(lNumberArea, 0, 2, 1, 1);
 
     gridLayout->addWidget(new QLabel(tr("\tНачальные параметры позиционных районов:")), 1, 0, 1, 3);
@@ -31,7 +32,6 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     tAreaPar = new QTableWidget(AREAS_DEF_COUNT, 6, this);
     tAreaPar->setHorizontalHeaderLabels(QStringList() << tr("№ ПР") << tr("Координата X") << tr("Координата Y") <<
                                         tr("Радиус") << tr("T критическое") << tr("R обнаружения"));
-    QObject::connect(sliderArea, SIGNAL(valueChanged(int)), this, SLOT(initPar(int)));
     gridLayout->addWidget(tAreaPar, 2, 0, 1, 3);
 
     this->setLayout(gridLayout);

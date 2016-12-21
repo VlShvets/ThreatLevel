@@ -46,6 +46,7 @@ void TrackGraph::resetGraph()
     QMap <int, QVector <int> >::iterator count = trackCount.begin();
     for(; count != trackCount.end(); ++count)
         count.value().clear();
+
     trackCount.clear();
 
     repaint();
@@ -67,10 +68,13 @@ void TrackGraph::paintEvent(QPaintEvent *_pEvent)
     pen.setWidth(3);
     p.setPen(pen);
 
-    for(int i = trackCount[numArea].count() - 1; i > 0; --i)
+    if(trackCount.contains(numArea))
     {
-        p.drawLine(QPointF(- i      - SHIFT, trackCount[numArea].at(i)),
-                   QPointF(- i + 1  - SHIFT, trackCount[numArea].at(i - 1)));
+        for(int i = trackCount[numArea].count() - 1; i > 0; --i)
+        {
+            p.drawLine(QPointF(- i      - SHIFT, trackCount[numArea].at(i)),
+                       QPointF(- i + 1  - SHIFT, trackCount[numArea].at(i - 1)));
+        }
     }
 
     p.end();

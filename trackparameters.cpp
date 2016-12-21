@@ -24,7 +24,7 @@ TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
     lGroupsOfCMCount->display(GROUPS_OF_CM_DEF_COUNT);
     lGroupsOfCMCount->setFixedWidth(100);
     QObject::connect(sGroupsOfCMCount, SIGNAL(valueChanged(int)), lGroupsOfCMCount, SLOT(display(int)));
-    QObject::connect(sGroupsOfCMCount, SIGNAL(valueChanged(int)), this, SLOT(groupsOfCMCountChanged(int)));
+    QObject::connect(sGroupsOfCMCount, SIGNAL(valueChanged(int)), this, SLOT(initCMPar(int)));
     gridLayout->addWidget(lGroupsOfCMCount, 0, 2, 1, 1);
 
     gridLayout->addWidget(new QLabel(tr("Количество КР в группе: ")), 1, 0, 1, 1);
@@ -48,9 +48,9 @@ TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("\tНачальные параметры КР:")), 2, 0, 1, 3);
 
-    tCMPar = new QTableWidget(GROUPS_OF_CM_DEF_COUNT * CM_IN_GROUP_DEF_COUNT, 6, this);
+    tCMPar = new QTableWidget(GROUPS_OF_CM_DEF_COUNT * CM_IN_GROUP_DEF_COUNT, 7, this);
     tCMPar->setHorizontalHeaderLabels(QStringList() << tr("№ трассы") << tr("Нач. коорд. X") << tr("Нач. коорд. Y") <<
-                                      tr("Курс (град.)") << tr("Скорость") << tr("Ускорение"));
+                                      tr("Курс (град.)") << tr("Скорость") << tr("Ускорение") << tr("Колич. состав"));
     gridLayout->addWidget(tCMPar, 3, 0, 1, 3);
 
     gridLayout->addWidget(new QLabel(tr("Количество БЦ: ")), 4, 0, 1, 1);
@@ -69,7 +69,7 @@ TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
     lBGCount->display(BG_DEF_COUNT);
     lBGCount->setFixedWidth(100);
     QObject::connect(sBGCount, SIGNAL(valueChanged(int)), lBGCount, SLOT(display(int)));
-    QObject::connect(sBGCount, SIGNAL(valueChanged(int)), this, SLOT(BGCountChanged(int)));
+    QObject::connect(sBGCount, SIGNAL(valueChanged(int)), this, SLOT(initBGPar(int)));
     gridLayout->addWidget(lBGCount, 4, 2, 1, 1);
 
     gridLayout->addWidget(new QLabel(tr("\tНачальные параметры БЦ:")), 5, 0, 1, 3);
@@ -83,7 +83,8 @@ TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
 
     this->setLayout(gridLayout);
 
-    initCMPar(GROUPS_OF_CM_DEF_COUNT, CM_IN_GROUP_DEF_COUNT);
+    CMInGroupCount = CM_IN_GROUP_DEF_COUNT;
+    initCMPar(GROUPS_OF_CM_DEF_COUNT);
     initBGPar(BG_DEF_COUNT);
 }
 
@@ -96,145 +97,135 @@ TrackParameters::~TrackParameters()
     delete tBGPar;
 }
 
-/// Изменение количества групп КР
-void TrackParameters::groupsOfCMCountChanged(int _count)
-{
-    tCMPar->setRowCount(_count * lCMInGroupCount->intValue());
-
-    initCMPar(_count, lCMInGroupCount->intValue());
-}
-
 /// Изменение количества КР в группе
 void TrackParameters::CMInGroupCountChanged(int _count)
 {
-    tCMPar->setRowCount(lGroupsOfCMCount->intValue() * _count);
+    CMInGroupCount = _count;
 
-    initCMPar(lGroupsOfCMCount->intValue(), _count);
-}
-
-/// Изменение количества БЦ
-void TrackParameters::BGCountChanged(int _count)
-{
-    tBGPar->setRowCount(_count);
-
-    initBGPar(_count);
+    initCMPar(tCMPar->rowCount());
 }
 
 /// Начальная инициализация параметров КР
-void TrackParameters::initCMPar(int _countGroupsOfCM, int _countCMinGroup)
+void TrackParameters::initCMPar(int _count)
 {
-    for(int i = 0; i < _countCMinGroup; ++i)
+    tCMPar->setRowCount(_count);
+
+    switch(_count)
     {
-        switch(_countGroupsOfCM)
-        {
-        case 10:
-            /// Группа КР №10
-            tCMPar->setItem(_countGroupsOfCM * i + 9, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 10)));
-            tCMPar->setItem(_countGroupsOfCM * i + 9, 1, new QTableWidgetItem(QString::number(-360000.0 - CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 9, 2, new QTableWidgetItem(QString::number(-880000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 9, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.5 * M_PI_4 +
-                                                                                                                M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 9, 4, new QTableWidgetItem(QString::number(250.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 9, 5, new QTableWidgetItem(QString::number(-0.05)));
+    case 10:
+        /// Группа КР №10
+        tCMPar->setItem(9, 0, new QTableWidgetItem(QString::number(10)));
+        tCMPar->setItem(9, 1, new QTableWidgetItem(QString::number(-360000.0)));
+        tCMPar->setItem(9, 2, new QTableWidgetItem(QString::number(-880000.0)));
+        tCMPar->setItem(9, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.5 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(9, 4, new QTableWidgetItem(QString::number(250.0)));
+        tCMPar->setItem(9, 5, new QTableWidgetItem(QString::number(-0.05)));
+        tCMPar->setItem(9, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 9:
-            /// Группа КР №9
-            tCMPar->setItem(_countGroupsOfCM * i + 8, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 9)));
-            tCMPar->setItem(_countGroupsOfCM * i + 8, 1, new QTableWidgetItem(QString::number(360000.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 8, 2, new QTableWidgetItem(QString::number(-880000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 8, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.5 * M_PI_4 +
-                                                                                                                M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 8, 4, new QTableWidgetItem(QString::number(180.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 8, 5, new QTableWidgetItem(QString::number(0.05)));
+    case 9:
+        /// Группа КР №9
+        tCMPar->setItem(8, 0, new QTableWidgetItem(QString::number(9)));
+        tCMPar->setItem(8, 1, new QTableWidgetItem(QString::number(360000.0)));
+        tCMPar->setItem(8, 2, new QTableWidgetItem(QString::number(-880000.0)));
+        tCMPar->setItem(8, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.5 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(8, 4, new QTableWidgetItem(QString::number(180.0)));
+        tCMPar->setItem(8, 5, new QTableWidgetItem(QString::number(0.05)));
+        tCMPar->setItem(8, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 8:
-            /// Группа КР №8
-            tCMPar->setItem(_countGroupsOfCM * i + 7, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 8)));
-            tCMPar->setItem(_countGroupsOfCM * i + 7, 1, new QTableWidgetItem(QString::number(700000.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 7, 2, new QTableWidgetItem(QString::number(-700000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 7, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.0 * M_PI_4 +
-                                                                                                                M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 7, 4, new QTableWidgetItem(QString::number(215.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 7, 5, new QTableWidgetItem(QString::number(0.0)));
+    case 8:
+        /// Группа КР №8
+        tCMPar->setItem(7, 0, new QTableWidgetItem(QString::number(8)));
+        tCMPar->setItem(7, 1, new QTableWidgetItem(QString::number(700000.0)));
+        tCMPar->setItem(7, 2, new QTableWidgetItem(QString::number(-700000.0)));
+        tCMPar->setItem(7, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.0 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(7, 4, new QTableWidgetItem(QString::number(215.0)));
+        tCMPar->setItem(7, 5, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(7, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 7:
-            /// Группа КР №7
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 7)));
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 1, new QTableWidgetItem(QString::number(-800000.0 - CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 2, new QTableWidgetItem(QString::number(-800000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.6 * M_PI_4 + M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 4, new QTableWidgetItem(QString::number(250.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 6, 5, new QTableWidgetItem(QString::number(0.0)));
+    case 7:
+        /// Группа КР №7
+        tCMPar->setItem(6, 0, new QTableWidgetItem(QString::number(7)));
+        tCMPar->setItem(6, 1, new QTableWidgetItem(QString::number(-800000.0)));
+        tCMPar->setItem(6, 2, new QTableWidgetItem(QString::number(-800000.0)));
+        tCMPar->setItem(6, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.6 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(6, 4, new QTableWidgetItem(QString::number(250.0)));
+        tCMPar->setItem(6, 5, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(6, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 6:
-            /// Группа КР №6
-            tCMPar->setItem(_countGroupsOfCM * i + 5, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 6)));
-            tCMPar->setItem(_countGroupsOfCM * i + 5, 1, new QTableWidgetItem(QString::number(0.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 5, 2, new QTableWidgetItem(QString::number(-800000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 5, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.0 + M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 5, 4, new QTableWidgetItem(QString::number(180.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 5, 5, new QTableWidgetItem(QString::number(0.0)));
+    case 6:
+        /// Группа КР №6
+        tCMPar->setItem(5, 0, new QTableWidgetItem(QString::number(6)));
+        tCMPar->setItem(5, 1, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(5, 2, new QTableWidgetItem(QString::number(-800000.0)));
+        tCMPar->setItem(5, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.0 + M_PI / 36.0))));
+        tCMPar->setItem(5, 4, new QTableWidgetItem(QString::number(180.0)));
+        tCMPar->setItem(5, 5, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(5, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 5:
-            /// Группа КР №5
-            tCMPar->setItem(_countGroupsOfCM * i + 4, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 5)));
-            tCMPar->setItem(_countGroupsOfCM * i + 4, 1, new QTableWidgetItem(QString::number(-320000.0 - CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 4, 2, new QTableWidgetItem(QString::number(-780000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 4, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.5 * M_PI_4 +
-                                                                                                                M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 4, 4, new QTableWidgetItem(QString::number(250.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 4, 5, new QTableWidgetItem(QString::number(-0.05)));
+    case 5:
+        /// Группа КР №5
+        tCMPar->setItem(4, 0, new QTableWidgetItem(QString::number(5)));
+        tCMPar->setItem(4, 1, new QTableWidgetItem(QString::number(-320000.0)));
+        tCMPar->setItem(4, 2, new QTableWidgetItem(QString::number(-780000.0)));
+        tCMPar->setItem(4, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.5 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(4, 4, new QTableWidgetItem(QString::number(250.0)));
+        tCMPar->setItem(4, 5, new QTableWidgetItem(QString::number(-0.05)));
+        tCMPar->setItem(4, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 4:
-            /// Группа КР №4
-            tCMPar->setItem(_countGroupsOfCM * i + 3, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 4)));
-            tCMPar->setItem(_countGroupsOfCM * i + 3, 1, new QTableWidgetItem(QString::number(320000.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 3, 2, new QTableWidgetItem(QString::number(-780000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 3, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.5 * M_PI_4 +
-                                                                                                                M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 3, 4, new QTableWidgetItem(QString::number(180.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 3, 5, new QTableWidgetItem(QString::number(0.05)));
+    case 4:
+        /// Группа КР №4
+        tCMPar->setItem(3, 0, new QTableWidgetItem(QString::number(4)));
+        tCMPar->setItem(3, 1, new QTableWidgetItem(QString::number(320000.0)));
+        tCMPar->setItem(3, 2, new QTableWidgetItem(QString::number(-780000.0)));
+        tCMPar->setItem(3, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.5 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(3, 4, new QTableWidgetItem(QString::number(180.0)));
+        tCMPar->setItem(3, 5, new QTableWidgetItem(QString::number(0.05)));
+        tCMPar->setItem(3, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 3:
-            /// Группа КР №3
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 3)));
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 1, new QTableWidgetItem(QString::number(600000.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 2, new QTableWidgetItem(QString::number(-600000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.25 * M_PI_4 +
-                                                                                                                M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 4, new QTableWidgetItem(QString::number(215.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 2, 5, new QTableWidgetItem(QString::number(0.0)));
+    case 3:
+        /// Группа КР №3
+        tCMPar->setItem(2, 0, new QTableWidgetItem(QString::number(3)));
+        tCMPar->setItem(2, 1, new QTableWidgetItem(QString::number(600000.0)));
+        tCMPar->setItem(2, 2, new QTableWidgetItem(QString::number(-600000.0)));
+        tCMPar->setItem(2, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(7.25 * M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(2, 4, new QTableWidgetItem(QString::number(215.0)));
+        tCMPar->setItem(2, 5, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(2, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 2:
-            /// Группа КР №2
-            tCMPar->setItem(_countGroupsOfCM * i + 1, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 2)));
-            tCMPar->setItem(_countGroupsOfCM * i + 1, 1, new QTableWidgetItem(QString::number(-700000.0 - CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 1, 2, new QTableWidgetItem(QString::number(-700000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i + 1, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(M_PI_4 + M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i + 1, 4, new QTableWidgetItem(QString::number(250.0)));
-            tCMPar->setItem(_countGroupsOfCM * i + 1, 5, new QTableWidgetItem(QString::number(0.0)));
+    case 2:
+        /// Группа КР №2
+        tCMPar->setItem(1, 0, new QTableWidgetItem(QString::number(2)));
+        tCMPar->setItem(1, 1, new QTableWidgetItem(QString::number(-700000.0)));
+        tCMPar->setItem(1, 2, new QTableWidgetItem(QString::number(-700000.0)));
+        tCMPar->setItem(1, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(M_PI_4 + M_PI / 36.0))));
+        tCMPar->setItem(1, 4, new QTableWidgetItem(QString::number(250.0)));
+        tCMPar->setItem(1, 5, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(1, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        case 1:
-            /// Группа КР №1
-            tCMPar->setItem(_countGroupsOfCM * i, 0, new QTableWidgetItem(QString::number(_countGroupsOfCM * i + 1)));
-            tCMPar->setItem(_countGroupsOfCM * i, 1, new QTableWidgetItem(QString::number(0.0 + CM_IN_GROUP_DISTANCE * (i / 3))));
-            tCMPar->setItem(_countGroupsOfCM * i, 2, new QTableWidgetItem(QString::number(-700000.0 - CM_IN_GROUP_DISTANCE * (i % 3))));
-            tCMPar->setItem(_countGroupsOfCM * i, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.0 + M_PI / 36.0))));
-            tCMPar->setItem(_countGroupsOfCM * i, 4, new QTableWidgetItem(QString::number(180.0)));
-            tCMPar->setItem(_countGroupsOfCM * i, 5, new QTableWidgetItem(QString::number(0.0)));
+    case 1:
+        /// Группа КР №1
+        tCMPar->setItem(0, 0, new QTableWidgetItem(QString::number(1)));
+        tCMPar->setItem(0, 1, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(0, 2, new QTableWidgetItem(QString::number(-700000.0)));
+        tCMPar->setItem(0, 3, new QTableWidgetItem(QString::number(qRadiansToDegrees(0.0 + M_PI / 36.0))));
+        tCMPar->setItem(0, 4, new QTableWidgetItem(QString::number(180.0)));
+        tCMPar->setItem(0, 5, new QTableWidgetItem(QString::number(0.0)));
+        tCMPar->setItem(0, 6, new QTableWidgetItem(QString::number(CMInGroupCount)));
 
-        default:
-            break;
-        }
+    default:
+        break;
     }
 }
 
-void TrackParameters::initBGPar(int _countBG)
+void TrackParameters::initBGPar(int _count)
 {
-    switch (_countBG) {
+    tBGPar->setRowCount(_count);
+
+    switch(_count)
+    {
     case 5:
         /// БЦ №5
-        tBGPar->setItem(4, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT * CM_IN_GROUP_MAX_COUNT + 5)));
+        tBGPar->setItem(4, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT + 5)));
         tBGPar->setItem(4, 1, new QTableWidgetItem(QString::number(-360000.0)));
         tBGPar->setItem(4, 2, new QTableWidgetItem(QString::number(-880000.0)));
         tBGPar->setItem(4, 3, new QTableWidgetItem(QString::number(250000.0)));
@@ -244,7 +235,7 @@ void TrackParameters::initBGPar(int _countBG)
 
     case 4:
         /// БЦ №4
-        tBGPar->setItem(3, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT * CM_IN_GROUP_MAX_COUNT + 4)));
+        tBGPar->setItem(3, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT + 4)));
         tBGPar->setItem(3, 1, new QTableWidgetItem(QString::number(360000.0)));
         tBGPar->setItem(3, 2, new QTableWidgetItem(QString::number(-880000.0)));
         tBGPar->setItem(3, 3, new QTableWidgetItem(QString::number(-250000.0)));
@@ -254,7 +245,7 @@ void TrackParameters::initBGPar(int _countBG)
 
     case 3:
         /// БЦ №3
-        tBGPar->setItem(2, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT * CM_IN_GROUP_MAX_COUNT + 3)));
+        tBGPar->setItem(2, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT + 3)));
         tBGPar->setItem(2, 1, new QTableWidgetItem(QString::number(700000.0)));
         tBGPar->setItem(2, 2, new QTableWidgetItem(QString::number(-700000.0)));
         tBGPar->setItem(2, 3, new QTableWidgetItem(QString::number(-250000.0)));
@@ -264,7 +255,7 @@ void TrackParameters::initBGPar(int _countBG)
 
     case 2:
         /// БЦ №2
-        tBGPar->setItem(1, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT * CM_IN_GROUP_MAX_COUNT + 2)));
+        tBGPar->setItem(1, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT + 2)));
         tBGPar->setItem(1, 1, new QTableWidgetItem(QString::number(-800000.0)));
         tBGPar->setItem(1, 2, new QTableWidgetItem(QString::number(-800000.0)));
         tBGPar->setItem(1, 3, new QTableWidgetItem(QString::number(0.0)));
@@ -274,7 +265,7 @@ void TrackParameters::initBGPar(int _countBG)
 
     case 1:
         /// БЦ №1
-        tBGPar->setItem(0, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT * CM_IN_GROUP_MAX_COUNT + 1)));
+        tBGPar->setItem(0, 0, new QTableWidgetItem(QString::number(GROUPS_OF_CM_MAX_COUNT + 1)));
         tBGPar->setItem(0, 1, new QTableWidgetItem(QString::number(0.0)));
         tBGPar->setItem(0, 2, new QTableWidgetItem(QString::number(-800000.0)));
         tBGPar->setItem(0, 3, new QTableWidgetItem(QString::number(0.0)));

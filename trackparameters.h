@@ -33,21 +33,17 @@ public:
     inline float        getBGPar(int _row, int _column) const;
 
 private slots:
-    /// Изменение количества групп КР
-    void                groupsOfCMCountChanged(int _count);
-
     /// Изменение количества КР в группе
     void                CMInGroupCountChanged(int _count);
 
-    /// Изменение количества БЦ
-    void                BGCountChanged(int _count);
-
-private:
     /// Начальная инициализация параметров КР
-    void                initCMPar(int _countGroupsOfCM, int _countCMinGroup);
+    void                initCMPar(int _count);
 
     /// Начальная инициализация параметров БЦ
-    void                initBGPar(int _countBG);
+    void                initBGPar(int _count);
+
+private:
+    int                 CMInGroupCount;                 /// Количество групп КР
 
     QLCDNumber          *lGroupsOfCMCount;              /// Виджет отображения количества групп КР
     QLCDNumber          *lCMInGroupCount;               /// Виджет отображения количества КР в группе
@@ -58,9 +54,8 @@ private:
     static const int    GROUPS_OF_CM_MAX_COUNT  = 10;   /// Максимальное количество групп КР
     static const int    GROUPS_OF_CM_DEF_COUNT  = 5;    /// Количество групп КР по умолчанию
 
-    static const int    CM_IN_GROUP_MAX_COUNT   = 12;   /// Максимальное количество КР в группе
+    static const int    CM_IN_GROUP_MAX_COUNT   = 15;   /// Максимальное количество КР в группе
     static const int    CM_IN_GROUP_DEF_COUNT   = 1;    /// Количество КР в группе по умолчанию
-    static const int    CM_IN_GROUP_DISTANCE    = 6000; /// Расстояние между КР в группе
 
     static const int    BG_MAX_COUNT            = 5;    /// Максимальное количество БЦ
     static const int    BG_DEF_COUNT            = 2;    /// Количество БЦ по умолчанию

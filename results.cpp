@@ -88,14 +88,15 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
         tResults->setItem(i, 7, new QTableWidgetItem(QString::number(area.value().rmsDiffTime)));
         tResults->item(i, 7)->setBackgroundColor(QColor(255, 0, 0, 25));
 
-        /// Отправка количественного состава налета по ПР на график
-        trackGraph->loadTrackCount((int) area.key(), area.value().trackCount);
 
         /// Время поражения ПР с погрешностью и номер трассы
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
-            tResults->setItem(i, j + 8, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(j)].errTime) + " (" +
-                                                             QString::number(area.value().numTrack.at(j)) + ")"));
+            if(_tracks.contains(area.value().numTrack.at(j)))
+            {
+                tResults->setItem(i, j + 8, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(j)].errTime) + " (" +
+                                                                 QString::number(area.value().numTrack.at(j)) + ")"));
+            }
         }
 
         /// Очистка неиспользующихся ячеек времени поражения ПР с погрешностью
@@ -131,14 +132,22 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
     tResults->item(_areas.count(), 6)->setBackgroundColor(QColor(255, 0, 0, 100));
 
     /// Минимальное время поражения ПР с погрешностью
-    tResults->setItem(_areas.count(), 8, new QTableWidgetItem(QString::number(_tracks[Track::numTrackMinErrTime].errTime)));
-    tResults->item(_areas.count(), 8)->setBackgroundColor(QColor(255, 0, 0, 25));
-
-    /// Отправка количественного состава налета по всем ПР на график
-    trackGraph->loadTrackCount(0, Area::trackSumCount);
+    if(Track::numTrackMinErrTime != -1 &&
+       _tracks.contains(Track::numTrackMinErrTime))
+    {
+        tResults->setItem(_areas.count(), 7, new QTableWidgetItem(QString::number(_tracks[Track::numTrackMinErrTime].errTime)));
+        tResults->item(_areas.count(), 7)->setBackgroundColor(QColor(255, 0, 0, 50));
+    }
 
     /// Отображение числа количественного состава налета по всем ПР
     lcdMaxSumTrack->display(Area::trackSumCount);
+
+    /// Отправка количественного состава налета по ПР на график
+    for(area = _areas.begin(); area != _areas.end(); ++area)
+        trackGraph->loadTrackCount((int) area.key(), area.value().trackCount);
+
+    /// Отправка количественного состава налета по всем ПР на график
+    trackGraph->loadTrackCount(0, Area::trackSumCount);
 }
 
 /// Очистка таблицы результатов
