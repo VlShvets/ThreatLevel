@@ -175,8 +175,8 @@ void Painter::timerEvent(QTimerEvent *)
     /// Расчет времени поражения ПР
     calcErrTime();
 
-    /// Расчет параметров связанных со временем
-    calcTimeParameters();
+    /// Сортировка трасс и определение номера трассы с минимальным временем поражения ПР
+    calcNumTrackMinErrTime();
 
     /// Сброс трасс
     resetTracks();
@@ -187,8 +187,8 @@ void Painter::timerEvent(QTimerEvent *)
     /// Расчет количества баллистических целей
     calcBGcount();
 
-    /// Расчет количественного состава налёта
-    calcTrackCount();
+    /// Расчет количественного состава налёта с учетом тратилового эквивалента БЦ
+    calcRaidCount();
 
     /// Отображение результатов вычислений
     results->loadTable(areas, tracks);
@@ -215,12 +215,6 @@ void Painter::initAreaPar()
     QMap <int, Area>::iterator area = areas.begin();
     for(; area != areas.end(); ++area)
     {
-        /// Обнуление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
-        area.value().sumDiffTime    = 0.0;
-
-        /// Обнуление среднеквадратической разности времени поражения с погрешностью и точного времени поражения
-        area.value().rmsDiffTime    = 0.0;
-
         /// Обнуление максимального количества ассоциированных с ПР крылатых ракет
         area.value().CMMaxCount     = 0;
 
@@ -228,7 +222,7 @@ void Painter::initAreaPar()
         area.value().BGMaxCount     = 0;
 
         /// Обнуление максимального количества ассоциированных с ПР трасс
-        area.value().trackMaxCount  = 0;
+        area.value().raidMaxCount   = 0;
     }
 
     /// Обнуление максимального суммарного количества крылатых ракет
@@ -238,7 +232,7 @@ void Painter::initAreaPar()
     Area::BGMaxSumCount     = 0;
 
     /// Обнуление максимального количественного состава налета по всем ПР
-    Area::trackMaxSumCount  = 0;
+    Area::raidMaxSumCount   = 0;
 }
 
 void Painter::initTrackPar()
@@ -301,10 +295,16 @@ void Painter::initTrackPar()
         /// Обнуление рекурентно использующихся при сглаживании проекций вектора скорости с погрешностями
         track.value().errVx         = 0.0;
         track.value().errVy         = 0.0;
+
+        /// Обнуление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
+        track.value().sumDiffTime   = 0.0;
+
+        /// Обнуление среднеквадратической разности времени поражения с погрешностью и точного времени поражения
+        track.value().rmsDiffTime   = 0.0;
     }
 }
 
-/// Движение трасс
+/// Движение трасс и сглаживание измерений
 void Painter::trackMovement()
 {
     QMap <int, Track>::iterator track = tracks.begin();
@@ -415,12 +415,16 @@ void Painter::calcErrTime()
         if(numArea != -1 &&
            areas.contains(numArea))
         {
+            /// Инкрементация количества измерений
+            ++track.value().amtMeasure;
+
             /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
 //            calcTanPoints(areas[numArea].initPos, areas[numArea].initRadius,
 //                          track.value().pos, track.value().tanPoint1, track.value().tanPoint2);
 
+            /// --------------------------------------------------
             /// Расчет точных значений переменных
-            /// ------------------------------------------
+            /// --------------------------------------------------
 
             /// Вычисление расстояния между проекцией трассы на прямую от начальной точки траектории до центра ПР
             /// и центром ПР
@@ -429,10 +433,11 @@ void Painter::calcErrTime()
 
             /// Расчет времени поражения ПР
             track.value().time  = track.value().dist / (track.value().speed * qCos(track.value().angCourseToPA));
-            /// ------------------------------------------
 
+
+            /// --------------------------------------------------
             /// Расчет значений переменных с погрешностями
-            /// ------------------------------------------
+            /// --------------------------------------------------
 
             /// Определение угла между курсом и прямой от начальной точки траектории до центра ПР с погрешностью
             track.value().errAngCourseToPA  = track.value().errCourse -
@@ -447,13 +452,22 @@ void Painter::calcErrTime()
             /// Расчет времени поражения ПР с погрешностью
             track.value().errTime   = track.value().errDist /
                     (track.value().errSpeed * qCos(track.value().errAngCourseToPA));
-            /// ------------------------------------------
+
+            /// --------------------------------------------------
+            /// Расчет среднеквадратической разности времени поражения с погрешностью и точного времени поражения
+            /// --------------------------------------------------
+
+            /// Вычисление разности времени поражения с погрешностью и точного времени поражения в текущий момент времени
+            track.value().diffTime      = track.value().errTime - track.value().time;
+
+            /// Вычисление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
+            track.value().sumDiffTime   += track.value().diffTime * track.value().diffTime;
+
+            /// Вычисление среднеквадратической разности времени поражения с погрешностью и точного времени поражения
+            track.value().rmsDiffTime   = qSqrt(track.value().sumDiffTime / track.value().amtMeasure);
 
             /// Вычисление координат экстраполированного конца траектории
             track.value().finalPos  = calcEndPos(track.value(), areas[numArea]);
-
-            /// Инкрементация количества измерений
-            ++track.value().amtMeasure;
         }
     }
 }
@@ -502,8 +516,8 @@ void Painter::resetTracks()
     }
 }
 
-/// Расчет среднеквадратической разности времени поражения с погрешностью и точного времени поражения
-void Painter::calcTimeParameters()
+/// Сортировка трасс и определение номера трассы с минимальным временем поражения ПР
+void Painter::calcNumTrackMinErrTime()
 {
     Track::numTrackMinErrTime   = -1;
     QMap <int, Area>::iterator area = areas.begin();
@@ -511,17 +525,8 @@ void Painter::calcTimeParameters()
     {
         if(!area.value().numTrack.isEmpty())
         {
-            /// Сортировка целей по времени поражения ПР с погрешностью
+            /// Сортировка целей по времени поражения данного ПР с погрешностью
             quickSortTracks(area.value().numTrack, 0, area.value().numTrack.count() - 1);
-
-            /// Вычисление разности времени поражения с погрешностью и точного времени поражения в текущий момент времени
-            area.value().diffTime       = tracks[area.value().numTrack.at(0)].errTime - tracks[area.value().numTrack.at(0)].time;
-
-            /// Вычисление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
-            area.value().sumDiffTime    += area.value().diffTime * area.value().diffTime;
-
-            /// Вычисление среднеквадратической разности времени поражения с погрешностью и точного времени поражения
-            area.value().rmsDiffTime    = qSqrt(area.value().sumDiffTime / tracks[area.value().numTrack.at(0)].amtMeasure);
 
             /// Определение номера трассы с минимальным временем поражения ПР с погрешностью
             if(Track::numTrackMinErrTime == -1 ||
@@ -589,27 +594,32 @@ void Painter::calcBGcount()
         Area::BGMaxSumCount = Area::BGSumCount;
 }
 
-/// Расчет количественного состава налёта
-void Painter::calcTrackCount()
+/// Расчет количественного состава налёта с учетом тратилового эквивалента БЦ
+void Painter::calcRaidCount()
 {
-    Area::trackSumCount = 0;
+    Area::maxTracksCount = 0;
+    Area::raidSumCount = 0;
     QMap <int, Area>::iterator area = areas.begin();
     for(; area != areas.end(); ++area)
     {
         /// Вычисление количественного состава налета по ПР
-        area.value().trackCount = area.value().CMCount + Track::BG_WEIGHT_COEF * area.value().BGCount;
+        area.value().raidCount = area.value().CMCount + Track::BG_WEIGHT_COEF * area.value().BGCount;
 
         /// Вычисление максимального количественного состава налета по ПР
-        if(area.value().trackMaxCount < area.value().trackCount)
-            area.value().trackMaxCount  = area.value().trackCount;
+        if(area.value().raidMaxCount < area.value().raidCount)
+            area.value().raidMaxCount  = area.value().raidCount;
 
         /// Вычисление количественного состава налета по всем ПР
-        Area::trackSumCount += area.value().trackCount;
+        Area::raidSumCount += area.value().raidCount;
+
+        /// Определение максимального количества ассоциированных с каким-либо ПР трасс в текущий момент
+        if(Area::maxTracksCount < area.value().numTrack.count())
+            Area::maxTracksCount = area.value().numTrack.count();
     }
 
     /// Вычисление максимального количественного состава налета по всем ПР
-    if(Area::trackMaxSumCount < Area::trackSumCount)
-        Area::trackMaxSumCount  = Area::trackSumCount;
+    if(Area::raidMaxSumCount < Area::raidSumCount)
+        Area::raidMaxSumCount  = Area::raidSumCount;
 }
 
 /// Определение для трассы номера ближайшего по курсу позиционного района
@@ -647,24 +657,24 @@ int Painter::numOnCourseMinDistanceArea(const Track &_track)
         /// Крылатая ракета
         else
         {
-            float distanceOnCourse;     /// Расстояние от трассы до ПР по курсу
+            float distance;     /// Расстояние от трассы до ПР
             float minDistanceOnCourse;  /// Расстояние от трассы до ближайшего ПР по курсу
 
             for(area = areas.begin(); area != areas.end(); ++area)
             {
-                distanceOnCourse = calcDistance(_track.pos, area.value().initPos);
+                distance = calcDistance(_track.pos, area.value().initPos);
 
                 /// Определение попадания курса в границы ПР
                 if(qAbs(_track.errCourse - qAtan2(area.value().initPos.x() - _track.pos.x(),
                                                   area.value().initPos.y() - _track.pos.y())) <
-                   qAbs(qAsin(area.value().initRadius / distanceOnCourse)))
+                   qAbs(qAsin(area.value().initRadius / distance)))
                 {
                     /// Определение минимальной дистанции
                     if(numArea == -1 ||
-                       minDistanceOnCourse > distanceOnCourse)
+                       minDistanceOnCourse > distance)
                     {
                         numArea             = area.key();
-                        minDistanceOnCourse = distanceOnCourse;
+                        minDistanceOnCourse = distance;
                     }
                 }
             }

@@ -22,62 +22,66 @@ class Painter : public Grapher2D
     Q_OBJECT
 
 public:
-    explicit                Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters,
-                                    Results *_results, QWidget *_parent = 0);
+    explicit        Painter(AreaParameters *_areaParameters, TrackParameters *_trackParameters,
+                            Results *_results, QWidget *_parent = 0);
     ~Painter();
 
     /// Установка таймера
-    inline void             setIdTimer(int _idTimer);
+    inline void     setIdTimer(int _idTimer);
 
     /// Возврат номера таймера
-    inline int              getIdTimer()                const;
+    inline int      getIdTimer()    const;
 
 public slots:
     /// Перезапуск
-    void                    reStart();
+    void            reStart();
 
 protected:
-    void                    paintEvent(QPaintEvent *_pEvent);
+    void            paintEvent(QPaintEvent *_pEvent);
 
 private slots:
-    void                    timerEvent(QTimerEvent *);
+    void            timerEvent(QTimerEvent *);
 
 private:
     /// Начальная инициализация параметров ПР
-    void                    initAreaPar();
+    void            initAreaPar();
 
     /// Начальная инициализация параметров трасс
-    void                    initTrackPar();
+    void            initTrackPar();
 
-    /// Движение трасс
-    void                    trackMovement();
+    /// Движение трасс и сглаживание измерений
+    void            trackMovement();
 
     /// Ассоциация трасс с позиционными районами
-    void                    associationTrackArea();
+    void            associationTrackArea();
 
     /// Расчет времени поражения ПР
-    void                    calcErrTime();
+    void            calcErrTime();
 
     /// Сброс трасс
-    void                    resetTracks();
+    void            resetTracks();
 
-    /// Расчет среднеквадратической разности времени поражения с погрешностью и точного времени поражения
-    void                    calcTimeParameters();
+    /// Сортировка трасс и определение номера трассы с минимальным временем поражения ПР
+    void            calcNumTrackMinErrTime();
 
     /// Расчет количества крылатых ракет
-    void                    calcCMcount();
+    void            calcCMcount();
 
     /// Расчет количества баллистических целей
-    void                    calcBGcount();
+    void            calcBGcount();
 
-    /// Расчет количественного состава налёта
-    void                    calcTrackCount();
+    /// Расчет количественного состава налёта с учетом тратилового эквивалента БЦ
+    void            calcRaidCount();
 
     /// Определение для трассы номера ближайшего по курсу позиционного района
-    int                     numOnCourseMinDistanceArea(const Track &_track);
+    int             numOnCourseMinDistanceArea(const Track &_track);
 
-    /// Быстрая сортировка целей по времени поражения с погрешностью определенного ПР
-    void                    quickSortTracks(QVector <int> &_numTrack, const int _first, const int _last);
+    /// Быстрая сортировка трасс по времени поражения с погрешностью определенного ПР
+    void            quickSortTracks(QVector <int> &_numTrack, const int _first, const int _last);
+
+    /// --------------------------------------------------
+    /// Статические функции
+    /// --------------------------------------------------
 
     /// Вычисление координат экстраполированного конца траектории
     static const QPointF    calcEndPos(const Track &_track, const Area &_area);
@@ -95,25 +99,36 @@ private:
     /// Распределение Гаусса
     static float            gaussDistribution(const float _mean, const float _dev);
 
-    QMap <int, Area>        areas;                          /// Словарь ПР <номер, структура параметров>
-    QMap <int, Track>       tracks;                         /// Словарь трасс <номер, структура параметров>
+    /// Указатели на объекты классов
+    AreaParameters      *areaParameters;    /// Класс редактирования параметров ПР
+    TrackParameters     *trackParameters;   /// Класс редактирования параметров трасс
+    Results             *results;           /// Класс отображения результатов
 
-    int                     idTimer;                        /// Номер таймера (-1 - нет таймера)
+    /// --------------------------------------------------
+    /// Переменные
+    /// --------------------------------------------------
 
-    AreaParameters          *areaParameters;                /// Виджет редактирования параметров ПР
-    TrackParameters         *trackParameters;               /// Виджет редактирования параметров трасс
-    Results                 *results;                       /// Виджет отображения результатов
+    /// Таймер
+    int                 idTimer;    /// Номер таймера (-1 - нет таймера)
 
-    static const float      DELTA_T             = 10.0;     /// Константа времени
-    static const float      SMOOTH              = 0.9;      /// Весовой коэфициент сглаживания погрешностей ( < 1.0)
+    /// Позиционные районы и трассы
+    QMap <int, Area>    areas;      /// Словарь ПР <номер, структура параметров>
+    QMap <int, Track>   tracks;     /// Словарь трасс <номер, структура параметров>
 
-    static const float      LENGTH              = 100000.0; /// Длина курса трасс до ассоциации с ПР
+    /// --------------------------------------------------
+    /// Константы
+    /// --------------------------------------------------
 
-    static const float      ABS_MEASURE         = 10000.0;  /// Масштаб оси абсцисс
-    static const float      ORD_MEASURE         = 10000.0;  /// Масштаб оси ординат
-    static const int        DEF_ZOOM            = 10;       /// Масштаб отображения по умолчанию
+    /// Параметры отрисовки
+    static const int    DEF_ZOOM            = 10;           /// Масштаб отображения по умолчанию
+    static const float  ABS_MEASURE         = 10000.0;      /// Масштаб оси абсцисс
+    static const float  ORD_MEASURE         = 10000.0;      /// Масштаб оси ординат
+    static const float  LENGTH              = 100000.0;     /// Длина курса трасс до ассоциации с ПР
 
-    static const float      ACCURACY_TAN_POINT  = 1e-06;    /// Точность вычисления точек соприкосновения касательных
+    /// Вычислительные параметры
+    static const float  DELTA_T             = 10.0;         /// Интервал времени измерений
+    static const float  SMOOTH              = 0.9;          /// Весовой коэфициент сглаживания погрешностей ( < 1.0)
+    static const float  ACCURACY_TAN_POINT  = 1e-06;        /// Точность вычисления точек соприкосновения касательных
                                                             /// от текущего положения трассы до границы ПР
 };
 

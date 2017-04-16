@@ -20,26 +20,38 @@ class Settings : public QWidget
     Q_OBJECT
 
 public:
-    explicit            Settings(class Painter *_painter, QWidget *parent = 0);
+    explicit    Settings(class Painter *_painter, QWidget *parent = 0);
     ~Settings();
 
 private slots:
     /// Запуск и остановка таймера
-    void                changeState();
+    void        changeState();
 
     /// Изменение интервала таймера
-    void                changeTimerInterval(int _interval);
+    void        changeTimerInterval(int _interval);
 
 private:
-    QLCDNumber          *lTimerInterval;            /// Интервал таймера
-    QPushButton         *pStartStop;                /// Кнопка запуска и остановки
+    /// Указатели на виджеты
+    QLCDNumber      *lTimerInterval;    /// Виджет отображения интервала таймера
+    QPushButton     *pStartStop;        /// Виджет кнопки запуска и остановки таймера
 
-    class Painter       *painter;                   /// Виджет отрисовки трасс и позиционных районов
+    /// Указатели на объекты классов
+    class Painter   *painter;           /// Класс отрисовки трасс и позиционных районов
 
-    bool                isStart;                    /// Флаг состояния таймера
+    /// --------------------------------------------------
+    /// Переменные
+    /// --------------------------------------------------
 
-    static const int    TIMER_MAX_INTERVAL  = 10;   /// Максимальный интервал таймера
+    /// Состояние таймера
+    bool    isStart;    /// Флаг состояния таймера
+
+    /// --------------------------------------------------
+    /// Константы
+    /// --------------------------------------------------
+
+    /// Параметры таймера
     static const int    TIMER_DEF_INTERVAL  = 1;    /// Интервал таймера по умолчанию
+    static const int    TIMER_MAX_INTERVAL  = 10;   /// Максимальный интервал таймера
 };
 
 }

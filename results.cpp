@@ -3,14 +3,16 @@
 namespace ThreatLevel
 {
 
+int Area::maxTracksCount;
+
 int Area::CMSumCount;
 int Area::CMMaxSumCount;
 
 int Area::BGSumCount;
 int Area::BGMaxSumCount;
 
-int Area::trackSumCount;
-int Area::trackMaxSumCount;
+int Area::raidSumCount;
+int Area::raidMaxSumCount;
 
 int Track::numTrackMinErrTime;
 
@@ -50,7 +52,7 @@ Results::~Results()
 void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> &_tracks)
 {
     tResults->setRowCount(_areas.count() + 1);
-    tResults->setColumnCount(_tracks.count() + 8);
+    tResults->setColumnCount(Area::maxTracksCount + 8);
     tResults->setHorizontalHeaderLabels(QStringList() << tr("№ ПР") << tr("КР") << tr("max КР") <<
                                         tr("БЦ") << tr("max БЦ") << tr("КР + БЦ") << tr("max КР + БЦ") << tr("СКО"));
 
@@ -60,34 +62,41 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
         /// Номер ПР
         tResults->setItem(i, 0, new QTableWidgetItem(QString::number(area.key())));
 
+        /// --------------------------------------------------
+        /// Результирующие параметры по конкретному ПР
+        /// --------------------------------------------------
+
         /// Количество ассоциированных с ПР крылатых ракет
         tResults->setItem(i, 1, new QTableWidgetItem(QString::number(area.value().CMCount)));
-        tResults->item(i, 1)->setBackgroundColor(QColor(255, 0, 0, 50));
+        tResults->item(i, 1)->setBackgroundColor(QColor(255, 0, 0, 25));
 
         /// Максимальное количество ассоциированных с ПР крылатых ракет
         tResults->setItem(i, 2, new QTableWidgetItem(QString::number(area.value().CMMaxCount)));
-        tResults->item(i, 2)->setBackgroundColor(QColor(255, 0, 0, 50));
+        tResults->item(i, 2)->setBackgroundColor(QColor(255, 0, 0, 25));
 
         /// Количество ассоциированных с ПР баллистических целей
         tResults->setItem(i, 3, new QTableWidgetItem(QString::number(area.value().BGCount)));
-        tResults->item(i, 3)->setBackgroundColor(QColor(255, 0, 0, 50));
+        tResults->item(i, 3)->setBackgroundColor(QColor(255, 0, 0, 25));
 
         /// Максимальное количество ассоциированных с ПР баллистических целей
         tResults->setItem(i, 4, new QTableWidgetItem(QString::number(area.value().BGMaxCount)));
-        tResults->item(i, 4)->setBackgroundColor(QColor(255, 0, 0, 50));
+        tResults->item(i, 4)->setBackgroundColor(QColor(255, 0, 0, 25));
 
-        /// Количественный состав налета по ПР
-        tResults->setItem(i, 5, new QTableWidgetItem(QString::number(area.value().trackCount)));
-        tResults->item(i, 5)->setBackgroundColor(QColor(255, 0, 0, 50));
+        /// Количественный состав налета по ПР с учетом тратилового эквивалента БЦ
+        tResults->setItem(i, 5, new QTableWidgetItem(QString::number(area.value().raidCount)));
+        tResults->item(i, 5)->setBackgroundColor(QColor(255, 0, 0, 25));
 
-        /// Максимальный количественный состав налета по ПР
-        tResults->setItem(i, 6, new QTableWidgetItem(QString::number(area.value().trackMaxCount)));
-        tResults->item(i, 6)->setBackgroundColor(QColor(255, 0, 0, 50));
+        /// Максимальный количественный состав налета по ПР с учетом тратилового эквивалента БЦ
+        tResults->setItem(i, 6, new QTableWidgetItem(QString::number(area.value().raidMaxCount)));
+        tResults->item(i, 6)->setBackgroundColor(QColor(255, 0, 0, 25));
 
         /// Cреднеквадратическая разность времени поражения с погрешностью и точного времени поражения
-        tResults->setItem(i, 7, new QTableWidgetItem(QString::number(area.value().rmsDiffTime)));
-        tResults->item(i, 7)->setBackgroundColor(QColor(255, 0, 0, 25));
-
+        if(area.value().numTrack.count() != 0 &&
+           _tracks.contains(area.value().numTrack.at(0)))
+        {
+            tResults->setItem(i, 7, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(0)].rmsDiffTime) + " (" +
+                                                         QString::number(area.value().numTrack.at(0)) + ")"));
+        }
 
         /// Время поражения ПР с погрешностью и номер трассы
         for(int j = 0; j < area.value().numTrack.count(); ++j)
@@ -99,55 +108,63 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
             }
         }
 
-        /// Очистка неиспользующихся ячеек времени поражения ПР с погрешностью
-        for(int j = area.value().numTrack.count(); j < _tracks.count() + 8; ++j)
-            tResults->takeItem(i, j + 8);
+        /// Подсвечивание СКО и времении поражения ПР наиболее опасной трассы
+        if(area.value().numTrack.count() != 0 &&
+           area.value().numTrack.at(0) == Track::numTrackMinErrTime)
+        {
+            tResults->item(i, 7)->setBackgroundColor(QColor(255, 0, 0, 100));
+            tResults->item(i, 8)->setBackgroundColor(QColor(255, 0, 0, 100));
+        }
+
+        /// Очистка неиспользующихся ячеек СКО
+        if(area.value().numTrack.count() == 0)
+            tResults->takeItem(i, 7);
+
+        /// Очистка неиспользующихся ячеек времени поражения ПР
+        for(int j = _tracks.count() + 8; j > area.value().numTrack.count() + 7; --j)
+            tResults->takeItem(i, j);
     }
 
     /// Знак суммы
     tResults->setItem(_areas.count(), 0, new QTableWidgetItem(tr("Σ")));
 
+    /// --------------------------------------------------
+    /// Результирующие параметры по всем ПР
+    /// --------------------------------------------------
+
     /// Суммарное количество крылатых ракет
     tResults->setItem(_areas.count(), 1, new QTableWidgetItem(QString::number(Area::CMSumCount)));
-    tResults->item(_areas.count(), 1)->setBackgroundColor(QColor(255, 0, 0, 100));
+    tResults->item(_areas.count(), 1)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальное суммарное количество крылатых ракет
     tResults->setItem(_areas.count(), 2, new QTableWidgetItem(QString::number(Area::CMMaxSumCount)));
-    tResults->item(_areas.count(), 2)->setBackgroundColor(QColor(255, 0, 0, 100));
+    tResults->item(_areas.count(), 2)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Суммарное количество баллистических целей
     tResults->setItem(_areas.count(), 3, new QTableWidgetItem(QString::number(Area::BGSumCount)));
-    tResults->item(_areas.count(), 3)->setBackgroundColor(QColor(255, 0, 0, 100));
+    tResults->item(_areas.count(), 3)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальное суммарное количество баллистических целей
     tResults->setItem(_areas.count(), 4, new QTableWidgetItem(QString::number(Area::BGMaxSumCount)));
-    tResults->item(_areas.count(), 4)->setBackgroundColor(QColor(255, 0, 0, 100));
+    tResults->item(_areas.count(), 4)->setBackgroundColor(QColor(255, 0, 0, 50));
 
-    /// Количественный состав налета по всем ПР
-    tResults->setItem(_areas.count(), 5, new QTableWidgetItem(QString::number(Area::trackSumCount)));
-    tResults->item(_areas.count(), 5)->setBackgroundColor(QColor(255, 0, 0, 100));
+    /// Количественный состав налета по всем ПР с учетом тратилового эквивалента БЦ
+    tResults->setItem(_areas.count(), 5, new QTableWidgetItem(QString::number(Area::raidSumCount)));
+    tResults->item(_areas.count(), 5)->setBackgroundColor(QColor(255, 0, 0, 50));
 
-    /// Максимальный количественный состав налета по всем ПР
-    tResults->setItem(_areas.count(), 6, new QTableWidgetItem(QString::number(Area::trackMaxSumCount)));
-    tResults->item(_areas.count(), 6)->setBackgroundColor(QColor(255, 0, 0, 100));
+    /// Максимальный количественный состав налета по всем ПР с учетом тратилового эквивалента БЦ
+    tResults->setItem(_areas.count(), 6, new QTableWidgetItem(QString::number(Area::raidMaxSumCount)));
+    tResults->item(_areas.count(), 6)->setBackgroundColor(QColor(255, 0, 0, 50));
 
-    /// Минимальное время поражения ПР с погрешностью
-    if(Track::numTrackMinErrTime != -1 &&
-       _tracks.contains(Track::numTrackMinErrTime))
-    {
-        tResults->setItem(_areas.count(), 7, new QTableWidgetItem(QString::number(_tracks[Track::numTrackMinErrTime].errTime)));
-        tResults->item(_areas.count(), 7)->setBackgroundColor(QColor(255, 0, 0, 50));
-    }
+    /// Отображение числа количественного состава налета по всем ПР с учетом тратилового эквивалента БЦ
+    lcdMaxSumTrack->display(Area::raidSumCount);
 
-    /// Отображение числа количественного состава налета по всем ПР
-    lcdMaxSumTrack->display(Area::trackSumCount);
-
-    /// Отправка количественного состава налета по ПР на график
+    /// Отправка количественного состава налета с учетом тратилового эквивалента БЦ на график
     for(area = _areas.begin(); area != _areas.end(); ++area)
-        trackGraph->loadTrackCount((int) area.key(), area.value().trackCount);
+        trackGraph->loadTrackCount((int) area.key(), area.value().raidCount);
 
-    /// Отправка количественного состава налета по всем ПР на график
-    trackGraph->loadTrackCount(0, Area::trackSumCount);
+    /// Отправка количественного состава налета по всем ПР с учетом тратилового эквивалента БЦ на график
+    trackGraph->loadTrackCount(0, Area::raidSumCount);
 }
 
 /// Очистка таблицы результатов
@@ -159,9 +176,6 @@ void Results::resetTable()
     trackGraph->resetGraph();
 }
 
-void Results::tableSelectionChanged(QItemSelection, QItemSelection)
-{
-    trackGraph->showGraph(tResults->selectedItems().first()->text().toInt());
-}
+
 
 }
