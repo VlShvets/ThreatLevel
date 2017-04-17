@@ -103,7 +103,7 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
         {
             if(_tracks.contains(area.value().numTrack.at(j)))
             {
-                tResults->setItem(i, j + 8, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(j)].errTime) + " (" +
+                tResults->setItem(i, j + 8, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(j)].timeToPA) + " (" +
                                                                  QString::number(area.value().numTrack.at(j)) + ")"));
             }
         }
