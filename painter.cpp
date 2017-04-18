@@ -167,13 +167,13 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 void Painter::timerEvent(QTimerEvent *)
 {
     /// Движение трассы
-    trackMovement();
+    tracksMovement();
 
     /// Ассоциация трасс с позиционными районами
     associationTrackArea();
 
     /// Расчет времени поражения ПР
-    calcErrTime();
+    calcTime();
 
     /// Сортировка трасс и определение номера трассы с минимальным временем поражения ПР
     calcNumTrackMinErrTime();
@@ -242,16 +242,15 @@ void Painter::initTrackPar()
     {
         /// Определение номера трассы
         int num = (int) trackParameters->getCMPar(j, 0);
-        tracks[num].initIsBG            = false;
 
         /// Загрузка начальных данных из таблицы
+        tracks[num].initIsBG            = false;
         tracks[num].initStartPos.setX(trackParameters->getCMPar(j, 1));
         tracks[num].initStartPos.setY(trackParameters->getCMPar(j, 2));
+        tracks[num].initSpeed           = trackParameters->getCMPar(j, 3);
         tracks[num].initFinalPos        = QPointF();
-        tracks[num].initCourse          = qDegreesToRadians(trackParameters->getCMPar(j, 3));
-        tracks[num].initSpeed           = trackParameters->getCMPar(j, 4);
-        tracks[num].initAcceleration    = trackParameters->getCMPar(j, 5);
-        tracks[num].initQuant           = trackParameters->getCMPar(j, 6);
+        tracks[num].initCourse          = qDegreesToRadians(trackParameters->getCMPar(j, 4));
+        tracks[num].initQuant           = trackParameters->getCMPar(j, 5);
     }
 
     /// Загрузка параметров БЦ
@@ -264,12 +263,11 @@ void Painter::initTrackPar()
         tracks[num].initIsBG            = true;
         tracks[num].initStartPos.setX(trackParameters->getBGPar(j, 1));
         tracks[num].initStartPos.setY(trackParameters->getBGPar(j, 2));
-        tracks[num].initFinalPos.setX(trackParameters->getBGPar(j, 3));
-        tracks[num].initFinalPos.setY(trackParameters->getBGPar(j, 4));
+        tracks[num].initSpeed           = trackParameters->getBGPar(j, 3);
+        tracks[num].initFinalPos.setX(trackParameters->getBGPar(j, 4));
+        tracks[num].initFinalPos.setY(trackParameters->getBGPar(j, 5));
         tracks[num].initCourse          = qAtan2(tracks[num].initFinalPos.x() - tracks[num].initStartPos.x(),
                                                  tracks[num].initFinalPos.y() - tracks[num].initStartPos.y());
-        tracks[num].initSpeed           = trackParameters->getBGPar(j, 5);
-        tracks[num].initAcceleration    = trackParameters->getBGPar(j, 6);
         tracks[num].initQuant           = 1;
     }
 
@@ -279,22 +277,19 @@ void Painter::initTrackPar()
         /// Присвоение текущим координатам начальных координат траектории
         track.value().exactPos      = track.value().initStartPos;
 
-        /// Присвоение текущей скорости начальной скорости
-        track.value().exactSpeed    = track.value().initSpeed;
-
-        /// Очистка номера ассоциированного ПР
-        track.value().numArea       = -1;
-
-        /// Обнуление количества измерений
-        track.value().countMeas     = 0;
-
         /// Обнуление координат начальной точки и экстраполированного конца траектории
         track.value().startPos      = QPointF();
         track.value().finalPos      = QPointF();
 
+        /// Обнуление количества измерений
+        track.value().countMeas     = 0;
+
         /// Обнуление рекурентно использующихся при сглаживании проекций вектора скорости с погрешностями
         track.value().smoothVx      = 0.0;
         track.value().smoothVy      = 0.0;
+
+        /// Очистка номера ассоциированного ПР
+        track.value().numArea       = -1;
 
         /// Обнуление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
         track.value().sumDiffTime   = 0.0;
@@ -305,19 +300,18 @@ void Painter::initTrackPar()
 }
 
 /// Движение трасс и сглаживание измерений
-void Painter::trackMovement()
+void Painter::tracksMovement()
 {
     QMap <int, Track>::iterator track = tracks.begin();
     for(; track != tracks.end(); ++track)
     {
         /// Точные значения
-        track.value().exactSpeed    += track.value().initAcceleration   * DELTA_T;
-        track.value().exactPos      += QPointF(track.value().measSpeed  * qSin(track.value().initCourse),
-                                               track.value().measSpeed  * qCos(track.value().initCourse))   * DELTA_T;
+        track.value().exactPos      += QPointF(track.value().initSpeed  * qSin(track.value().initCourse),
+                                               track.value().initSpeed  * qCos(track.value().initCourse))   * DELTA_T;
 
         /// Внесение погрешностей
+        track.value().measSpeed     = track.value().initSpeed  + gaussDistribution(0, Track::ERR_SPEED);
         track.value().measCourse    = track.value().initCourse  + qDegreesToRadians(uniformDistribution(0, Track::ERR_COURSE));
-        track.value().measSpeed     = track.value().exactSpeed  + gaussDistribution(0, Track::ERR_SPEED);
 
         /// Сглаживание проекции вектора скорости на ось абсцисс
         if(track.value().smoothVx == 0.0)
@@ -410,7 +404,7 @@ void Painter::associationTrackArea()
 }
 
 /// Расчет времени поражения ПР
-void Painter::calcErrTime()
+void Painter::calcTime()
 {
     QMap <int, Track>::iterator track = tracks.begin();
     for(; track != tracks.end(); ++track)
@@ -449,8 +443,9 @@ void Painter::calcErrTime()
             /// --------------------------------------------------
 
             /// Вычисление разности времени поражения с погрешностью и точного времени поражения в текущий момент времени
-            track.value().diffTime      = track.value().startTime - (calcDistance(track.value().startPos, track.value().exactPos) /
-                                                                     track.value().measSpeed) - track.value().timeToPA;
+            track.value().diffTime      = track.value().startTime -
+                                         (calcDistance(track.value().startPos, track.value().exactPos) / track.value().measSpeed) -
+                                          track.value().timeToPA;
 
             /// Вычисление суммы квадратов разности времени поражения с погрешностью и точного времени поражения
             track.value().sumDiffTime   += track.value().diffTime * track.value().diffTime;
@@ -473,10 +468,6 @@ void Painter::resetTracks()
     for(; track != tracks.end();)
     {
         isReset = false;
-
-        /// Сброс трассы при отрицательной скорости
-        if(track.value().exactSpeed < 0.0)
-            isReset = true;
 
         int numArea = track.value().numArea;
         if(numArea != -1 &&

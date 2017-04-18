@@ -50,13 +50,13 @@ private:
     void            initTrackPar();
 
     /// Движение трасс и сглаживание измерений
-    void            trackMovement();
+    void            tracksMovement();
 
     /// Ассоциация трасс с позиционными районами
     void            associationTrackArea();
 
     /// Расчет времени поражения ПР
-    void            calcErrTime();
+    void            calcTime();
 
     /// Сброс трасс
     void            resetTracks();

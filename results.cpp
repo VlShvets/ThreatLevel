@@ -112,6 +112,7 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
         if(area.value().numTrack.count() != 0 &&
            area.value().numTrack.at(0) == Track::numTrackMinErrTime)
         {
+            tResults->item(i, 0)->setBackgroundColor(QColor(255, 0, 0, 100));
             tResults->item(i, 7)->setBackgroundColor(QColor(255, 0, 0, 100));
             tResults->item(i, 8)->setBackgroundColor(QColor(255, 0, 0, 100));
         }
