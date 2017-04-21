@@ -76,17 +76,13 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
             p.restore();
         }
 
-        /// Отрисовка критического времени при минимальной скорости
+        /// Отрисовка критического времени при минимально и максимально возможной скорости
         pen.setStyle(Qt::DashLine);
         pen.setColor(Qt::darkRed);
         pen.setWidth(1);
         p.setPen(pen);
         p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MIN_SPEED,
                       area.value().initCritTime * Track::MIN_SPEED);
-
-        /// Отрисовка критического времени при максимальной скорости
-        pen.setColor(Qt::darkGreen);
-        p.setPen(pen);
         p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MAX_SPEED,
                       area.value().initCritTime * Track::MAX_SPEED);
 
@@ -382,7 +378,7 @@ void Painter::associationTrackArea()
 
                 /// Определение времени поражения ПР от начальной точки траектории
                 track.value().startTime     = track.value().startDist /
-                                              track.value().measSpeed * qCos(track.value().angCourseToPA);
+                                             (track.value().measSpeed * qCos(track.value().angCourseToPA));
             }
             /// Трасса перестала быть ассоциирована с каким-либо ПР
             else
@@ -396,7 +392,7 @@ void Painter::associationTrackArea()
             /// Присвоение начальной точки траектории текущих координат
             track.value().startPos      = track.value().exactPos;
 
-            /// Подсчёт точки для отображения курса до ассоциации с сПР
+            /// Подсчёт точки для отображения курса до ассоциации с ПР
             track.value().finalPos      = track.value().startPos + LENGTH * QPointF(qSin(track.value().initCourse),
                                                                                     qCos(track.value().initCourse));
         }
