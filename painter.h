@@ -49,42 +49,51 @@ private:
     /// Начальная инициализация параметров трасс
     void            initTrackPar();
 
-    /// Движение трасс и сглаживание измерений
-    void            tracksMovement();
+    /// Движение трасс и внесение погрешностей измерения
+    void            movementOfTracks();
 
-    /// Ассоциация трасс с позиционными районами
-    void            associationTrackArea();
+    /// Сглаживание погрешностей измерения
+    void            smootheningOfMeasurement();
 
-    /// Расчет времени поражения ПР
-    void            calcTime();
+    /// Идентификация трасс с позиционными районами
+    void            identificationOfTracksWithAreas();
+
+    /// Расчет связанных со временем переменных
+    void            calculationOfTime();
+
+    /// Вычисление координат экстраполированных концов траекторий
+    void            calcFinalPosOfTracks();
 
     /// Сброс трасс
     void            resetTracks();
 
-    /// Сортировка трасс и определение номера трассы с минимальным временем поражения ПР
-    void            calcNumTrackMinErrTime();
+    /// Определение номера трассы с минимальным временем преодоления расстояния до ПР путем сортировки
+    int             numTrackOfMinTime();
 
     /// Расчет количества крылатых ракет
-    void            calcCMcount();
+    void            calculationOfCMCount();
 
     /// Расчет количества баллистических целей
-    void            calcBGcount();
+    void            calculationOfBGCount();
 
-    /// Расчет количественного состава налёта с учетом тратилового эквивалента БЦ
-    void            calcRaidCount();
+    /// Расчет количественного состава налёта с учетом тротилового эквивалента БЦ
+    void            calculationOfRaidCount();
 
-    /// Определение для трассы номера ближайшего по курсу позиционного района
-    int             numOnCourseMinDistanceArea(const Track &_track);
+    /// Определение попадания в зону обнаружения
+    bool            trackIsDetected(const Track &_track);
 
-    /// Быстрая сортировка трасс по времени поражения с погрешностью определенного ПР
+    /// Определение номера позиционного района по попаданию конечной точки траектории БЦ
+    int             numAreaHitFinalPosOfBG(const Track &_track);
+
+    /// Определение номера позиционного района ближайшего по курсу КР
+    int             numAreaNearestOnCourseOfCM(const Track &_track);
+
+    /// Быстрая сортировка трасс по времени поражения определенного ПР
     void            quickSortTracks(QVector <int> &_numTrack, const int _first, const int _last);
 
     /// --------------------------------------------------
     /// Статические функции
     /// --------------------------------------------------
-
-    /// Вычисление координат экстраполированного конца траектории
-    static const QPointF    calcEndPos(const Track &_track, const Area &_area);
 
     /// Вычисление расстояния между двумя точками
     static float            calcDistance(const QPointF &_p1, const QPointF &_p2);
