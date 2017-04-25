@@ -174,9 +174,6 @@ void Painter::timerEvent(QTimerEvent *)
     /// Расчет связанных со временем переменных
     calculationOfTime();
 
-    /// Вычисление координат экстраполированных концов траекторий
-    calcFinalPosOfTracks();
-
     /// Определение номера трассы с минимальным временем преодоления расстояния до ПР путем сортировки
     Track::numTrackMinErrTime = numTrackOfMinTime();
 
@@ -347,11 +344,87 @@ void Painter::smootheningOfMeasurement()
 /// Идентификация трасс с позиционными районами
 void Painter::identificationOfTracksWithAreas()
 {
+    Area::detectTracksCount = 0;    /// Количествообнаруженных не идентифицированных ни с каким ПР трасс в текущий момент
+
     QMap <int, Track>::iterator track = tracks.begin();
     for(; track != tracks.end(); ++track)
-    {        
-        /// Определение попадания в зону обнаружения
-        if(!trackIsDetected(track.value()))
+    {
+        if(trackIsDetected(track.value()))
+        {
+            /// Определение номера позиционного района
+            float numArea;
+            if(track.value().initIsBG)
+                numArea = numAreaHitFinalPosOfBG(track.value());
+            else
+                numArea = numAreaNearestOnCourseOfCM(track.value());
+
+            /// Трасса идентифицированна с ПР
+            if(numArea != -1 &&
+               areas.contains(numArea))
+            {
+                /// Вычисление критической дистанции
+                float critDistance;     /// Критическая дистанция
+                if(track.value().measSpeed * areas[numArea].initCritTime > areas[numArea].initRadius)
+                    critDistance = track.value().measSpeed * areas[numArea].initCritTime;
+                else
+                    critDistance = areas[numArea].initRadius;
+
+                /// Вычисление координат экстраполированного конца траектории
+                track.value().finalPos = track.value().startPos +
+                        QPointF((track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qSin(track.value().measCourse),
+                                (track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qCos(track.value().measCourse));
+
+                /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
+    //            calcTanPoints(areas[numArea].initPos, areas[numArea].initRadius,
+    //                          track.value().pos, track.value().tanPoint1, track.value().tanPoint2);
+            }
+            /// Трасса не идентифицированна с ПР
+            else
+            {
+                /// Расчет количества обнаруженных не идентифицированных ни с каким ПР трасс в текущий момент
+                ++Area::detectTracksCount;
+
+                /// Подсчет координат конечной точки линии направления вектора скорости
+                track.value().finalPos = track.value().exactPos;
+            }
+
+            if(track.value().numArea != numArea)
+            {
+                /// Трасса была идентифицированна с другим ПР
+                if(track.value().numArea != -1 &&
+                   areas.contains(track.value().numArea))
+                {
+                    /// Удаление номера трассы из списка номеров идентифицированных со старым ПР трасс
+                    if(areas[track.value().numArea].numTrack.contains(track.key()))
+                        areas[track.value().numArea].numTrack.removeOne(track.key());
+                }
+
+                /// Изменение номера идентифицированного ПР
+                track.value().numArea   = numArea;
+
+                /// Трасса стала идентифицированна с новым ПР
+                if(track.value().numArea != -1 &&
+                   areas.contains(track.value().numArea))
+                {
+                    /// Добавление номера трассы в список номеров идентифицированных с новым ПР трасс
+                    if(!areas[track.value().numArea].numTrack.contains(track.key()))
+                        areas[track.value().numArea].numTrack.push_back(track.key());
+
+                    /// Определение расстояния от начальной точки траектории до центра ПР
+                    track.value().startDist     = calcDistance(track.value().startPos, areas[track.value().numArea].initPos);
+
+                    /// Определение угла между курсом и отрезком от начальной точки траектории до центра ПР
+                    track.value().angCourseToPA = track.value().measCourse -
+                                                  qAtan2(areas[track.value().numArea].initPos.x() - track.value().startPos.x(),
+                                                         areas[track.value().numArea].initPos.y() - track.value().startPos.y());
+
+                    /// Определение времения преодоления расстояния от начальной точки траектории до центра ПР
+                    track.value().startTime     = track.value().startDist /
+                                                 (track.value().measSpeed * qCos(track.value().angCourseToPA));
+                }
+            }
+        }
+        else
         {
             /// Присвоение координатам начальной точки траектории текущих координат
             track.value().startPos  = track.value().exactPos;
@@ -359,51 +432,6 @@ void Painter::identificationOfTracksWithAreas()
             /// Подсчет координат конечной точки линии направления вектора скорости
             track.value().finalPos  = track.value().startPos + LENGTH * QPointF(qSin(track.value().initCourse),
                                                                                 qCos(track.value().initCourse));
-
-            continue;
-        }
-
-        /// Определение номера позиционного района
-        float numArea;
-        if(track.value().initIsBG)
-            numArea = numAreaHitFinalPosOfBG(track.value());
-        else
-            numArea = numAreaNearestOnCourseOfCM(track.value());
-
-        if(track.value().numArea != numArea)
-        {
-            /// Трасса была идентифицированна с другим ПР
-            if(track.value().numArea != -1 &&
-               areas.contains(track.value().numArea))
-            {
-                /// Удаление номера трассы из списка номеров идентифицированных со старым ПР трасс
-                if(areas[track.value().numArea].numTrack.contains(track.key()))
-                    areas[track.value().numArea].numTrack.removeOne(track.key());
-            }
-
-            /// Изменение номера идентифицированного ПР
-            track.value().numArea   = numArea;
-
-            /// Трасса стала идентифицированна с новым ПР
-            if(track.value().numArea != -1 &&
-               areas.contains(track.value().numArea))
-            {
-                /// Добавление номера трассы в список номеров идентифицированных с новым ПР трасс
-                if(!areas[track.value().numArea].numTrack.contains(track.key()))
-                    areas[track.value().numArea].numTrack.push_back(track.key());
-
-                /// Определение расстояния от начальной точки траектории до центра ПР
-                track.value().startDist     = calcDistance(track.value().startPos, areas[track.value().numArea].initPos);
-
-                /// Определение угла между курсом и отрезком от начальной точки траектории до центра ПР
-                track.value().angCourseToPA = track.value().measCourse -
-                                              qAtan2(areas[track.value().numArea].initPos.x() - track.value().startPos.x(),
-                                                     areas[track.value().numArea].initPos.y() - track.value().startPos.y());
-
-                /// Определение времения преодоления расстояния от начальной точки траектории до центра ПР
-                track.value().startTime     = track.value().startDist /
-                                             (track.value().measSpeed * qCos(track.value().angCourseToPA));
-            }
         }
     }
 }
@@ -452,33 +480,6 @@ void Painter::calculationOfTime()
 
             /// Расчет среднеквадратического отклонения времени преодоления расстояния до ПР
             track.value().rmsDiffTime   = qSqrt(track.value().sumDiffTime / track.value().countMeas);
-        }
-    }
-}
-
-/// Вычисление координат экстраполированных концов траекторий
-void Painter::calcFinalPosOfTracks()
-{
-    QMap <int, Track>::iterator track = tracks.begin();
-    for(; track != tracks.end(); ++track)
-    {
-        int numArea = track.value().numArea;
-        if(numArea != -1 &&
-           areas.contains(numArea))
-        {
-            float critDistance;
-            if(track.value().measSpeed * areas[numArea].initCritTime > areas[numArea].initRadius)
-                critDistance = track.value().measSpeed * areas[numArea].initCritTime;
-            else
-                critDistance = areas[numArea].initRadius;
-
-            track.value().finalPos = track.value().startPos +
-                    QPointF((track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qSin(track.value().measCourse),
-                            (track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qCos(track.value().measCourse));
-
-            /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
-//            calcTanPoints(areas[numArea].initPos, areas[numArea].initRadius,
-//                          track.value().pos, track.value().tanPoint1, track.value().tanPoint2);
         }
     }
 }
@@ -555,7 +556,7 @@ void Painter::calculationOfCMCount()
     QMap <int, Area>::iterator area = areas.begin();
     for(; area != areas.end(); ++area)
     {
-        /// Вычисление количества ассоциированных с ПР крылатых ракет
+        /// Вычисление количества идентифицированных с конкретным ПР крылатых ракет
         area.value().CMCount = 0;
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
@@ -563,7 +564,7 @@ void Painter::calculationOfCMCount()
                 area.value().CMCount += tracks[area.value().numTrack.at(j)].initQuant;
         }
 
-        /// Вычисление максимального количества ассоциированных с ПР крылатых ракет
+        /// Вычисление максимального количества идентифицированных с конкретным ПР крылатых ракет
         if(area.value().CMMaxCount < area.value().CMCount)
             area.value().CMMaxCount = area.value().CMCount;
 
@@ -571,9 +572,9 @@ void Painter::calculationOfCMCount()
         Area::CMSumCount    += area.value().CMCount;
     }
 
-    /// Вычисление максимального суммарного количества крылатых ракет по всем ПР
-    if(Area::CMMaxSumCount < Area::CMSumCount)
-        Area::CMMaxSumCount = Area::CMSumCount;
+    /// Вычисление максимального суммарного количества крылатых ракет с учетом не идентифицированных трасс
+    if(Area::CMMaxSumCount < Area::CMSumCount + Area::detectTracksCount)
+        Area::CMMaxSumCount = Area::CMSumCount + Area::detectTracksCount;
 }
 
 /// Расчет количества баллистических целей
@@ -583,7 +584,7 @@ void Painter::calculationOfBGCount()
     QMap <int, Area>::iterator area = areas.begin();
     for(; area != areas.end(); ++area)
     {
-        /// Вычисление количества ассоциированных с ПР баллистических целей
+        /// Вычисление количества идентифицированных с конкретным ПР баллистических целей
         area.value().BGCount = 0;
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
@@ -591,7 +592,7 @@ void Painter::calculationOfBGCount()
                 area.value().BGCount += tracks[area.value().numTrack.at(j)].initQuant;
         }
 
-        /// Вычисление максимального количества ассоциированных с ПР баллистических целей
+        /// Вычисление максимального количества идентифицированных с конкретным ПР баллистических целей
         if(area.value().BGMaxCount < area.value().BGCount)
             area.value().BGMaxCount = area.value().BGCount;
 
@@ -607,29 +608,29 @@ void Painter::calculationOfBGCount()
 /// Расчет количественного состава налёта с учетом тротилового эквивалента БЦ
 void Painter::calculationOfRaidCount()
 {
-    Area::maxTracksCount = 0;
+    Area::idenTracksMaxCount = 0;
     Area::raidSumCount = 0;
     QMap <int, Area>::iterator area = areas.begin();
     for(; area != areas.end(); ++area)
     {
-        /// Вычисление количественного состава налета по ПР с учетом тротилового эквивалента БЦ
+        /// Вычисление количественного состава налета по конкретному ПР с учетом тротилового эквивалента БЦ
         area.value().raidCount = area.value().CMCount + Track::BG_WEIGHT_COEF * area.value().BGCount;
 
-        /// Вычисление максимального количественного состава налета по ПР с учетом тротилового эквивалента БЦ
+        /// Вычисление максимального количественного состава налета по конкретному ПР с учетом тротилового эквивалента БЦ
         if(area.value().raidMaxCount < area.value().raidCount)
             area.value().raidMaxCount  = area.value().raidCount;
 
         /// Вычисление количественного состава налета по всем ПР с учетом тротилового эквивалента БЦ
-        Area::raidSumCount += area.value().raidCount;
+        Area::raidSumCount  += area.value().raidCount;
 
-        /// Определение максимального количества ассоциированных с каким-либо ПР трасс в текущий момент
-        if(Area::maxTracksCount < area.value().numTrack.count())
-            Area::maxTracksCount = area.value().numTrack.count();
+        /// Определение максимального количества идентифицированных с каким-либо ПР трасс в текущий момент
+        if(Area::idenTracksMaxCount < area.value().numTrack.count())
+            Area::idenTracksMaxCount = area.value().numTrack.count();
     }
 
-    /// Вычисление максимального количественного состава налета по всем ПР с учетом тротилового эквивалента БЦ
-    if(Area::raidMaxSumCount < Area::raidSumCount)
-        Area::raidMaxSumCount  = Area::raidSumCount;
+    /// Вычисление максимального количественного состава налета с учетом не идентифицированных трасс
+    if(Area::raidMaxSumCount < Area::raidSumCount + Area::detectTracksCount)
+        Area::raidMaxSumCount  = Area::raidSumCount + Area::detectTracksCount;
 }
 
 

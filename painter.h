@@ -61,9 +61,6 @@ private:
     /// Расчет связанных со временем переменных
     void            calculationOfTime();
 
-    /// Вычисление координат экстраполированных концов траекторий
-    void            calcFinalPosOfTracks();
-
     /// Сброс трасс
     void            resetTracks();
 

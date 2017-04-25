@@ -3,7 +3,8 @@
 namespace ThreatLevel
 {
 
-int Area::maxTracksCount;
+int Area::detectTracksCount;
+int Area::idenTracksMaxCount;
 
 int Area::CMSumCount;
 int Area::CMMaxSumCount;
@@ -52,7 +53,7 @@ Results::~Results()
 void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> &_tracks)
 {
     tResults->setRowCount(_areas.count() + 1);
-    tResults->setColumnCount(Area::maxTracksCount + 8);
+    tResults->setColumnCount(Area::idenTracksMaxCount + 8);
     tResults->setHorizontalHeaderLabels(QStringList() << tr("№ ПР") << tr("КР") << tr("max КР") <<
                                         tr("БЦ") << tr("max БЦ") << tr("КР + БЦ") << tr("max КР + БЦ") << tr("СКО"));
 
@@ -134,7 +135,8 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
     /// --------------------------------------------------
 
     /// Суммарное количество крылатых ракет
-    tResults->setItem(_areas.count(), 1, new QTableWidgetItem(QString::number(Area::CMSumCount)));
+    tResults->setItem(_areas.count(), 1, new QTableWidgetItem(QString::number(Area::CMSumCount) + " + " +
+                                                              QString::number(Area::detectTracksCount)));
     tResults->item(_areas.count(), 1)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальное суммарное количество крылатых ракет
@@ -150,7 +152,8 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
     tResults->item(_areas.count(), 4)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Количественный состав налета по всем ПР с учетом тратилового эквивалента БЦ
-    tResults->setItem(_areas.count(), 5, new QTableWidgetItem(QString::number(Area::raidSumCount)));
+    tResults->setItem(_areas.count(), 5, new QTableWidgetItem(QString::number(Area::raidSumCount) + " + " +
+                                                              QString::number(Area::detectTracksCount)));
     tResults->item(_areas.count(), 5)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальный количественный состав налета по всем ПР с учетом тратилового эквивалента БЦ
@@ -158,14 +161,14 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
     tResults->item(_areas.count(), 6)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Отображение числа количественного состава налета по всем ПР с учетом тратилового эквивалента БЦ
-    lcdMaxSumTrack->display(Area::raidSumCount);
+    lcdMaxSumTrack->display(Area::raidSumCount + Area::detectTracksCount);
 
     /// Отправка количественного состава налета с учетом тратилового эквивалента БЦ на график
     for(area = _areas.begin(); area != _areas.end(); ++area)
         trackGraph->loadTrackCount((int) area.key(), area.value().raidCount);
 
     /// Отправка количественного состава налета по всем ПР с учетом тратилового эквивалента БЦ на график
-    trackGraph->loadTrackCount(0, Area::raidSumCount);
+    trackGraph->loadTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
 }
 
 /// Очистка таблицы результатов
