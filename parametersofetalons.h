@@ -1,5 +1,5 @@
-#ifndef TRACKPARAMETERS_H
-#define TRACKPARAMETERS_H
+#ifndef PARAMETERSOFETALONS_H
+#define PARAMETERSOFETALONS_H
 
 #include <QGridLayout>
 #include <QSlider>
@@ -11,14 +11,14 @@
 namespace ThreatLevel
 {
 
-/// Класс виджета редактирования параметров трасс
-class TrackParameters : public QWidget
+/// Класс виджета редактирования параметров эталонов
+class ParametersOfEtalons : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit        TrackParameters(QWidget *parent = 0);
-    ~TrackParameters();
+    explicit        ParametersOfEtalons(QWidget *parent = 0);
+    ~ParametersOfEtalons();
 
     /// Получить количество КР
     inline int      getCMCount() const;
@@ -75,29 +75,29 @@ private:
 };
 
 /// Получить количество КР
-int TrackParameters::getCMCount() const
+int ParametersOfEtalons::getCMCount() const
 {
     return tCMPar->rowCount();
 }
 
 /// Получить параметр КР по номеру строки и номеру столбца
-float TrackParameters::getCMPar(int _row, int _column) const
+float ParametersOfEtalons::getCMPar(int _row, int _column) const
 {
     return tCMPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
 }
 
 /// Получить количество БЦ
-int TrackParameters::getBGCount() const
+int ParametersOfEtalons::getBGCount() const
 {
     return tBGPar->rowCount();
 }
 
 /// Получить параметр БЦ по номеру строки и номеру столбца
-float TrackParameters::getBGPar(int _row, int _column) const
+float ParametersOfEtalons::getBGPar(int _row, int _column) const
 {
     return tBGPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
 }
 
 }
 
-#endif // SETTINGTRACK_H
+#endif // PARAMETERSOFETALONS_H

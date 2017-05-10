@@ -18,7 +18,7 @@ int Area::raidMaxSumCount;
 int Track::numTrackMinErrTime;
 
 /// Класс виджета отображения результатов
-Results::Results(TrackGraph *_trackGraph, QWidget *parent) : QWidget(parent), trackGraph(_trackGraph)
+Results::Results(GraphOfTracksCount *_graphOfTrackCount, QWidget *_parent) : QWidget(_parent), graphOfTrackCount(_graphOfTrackCount)
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 
@@ -165,10 +165,10 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
 
     /// Отправка количественного состава налета с учетом тратилового эквивалента БЦ на график
     for(area = _areas.begin(); area != _areas.end(); ++area)
-        trackGraph->loadTrackCount((int) area.key(), area.value().raidCount);
+        graphOfTrackCount->loadTrackCount((int) area.key(), area.value().raidCount);
 
     /// Отправка количественного состава налета по всем ПР с учетом тратилового эквивалента БЦ на график
-    trackGraph->loadTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
+    graphOfTrackCount->loadTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
 }
 
 /// Очистка таблицы результатов
@@ -177,7 +177,7 @@ void Results::resetTable()
     tResults->setRowCount(0);
     tResults->setColumnCount(0);
 
-    trackGraph->resetGraph();
+    graphOfTrackCount->resetGraph();
 }
 
 

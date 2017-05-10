@@ -59,28 +59,28 @@ Settings::~Settings()
 /// Запуск и остановка таймера
 void Settings::changeState()
 {
-    if(isStart)
-    {
-        if(painter->getIdTimer() != -1)
-            painter->killTimer(painter->getIdTimer());
-        pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    }
-    else
-    {
-        painter->setIdTimer(painter->startTimer((int) 100 / lTimerInterval->intValue()));
-        pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-    }
-    isStart = !isStart;
+//    if(isStart)
+//    {
+//        if(painter->getIdTimer() != -1)
+//            painter->killTimer(painter->getIdTimer());
+//        pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+//    }
+//    else
+//    {
+//        painter->setIdTimer(painter->startTimer((int) 100 / lTimerInterval->intValue()));
+//        pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+//    }
+//    isStart = !isStart;
 }
 
 /// Изменение интервала таймера
 void Settings::changeTimerInterval(int _interval)
 {
-    if(isStart && painter->getIdTimer() != -1)
-    {
-        painter->killTimer(painter->getIdTimer());
-        painter->setIdTimer(painter->startTimer((int) 100 / _interval));
-    }
+//    if(isStart && painter->getIdTimer() != -1)
+//    {
+//        painter->killTimer(painter->getIdTimer());
+//        painter->setIdTimer(painter->startTimer((int) 100 / _interval));
+//    }
 }
 
 }

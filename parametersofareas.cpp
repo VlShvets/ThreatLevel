@@ -1,14 +1,14 @@
-#include "areaparameters.h"
+#include "parametersofareas.h"
 
 namespace ThreatLevel
 {
 
-/// Класс виджета редактирования параметров позиционных районов
-AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
+/// Класс виджета редактирования параметров ЗКВ
+ParametersOfAreas::ParametersOfAreas(QWidget *parent) : QWidget(parent)
 {
     QGridLayout *gridLayout = new QGridLayout(this);
 
-    gridLayout->addWidget(new QLabel(tr("Количество ПР: ")), 0, 0, 1, 1);
+    gridLayout->addWidget(new QLabel(tr("Количество ЗКВ: ")), 0, 0, 1, 1);
 
     QSlider *sliderArea = new QSlider(Qt::Horizontal);
     sliderArea->setRange(1, AREAS_MAX_COUNT);
@@ -27,10 +27,10 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     QObject::connect(sliderArea, SIGNAL(valueChanged(int)), this,           SLOT(initPar(int)));
     gridLayout->addWidget(lNumberArea, 0, 2, 1, 1);
 
-    gridLayout->addWidget(new QLabel(tr("\tНачальные параметры позиционных районов:")), 1, 0, 1, 3);
+    gridLayout->addWidget(new QLabel(tr("\tНачальные параметры ЗКВ:")), 1, 0, 1, 3);
 
     tAreaPar = new QTableWidget(AREAS_DEF_COUNT, 6, this);
-    tAreaPar->setHorizontalHeaderLabels(QStringList() << tr("№ ПР") << tr("Координата X") << tr("Координата Y") <<
+    tAreaPar->setHorizontalHeaderLabels(QStringList() << tr("№ ЗКВ") << tr("Координата X") << tr("Координата Y") <<
                                         tr("Радиус") << tr("T критическое") << tr("R обнаружения"));
     gridLayout->addWidget(tAreaPar, 2, 0, 1, 3);
 
@@ -39,20 +39,20 @@ AreaParameters::AreaParameters(QWidget *parent) : QWidget(parent)
     initPar(AREAS_DEF_COUNT);
 }
 
-AreaParameters::~AreaParameters()
+ParametersOfAreas::~ParametersOfAreas()
 {
     delete tAreaPar;
 }
 
-/// Начальная инициализация параметров ПР
-void AreaParameters::initPar(int _count)
+/// Начальная инициализация параметров ЗКВ
+void ParametersOfAreas::initPar(int _count)
 {
     tAreaPar->setRowCount(_count);
 
     switch(_count)
     {
     case 5:
-        /// Позиционный район №5
+        /// ЗКВ №5
         tAreaPar->setItem(4, 0, new QTableWidgetItem(QString::number(5)));
         tAreaPar->setItem(4, 1, new QTableWidgetItem(QString::number(250000.0)));
         tAreaPar->setItem(4, 2, new QTableWidgetItem(QString::number(0.0)));
@@ -61,7 +61,7 @@ void AreaParameters::initPar(int _count)
         tAreaPar->setItem(4, 5, new QTableWidgetItem(QString::number(320000.0)));
 
     case 4:
-        /// Позиционный район №4
+        /// ЗКВ №4
         tAreaPar->setItem(3, 0, new QTableWidgetItem(QString::number(4)));
         tAreaPar->setItem(3, 1, new QTableWidgetItem(QString::number(0.0)));
         tAreaPar->setItem(3, 2, new QTableWidgetItem(QString::number(-250000.0)));
@@ -70,7 +70,7 @@ void AreaParameters::initPar(int _count)
         tAreaPar->setItem(3, 5, new QTableWidgetItem(QString::number(320000.0)));
 
     case 3:
-        /// Позиционный район №3
+        /// ЗКВ №3
         tAreaPar->setItem(2, 0, new QTableWidgetItem(QString::number(3)));
         tAreaPar->setItem(2, 1, new QTableWidgetItem(QString::number(-250000.0)));
         tAreaPar->setItem(2, 2, new QTableWidgetItem(QString::number(0.0)));
@@ -79,7 +79,7 @@ void AreaParameters::initPar(int _count)
         tAreaPar->setItem(2, 5, new QTableWidgetItem(QString::number(320000.0)));
 
     case 2:
-        /// Позиционный район №2
+        /// ЗКВ №2
         tAreaPar->setItem(1, 0, new QTableWidgetItem(QString::number(2)));
         tAreaPar->setItem(1, 1, new QTableWidgetItem(QString::number(0.0)));
         tAreaPar->setItem(1, 2, new QTableWidgetItem(QString::number(250000.0)));
@@ -88,7 +88,7 @@ void AreaParameters::initPar(int _count)
         tAreaPar->setItem(1, 5, new QTableWidgetItem(QString::number(320000.0)));
 
     case 1:
-        /// Позиционный район №1
+        /// ЗКВ №1
         tAreaPar->setItem(0, 0, new QTableWidgetItem(QString::number(1)));
         tAreaPar->setItem(0, 1, new QTableWidgetItem(QString::number(0.0)));
         tAreaPar->setItem(0, 2, new QTableWidgetItem(QString::number(0.0)));

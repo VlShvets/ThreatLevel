@@ -19,21 +19,30 @@ SOURCES += main.cpp\
     painter.cpp \
     results.cpp \
     mainwindow.cpp \
-    areaparameters.cpp \
     settings.cpp \
-    trackparameters.cpp \
-    trackgraph.cpp
+#    imitation.cpp \
+    parametersofetalons.cpp \
+    parametersofareas.cpp \
+#    mainthread.cpp \
+#    definitionofthreatlevel.cpp \
+#    tertiaryprocessingofdata.cpp \
+    graphoftrackscount.cpp
 
 HEADERS  += \
     painter.h \
     results.h \
     mainwindow.h \
-    areaparameters.h \
-    trackparameters.h \
     settings.h \
     area.h \
     track.h \
-    trackgraph.h
+#    imitation.h \
+    etalon.h \
+    parametersofetalons.h \
+    parametersofareas.h \
+#    mainthread.h \
+#    definitionofthreatlevel.h \
+#    tertiaryprocessingofdata.h \
+    graphoftrackscount.h
 
 unix {
     target.path = /usr/lib

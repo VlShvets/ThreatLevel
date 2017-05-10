@@ -7,19 +7,20 @@ namespace ThreatLevel
 MainWindow::MainWindow(QWidget *_parent)
     : QMainWindow(_parent)
 {
-#ifdef Q_OS_WIN         /// Widnows
+
+#ifdef Q_OS_WIN         /// Widnows (Qt 5)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("cp-1251"));
-#elif defined Q_OS_UNIX /// Linux
+#elif defined Q_OS_UNIX /// Linux   (Qt 4)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
 #endif
 
     this->setWindowTitle(tr("Определение уровня угроз"));
 
-    areaParameters = new AreaParameters;
-    trackParameters = new TrackParameters;
-    trackGraph = new TrackGraph;
-    results = new Results(trackGraph);
-    painter = new Painter(areaParameters, trackParameters, results);
+    parametersOfAreas = new ParametersOfAreas;
+    parametersOfEtalons = new ParametersOfEtalons;
+    graphOfTracksCount = new GraphOfTracksCount;
+    results = new Results(graphOfTracksCount);
+    painter = new Painter(parametersOfAreas, results);
     settings = new Settings(painter);
 
     /// Виджет отрисовки трасс и позиционных районов
@@ -34,7 +35,7 @@ MainWindow::MainWindow(QWidget *_parent)
 
     /// Виджет редактирования параметров позиционных районов
     QDockWidget *dAreaParameters = new QDockWidget(this);
-    dAreaParameters->setWidget(areaParameters);
+    dAreaParameters->setWidget(parametersOfAreas);
     dAreaParameters->setWindowTitle(tr("Параметры ПР"));
     dAreaParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
     dAreaParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
@@ -43,7 +44,7 @@ MainWindow::MainWindow(QWidget *_parent)
 
     /// Виджет редактирования параметров трасс
     QDockWidget *dTrackParameters = new QDockWidget(this);
-    dTrackParameters->setWidget(trackParameters);
+    dTrackParameters->setWidget(parametersOfEtalons);
     dTrackParameters->setWindowTitle(tr("Параметры трасс"));
     dTrackParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
     dTrackParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
@@ -52,7 +53,7 @@ MainWindow::MainWindow(QWidget *_parent)
 
     /// Виджет графика количественного состава
     QDockWidget *dTrackGraph = new QDockWidget(this);
-    dTrackGraph->setWidget(trackGraph);
+    dTrackGraph->setWidget(graphOfTracksCount);
     dTrackGraph->setWindowTitle(tr("График количественного состава налета"));
     dTrackGraph->setAllowedAreas(Qt::AllDockWidgetAreas);
     dTrackGraph->setFeatures(QDockWidget::AllDockWidgetFeatures);
@@ -67,6 +68,10 @@ MainWindow::MainWindow(QWidget *_parent)
     dResults->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dResults->setMinimumHeight(300);
     addDockWidget(Qt::RightDockWidgetArea, dResults);
+
+    /// Гласс главного потока вычислений и отрисовки
+//    ThreatLevel::MainThread mainThread(painter);
+//    mainThread.start();
 }
 
 MainWindow::~MainWindow()
@@ -74,9 +79,9 @@ MainWindow::~MainWindow()
     delete settings;
     delete painter;
     delete results;
-    delete areaParameters;
-    delete trackParameters;
-    delete trackGraph;
+    delete graphOfTracksCount;
+    delete parametersOfEtalons;
+    delete parametersOfAreas;
 }
 
 }

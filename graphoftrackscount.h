@@ -1,5 +1,5 @@
-#ifndef TRACKGRAPH_H
-#define TRACKGRAPH_H
+#ifndef GRAPHOFTRACKSCOUNT_H
+#define GRAPHOFTRACKSCOUNT_H
 
 #include "Grapher2D.h"
 
@@ -7,11 +7,11 @@ namespace ThreatLevel
 {
 
 /// Класс виджета графика количественного состава налёта
-class TrackGraph : public Grapher2D
+class GraphOfTracksCount : public Grapher2D
 {
 public:
-    explicit    TrackGraph(QWidget *_parent = 0);
-    ~TrackGraph();
+    explicit    GraphOfTracksCount(QWidget *_parent = 0);
+    ~GraphOfTracksCount();
 
     /// Загрузка количественного состава налета
     void        loadTrackCount(const int _numArea, const int _trackCount);
@@ -49,10 +49,10 @@ private:
     static const int    SHIFT           = 5;        /// Сдвиг график относительно правого края
     static const int    STEP_ZOOM       = 3;        /// Шаг масштабирования
     static const int    DEF_ZOOM        = 10;       /// Масштаб отображения по умолчанию
-    static const float  ORD_MEASURE     = 1.0;      /// Масштаб оси ординат
-    static const float  ORD_EXPANSION   = 2.0;      /// Параметр растяжения оси ординат
+    static constexpr float  ORD_MEASURE     = 1.0;      /// Масштаб оси ординат
+    static constexpr float  ORD_EXPANSION   = 2.0;      /// Параметр растяжения оси ординат
 };
 
 }
 
-#endif // TRACKGRAPH_H
+#endif // GRAPHOFTRACKSCOUNT_H

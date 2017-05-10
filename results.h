@@ -9,7 +9,7 @@
 
 #include "area.h"
 #include "track.h"
-#include "trackgraph.h"
+#include "graphoftrackscount.h"
 
 namespace ThreatLevel
 {
@@ -20,7 +20,7 @@ class Results : public QWidget
     Q_OBJECT
 
 public:
-    explicit        Results(TrackGraph *_trackGraph, QWidget *parent = 0);
+    explicit        Results(class GraphOfTracksCount *_graphOfTrackCount, QWidget *parent = 0);
     ~Results();
 
     /// Загрузка результатов
@@ -39,7 +39,7 @@ private:
     QTableWidget    *tResults;          /// Виджет отображения результатов
 
     /// Указатели на объекты классов
-    TrackGraph      *trackGraph;        /// Класс графика количественного состава налёта
+    GraphOfTracksCount  *graphOfTrackCount;        /// Класс графика количественного состава налёта
 
     /// --------------------------------------------------
     /// Константы
@@ -51,7 +51,7 @@ private:
 
 void Results::tableSelectionChanged(QItemSelection, QItemSelection)
 {
-    trackGraph->showGraph(tResults->selectedItems().first()->text().toInt());
+    graphOfTrackCount->showGraph(tResults->selectedItems().first()->text().toInt());
 }
 
 }

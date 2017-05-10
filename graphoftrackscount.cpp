@@ -1,10 +1,10 @@
-#include "trackgraph.h"
+#include "graphoftrackscount.h"
 
 namespace ThreatLevel
 {
 
 /// Класс виджета графика количественного состава налёта
-TrackGraph::TrackGraph(QWidget *_parent) : Grapher2D(_parent), numArea(0)
+GraphOfTracksCount::GraphOfTracksCount(QWidget *_parent) : Grapher2D(_parent), numArea(0)
 {
     setCSOrdMeasure(ORD_MEASURE);
     setCSAngles(false, true, false, false);
@@ -15,12 +15,12 @@ TrackGraph::TrackGraph(QWidget *_parent) : Grapher2D(_parent), numArea(0)
     setCSZoomCenter(true);
 }
 
-TrackGraph::~TrackGraph()
+GraphOfTracksCount::~GraphOfTracksCount()
 {
 }
 
 /// Загрузка количественного состава налета
-void TrackGraph::loadTrackCount(const int _numArea, const int _trackCount)
+void GraphOfTracksCount::loadTrackCount(const int _numArea, const int _trackCount)
 {
     /// Добавление количественного состава налета в список
     trackCount[_numArea].push_front(_trackCount);
@@ -32,7 +32,7 @@ void TrackGraph::loadTrackCount(const int _numArea, const int _trackCount)
     repaint();
 }
 
-void TrackGraph::showGraph(const int _numArea)
+void GraphOfTracksCount::showGraph(const int _numArea)
 {
     if(trackCount.contains(_numArea))
         numArea = _numArea;
@@ -41,7 +41,7 @@ void TrackGraph::showGraph(const int _numArea)
 }
 
 /// Очистка графика количественного состава налёта
-void TrackGraph::resetGraph()
+void GraphOfTracksCount::resetGraph()
 {
     QMap <int, QVector <int> >::iterator count = trackCount.begin();
     for(; count != trackCount.end(); ++count)
@@ -52,7 +52,7 @@ void TrackGraph::resetGraph()
     repaint();
 }
 
-void TrackGraph::paintEvent(QPaintEvent *_pEvent)
+void GraphOfTracksCount::paintEvent(QPaintEvent *_pEvent)
 {
     Grapher2D::paintEvent(_pEvent);
 

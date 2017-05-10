@@ -1,15 +1,16 @@
 #ifndef CALCANGLE_H
 #define CALCANGLE_H
 
+#include "parametersofareas.h"
+#include "parametersofetalons.h"
+#include "settings.h"
+#include "graphoftrackscount.h"
+
 #include <QApplication>
 #include <QMainWindow>
 #include <QTextCodec>
 #include <QToolBar>
 #include <QDockWidget>
-
-#include "areaparameters.h"
-#include "trackparameters.h"
-#include "settings.h"
 
 namespace ThreatLevel
 {
@@ -23,12 +24,12 @@ public:
 
 private:
     /// Указатели на объекты классов
-    AreaParameters      *areaParameters;    /// Класс редактирования параметров позиционных районов
-    TrackParameters     *trackParameters;   /// Класс редактирования параметров трасс
-    TrackGraph          *trackGraph;        /// Класс графика количественного состава
-    Results             *results;           /// Класс отображения результатов
-    Painter             *painter;           /// Класс отрисовки трасс и позиционных районов
-    Settings            *settings;          /// Класс настроек
+    ParametersOfAreas       *parametersOfAreas;     /// Класс редактирования параметров ЗКВ
+    ParametersOfEtalons     *parametersOfEtalons;   /// Класс редактирования параметров эталонов
+    GraphOfTracksCount      *graphOfTracksCount;    /// Класс графика количественного состава
+    Results                 *results;               /// Класс отображения результатов
+    Painter                 *painter;               /// Класс отрисовки трасс и позиционных районов
+    Settings                *settings;              /// Класс настроек
 };
 
 }

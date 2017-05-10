@@ -1,10 +1,10 @@
-#include "trackparameters.h"
+#include "parametersofetalons.h"
 
 namespace ThreatLevel
 {
 
 /// Класс виджета редактирования параметров трасс
-TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
+ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
 {
     QGridLayout *gridLayout = new QGridLayout(this);
 
@@ -88,7 +88,7 @@ TrackParameters::TrackParameters(QWidget *parent) : QWidget(parent)
     initBGPar(BG_DEF_COUNT);
 }
 
-TrackParameters::~TrackParameters()
+ParametersOfEtalons::~ParametersOfEtalons()
 {
     delete lGroupsOfCMCount;
     delete lCMInGroupCount;
@@ -98,7 +98,7 @@ TrackParameters::~TrackParameters()
 }
 
 /// Изменение количества КР в группе
-void TrackParameters::CMInGroupCountChanged(int _count)
+void ParametersOfEtalons::CMInGroupCountChanged(int _count)
 {
     CMInGroupCount = _count;
 
@@ -106,7 +106,7 @@ void TrackParameters::CMInGroupCountChanged(int _count)
 }
 
 /// Начальная инициализация параметров КР
-void TrackParameters::initCMPar(int _count)
+void ParametersOfEtalons::initCMPar(int _count)
 {
     tCMPar->setRowCount(_count);
 
@@ -207,7 +207,7 @@ void TrackParameters::initCMPar(int _count)
     }
 }
 
-void TrackParameters::initBGPar(int _count)
+void ParametersOfEtalons::initBGPar(int _count)
 {
     tBGPar->setRowCount(_count);
 
