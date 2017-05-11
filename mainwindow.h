@@ -23,13 +23,16 @@ public:
     ~MainWindow();
 
 private:
+    /// --------------------------------------------------
     /// Указатели на объекты классов
-    ParametersOfAreas       *parametersOfAreas;     /// Класс редактирования параметров ЗКВ
-    ParametersOfEtalons     *parametersOfEtalons;   /// Класс редактирования параметров эталонов
-    GraphOfTracksCount      *graphOfTracksCount;    /// Класс графика количественного состава
-    Results                 *results;               /// Класс отображения результатов
-    Painter                 *painter;               /// Класс отрисовки трасс и позиционных районов
-    Settings                *settings;              /// Класс настроек
+    /// --------------------------------------------------
+
+    ParametersOfAreas       *parametersOfAreas;     /// Класс виджета редактирования параметров ЗКВ
+    ParametersOfEtalons     *parametersOfEtalons;   /// Класс виджета редактирования параметров эталонов
+    Painter                 *painter;               /// Класс виджета отрисовки эталонов, трасс и ЗКВ
+    GraphOfTracksCount      *graphOfTracksCount;    /// Класс виджета графика количественного состава налёта
+    Results                 *results;               /// Класс виджета отображения таблицы результатов
+    class Settings                *settings;              /// Класс виджета настроек
 };
 
 }

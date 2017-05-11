@@ -6,13 +6,16 @@ namespace ThreatLevel
 {
 
 /// Класс виджета настроек
-Settings::Settings(Painter *_painter, QWidget *parent) :
-    QWidget(parent), painter(_painter), isStart(false)
+Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
+                   Painter *_painter, Results *_results, QWidget *_parent) :
+    QWidget(_parent), parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons),
+    painter(_painter), results(_results), isStart(false)
 {
     QHBoxLayout *hLayout = new QHBoxLayout(this);
 
     hLayout->addWidget(new QSplitter());
 
+    /// Кнопка "Начать с начала"
     QPushButton *pReStart = new QPushButton(tr("Начать с начала"));
     pReStart->setFixedWidth(200);
     QObject::connect(pReStart, SIGNAL(clicked()), painter, SLOT(reStart()));
@@ -22,14 +25,16 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QLabel(tr("Интервал таймера (100 / X):")));
 
+    /// Слайдер регулирования интервала таймера
     QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
-    sTimerInterval->setRange(1, TIMER_MAX_INTERVAL);
+    sTimerInterval->setRange(TIMER_MIN_INTERVAL, TIMER_MAX_INTERVAL);
     sTimerInterval->setTickInterval(1);
     sTimerInterval->setValue(TIMER_DEF_INTERVAL);
     sTimerInterval->setTickPosition(QSlider::TicksAbove);
     QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), this, SLOT(changeTimerInterval(int)));
     hLayout->addWidget(sTimerInterval);
 
+    /// Дисплей отображения интервала таймера
     lTimerInterval = new QLCDNumber(2);
     lTimerInterval->setSegmentStyle(QLCDNumber::Flat);
     lTimerInterval->setMode(QLCDNumber::Dec);
@@ -39,6 +44,7 @@ Settings::Settings(Painter *_painter, QWidget *parent) :
 
     hLayout->addWidget(new QSplitter());
 
+    /// Кнопка "Play/Pause"
     pStartStop = new QPushButton;
     pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
     pStartStop->setFixedWidth(200);
@@ -56,9 +62,29 @@ Settings::~Settings()
     delete lTimerInterval;
 }
 
-/// Запуск и остановка таймера
-void Settings::changeState()
+/// Создание нового потока вычислений (удаление уже имеющегося потока)
+void Settings::reStart()
 {
+
+//    QMap <int, Area>::iterator area = areas.begin();
+//    for(; area != areas.end(); ++area)
+//        area.value().numTrack.clear();
+
+//    areas.clear();
+//    tracks.clear();
+
+//    initTrackPar();
+
+//    results->resetTable();
+}
+
+/// Запуск и остановка потока вычислений
+void Settings::stateChanged()
+{
+    /// Гласс главного потока вычислений и отрисовки
+//    ThreatLevel::MainThread mainThread(painter);
+//    mainThread.start();
+
 //    if(isStart)
 //    {
 //        if(painter->getIdTimer() != -1)
@@ -73,8 +99,8 @@ void Settings::changeState()
 //    isStart = !isStart;
 }
 
-/// Изменение интервала таймера
-void Settings::changeTimerInterval(int _interval)
+/// Изменение интервала таймера потока вычислений
+void Settings::intervalOfTimerChanged(int _interval)
 {
 //    if(isStart && painter->getIdTimer() != -1)
 //    {

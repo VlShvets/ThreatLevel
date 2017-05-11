@@ -10,14 +10,16 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(QObject::tr("Количество групп КР: ")), 0, 0, 1, 1);
 
+    /// Слайдер регулирования количества групп КР
     QSlider *sGroupsOfCMCount = new QSlider(Qt::Horizontal);
-    sGroupsOfCMCount->setRange(1, GROUPS_OF_CM_MAX_COUNT);
+    sGroupsOfCMCount->setRange(GROUPS_OF_CM_MIN_COUNT, GROUPS_OF_CM_MAX_COUNT);
     sGroupsOfCMCount->setTickInterval(1);
     sGroupsOfCMCount->setValue(GROUPS_OF_CM_DEF_COUNT);
     sGroupsOfCMCount->setTickPosition(QSlider::TicksAbove);
     sGroupsOfCMCount->setFixedWidth(100);
     gridLayout->addWidget(sGroupsOfCMCount, 0, 1, 1, 1);
 
+    /// Дисплей отображения количества групп КР
     lGroupsOfCMCount = new QLCDNumber(2);
     lGroupsOfCMCount->setSegmentStyle(QLCDNumber::Flat);
     lGroupsOfCMCount->setMode(QLCDNumber::Dec);
@@ -29,6 +31,7 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("Количество КР в группе: ")), 1, 0, 1, 1);
 
+    /// Слайдер регулирования количества КР в группе
     QSlider *sCMInGroupCount = new QSlider(Qt::Horizontal);
     sCMInGroupCount->setRange(1, CM_IN_GROUP_MAX_COUNT);
     sCMInGroupCount->setTickInterval(1);
@@ -37,6 +40,7 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
     sCMInGroupCount->setFixedWidth(100);
     gridLayout->addWidget(sCMInGroupCount, 1, 1, 1, 1);
 
+    /// Дисплей отображения количества КР в группе
     lCMInGroupCount = new QLCDNumber(2);
     lCMInGroupCount->setSegmentStyle(QLCDNumber::Flat);
     lCMInGroupCount->setMode(QLCDNumber::Dec);
@@ -48,6 +52,7 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("\tНачальные параметры КР:")), 2, 0, 1, 3);
 
+    /// Таблица параметров КР
     tCMPar = new QTableWidget(GROUPS_OF_CM_DEF_COUNT * CM_IN_GROUP_DEF_COUNT, 6, this);
     tCMPar->setHorizontalHeaderLabels(QStringList() << tr("№ трассы") << tr("Нач. коорд. X") << tr("Нач. коорд. Y") <<
                                       tr("Скорость") << tr("Курс (град.)") << tr("Колич. состав"));
@@ -55,6 +60,7 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("Количество БЦ: ")), 4, 0, 1, 1);
 
+    /// Слайдер регулирования количества БЦ
     QSlider *sBGCount = new QSlider(Qt::Horizontal);
     sBGCount->setRange(0, BG_MAX_COUNT);
     sBGCount->setTickInterval(1);
@@ -63,6 +69,7 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
     sBGCount->setFixedWidth(100);
     gridLayout->addWidget(sBGCount, 4, 1, 1, 1);
 
+    /// Дисплей отображения количества БЦ
     lBGCount = new QLCDNumber(1);
     lBGCount->setSegmentStyle(QLCDNumber::Flat);
     lBGCount->setMode(QLCDNumber::Dec);
@@ -74,12 +81,11 @@ ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("\tНачальные параметры БЦ:")), 5, 0, 1, 3);
 
+    /// Таблица параметров БЦ
     tBGPar = new QTableWidget(BG_DEF_COUNT, 6, this);
     tBGPar->setHorizontalHeaderLabels(QStringList() << tr("№ трассы") << tr("Нач. коорд. X") << tr("Нач. коорд. Y") <<
                                          tr("Скорость") << tr("Кон. коорд. X") << tr("Кон. коорд. Y"));
     gridLayout->addWidget(tBGPar, 6, 0, 1, 3);
-
-    gridLayout->addWidget(new QLabel(tr("Количество БЦ: ")), 4, 0, 1, 1);
 
     this->setLayout(gridLayout);
 

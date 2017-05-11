@@ -14,7 +14,7 @@
 namespace ThreatLevel
 {
 
-/// Класс виджета отображения результатов
+/// Класс виджета отображения таблицы результатов
 class Results : public QWidget
 {
     Q_OBJECT
@@ -35,10 +35,13 @@ private slots:
 
 private:
     /// Указатели на виджеты
-    QLCDNumber      *lcdMaxSumTrack;    /// Виджет отображающий максимимальный количественный состав налета
-    QTableWidget    *tResults;          /// Виджет отображения результатов
+    QLCDNumber      *lcdMaxSumTrack;    /// Виджет отображения числа количественного состава налета по всем ЗКВ
+    QTableWidget    *tResults;          /// Виджет отображения таблицы результатов
 
+    /// --------------------------------------------------
     /// Указатели на объекты классов
+    /// --------------------------------------------------
+
     GraphOfTracksCount  *graphOfTrackCount;        /// Класс графика количественного состава налёта
 
     /// --------------------------------------------------
@@ -49,6 +52,7 @@ private:
     static const int    LCD_DIGIT_COUNT = 4;    /// Число цифр в поле отображения максимального количественного состава налета
 };
 
+/// Выбор строки в таблице
 void Results::tableSelectionChanged(QItemSelection, QItemSelection)
 {
     graphOfTrackCount->showGraph(tResults->selectedItems().first()->text().toInt());

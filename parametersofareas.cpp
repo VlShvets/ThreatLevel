@@ -10,14 +10,16 @@ ParametersOfAreas::ParametersOfAreas(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("Количество ЗКВ: ")), 0, 0, 1, 1);
 
+    /// Слайдер регулирования количества ЗКВ
     QSlider *sliderArea = new QSlider(Qt::Horizontal);
-    sliderArea->setRange(1, AREAS_MAX_COUNT);
+    sliderArea->setRange(AREAS_MIN_COUNT, AREAS_MAX_COUNT);
     sliderArea->setTickInterval(1);
     sliderArea->setValue(AREAS_DEF_COUNT);
     sliderArea->setTickPosition(QSlider::TicksAbove);
     sliderArea->setFixedWidth(100);
     gridLayout->addWidget(sliderArea, 0, 1, 1, 1);
 
+    /// Дисплей отображения количества ЗКВ
     QLCDNumber *lNumberArea = new QLCDNumber(1);
     lNumberArea->setSegmentStyle(QLCDNumber::Flat);
     lNumberArea->setMode(QLCDNumber::Dec);
@@ -29,6 +31,7 @@ ParametersOfAreas::ParametersOfAreas(QWidget *parent) : QWidget(parent)
 
     gridLayout->addWidget(new QLabel(tr("\tНачальные параметры ЗКВ:")), 1, 0, 1, 3);
 
+    /// Таблица параметров ЗКВ
     tAreaPar = new QTableWidget(AREAS_DEF_COUNT, 6, this);
     tAreaPar->setHorizontalHeaderLabels(QStringList() << tr("№ ЗКВ") << tr("Координата X") << tr("Координата Y") <<
                                         tr("Радиус") << tr("T критическое") << tr("R обнаружения"));

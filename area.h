@@ -2,6 +2,7 @@
 #define AREA
 
 #include <QPointF>
+#include <QVector>
 
 namespace ThreatLevel
 {
@@ -50,7 +51,7 @@ struct Area
     static int  BGSumCount;             /// Текущее суммарное количество БЦ
     static int  BGMaxSumCount;          /// Максимальное суммарное количество БЦ
 
-    /// Количественный состав налета с учетом тротилового эквивалента БЦ
+    /// Количественный состав налета с учетом эквивалента БЦ
     static int  raidSumCount;           /// Текущий количественный состав налета
     static int  raidMaxSumCount;        /// Максимальный количественный состав налета
 };

@@ -4,14 +4,13 @@ namespace ThreatLevel
 {
 
 /// Класс виджета отрисовки трасс и позиционных районов
-Painter::Painter(ParametersOfAreas *_parametersOfAreas, Results *_results, QWidget *_parent)
-    : Grapher2D(_parent), parametersOfAreas(_parametersOfAreas), results(_results)
+Painter::Painter(QWidget *_parent)
+    : Grapher2D(_parent)
 {
     setCSAbsMeasure(ABS_MEASURE);
     setCSOrdMeasure(ORD_MEASURE);
     setCSZoom(DEF_ZOOM);
 
-    initAreaPar();
     initTrackPar();
 }
 
@@ -23,24 +22,6 @@ Painter::~Painter()
 
     areas.clear();
     tracks.clear();
-}
-
-/// Перезапуск
-void Painter::reStart()
-{
-    QMap <int, Area>::iterator area = areas.begin();
-    for(; area != areas.end(); ++area)
-        area.value().numTrack.clear();
-
-    areas.clear();
-    tracks.clear();
-
-    initAreaPar();
-    initTrackPar();
-
-    results->resetTable();
-
-    repaint();
 }
 
 void Painter::paintEvent(QPaintEvent * _pEvent)
@@ -158,52 +139,6 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     }
 
     p.end();
-}
-
-void Painter::timerEvent(QTimerEvent *)
-{
-
-
-    repaint();
-}
-
-void Painter::initAreaPar()
-{
-    /// Загрузка параметров ПР
-//    for(int i = 0; i < parametersOfAreas->getCount(); ++i)
-//    {
-//        /// Определение номера ПР
-//        int num                     = (int) areaParameters->getPar(i, 0);
-
-//        /// Загрузка начальных данных из таблицы
-//        areas[num].initPos.setX(areaParameters->getPar(i, 1));
-//        areas[num].initPos.setY(areaParameters->getPar(i, 2));
-//        areas[num].initRadius       = areaParameters->getPar(i, 3);
-//        areas[num].initCritTime     = areaParameters->getPar(i, 4);
-//        areas[num].initDetectRange  = areaParameters->getPar(i, 5);
-//    }
-
-//    QMap <int, Area>::iterator area = areas.begin();
-//    for(; area != areas.end(); ++area)
-//    {
-//        /// Обнуление максимального количества идентифицированных с ПР крылатых ракет
-//        area.value().CMMaxCount     = 0;
-
-//        /// Обнуление максимального количества идентифицированных с ПР баллистических целей
-//        area.value().BGMaxCount     = 0;
-
-//        /// Обнуление максимального количества идентифицированных с ПР трасс
-//        area.value().raidMaxCount   = 0;
-//    }
-
-//    /// Обнуление максимального суммарного количества крылатых ракет
-//    Area::CMMaxSumCount     = 0;
-
-//    /// Обнуление максимального суммарного количества баллистических целей
-//    Area::BGMaxSumCount     = 0;
-
-//    /// Обнуление максимального количественного состава налета по всем ПР
-//    Area::raidMaxSumCount   = 0;
 }
 
 void Painter::initTrackPar()

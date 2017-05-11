@@ -20,7 +20,7 @@ SOURCES += main.cpp\
     results.cpp \
     mainwindow.cpp \
     settings.cpp \
-#    imitation.cpp \
+    imitation.cpp \
     parametersofetalons.cpp \
     parametersofareas.cpp \
 #    mainthread.cpp \
@@ -35,7 +35,7 @@ HEADERS  += \
     settings.h \
     area.h \
     track.h \
-#    imitation.h \
+    imitation.h \
     etalon.h \
     parametersofetalons.h \
     parametersofareas.h \

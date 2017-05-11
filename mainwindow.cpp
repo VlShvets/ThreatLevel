@@ -11,17 +11,17 @@ MainWindow::MainWindow(QWidget *_parent)
 #ifdef Q_OS_WIN         /// Widnows (Qt 5)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("cp-1251"));
 #elif defined Q_OS_UNIX /// Linux   (Qt 4)
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("utf-8"));
+    QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
 #endif
 
     this->setWindowTitle(tr("Определение уровня угроз"));
 
-    parametersOfAreas = new ParametersOfAreas;
+    parametersOfAreas   = new ParametersOfAreas;
     parametersOfEtalons = new ParametersOfEtalons;
-    graphOfTracksCount = new GraphOfTracksCount;
-    results = new Results(graphOfTracksCount);
-    painter = new Painter(parametersOfAreas, results);
-    settings = new Settings(painter);
+    painter             = new Painter;
+    graphOfTracksCount  = new GraphOfTracksCount;
+    results             = new Results(graphOfTracksCount);
+    settings            = new Settings(parametersOfAreas, parametersOfEtalons, painter, results);
 
     /// Виджет отрисовки трасс и позиционных районов
     setCentralWidget(painter);
@@ -33,19 +33,19 @@ MainWindow::MainWindow(QWidget *_parent)
     tSettings->setMovable(false);
     addToolBar(tSettings);
 
-    /// Виджет редактирования параметров позиционных районов
+    /// Виджет редактирования параметров ЗКВ
     QDockWidget *dAreaParameters = new QDockWidget(this);
     dAreaParameters->setWidget(parametersOfAreas);
-    dAreaParameters->setWindowTitle(tr("Параметры ПР"));
+    dAreaParameters->setWindowTitle(tr("Параметры ЗКВ"));
     dAreaParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
     dAreaParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dAreaParameters->setMinimumHeight(300);
     addDockWidget(Qt::LeftDockWidgetArea, dAreaParameters);
 
-    /// Виджет редактирования параметров трасс
+    /// Виджет редактирования параметров эталонов
     QDockWidget *dTrackParameters = new QDockWidget(this);
     dTrackParameters->setWidget(parametersOfEtalons);
-    dTrackParameters->setWindowTitle(tr("Параметры трасс"));
+    dTrackParameters->setWindowTitle(tr("Параметры эталонов"));
     dTrackParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
     dTrackParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dTrackParameters->setMinimumHeight(300);
@@ -68,18 +68,14 @@ MainWindow::MainWindow(QWidget *_parent)
     dResults->setFeatures(QDockWidget::AllDockWidgetFeatures);
     dResults->setMinimumHeight(300);
     addDockWidget(Qt::RightDockWidgetArea, dResults);
-
-    /// Гласс главного потока вычислений и отрисовки
-//    ThreatLevel::MainThread mainThread(painter);
-//    mainThread.start();
 }
 
 MainWindow::~MainWindow()
 {
     delete settings;
-    delete painter;
     delete results;
     delete graphOfTracksCount;
+    delete painter;
     delete parametersOfEtalons;
     delete parametersOfAreas;
 }

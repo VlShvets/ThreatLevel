@@ -37,9 +37,10 @@ private:
     /// Константы
     /// --------------------------------------------------
 
-    /// Количество позиционных районов
-    static const int    AREAS_DEF_COUNT = 5;    /// Количество ЗКВ по умолчанию
-    static const int    AREAS_MAX_COUNT = 5;    /// Максимальное количество ЗКВ
+    /// Количество ЗКВ
+    static const int    AREAS_MIN_COUNT     = 1;    /// Минимальное количество ЗКВ
+    static const int    AREAS_DEF_COUNT     = 5;    /// Количество ЗКВ по умолчанию
+    static const int    AREAS_MAX_COUNT     = 5;    /// Максимальное количество ЗКВ
 };
 
 /// Получить количество ЗКВ

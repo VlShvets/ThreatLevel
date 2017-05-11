@@ -4,7 +4,7 @@
 #include "mainwindow.h"
 #include "imitation.h"
 #include "tertiaryprocessingofdata.h"
-#include "definitionofthreatlevel.h"
+//#include "definitionofthreatlevel.h"
 #include "painter.h"
 
 #include <QThread>
@@ -28,11 +28,11 @@ private:
     /// Указатели на объекты классов
     Imitation                   *imitation;                 /// Класс имитации
     class TertiaryProcessingOfData    *tertiaryProcessingOfData;  /// Класс третичной обработки данных
-    DefinitionOfThreatLevel     *definitionOfThreatLevel;   /// Класс определения уровня угрозы
+//    DefinitionOfThreatLevel     *definitionOfThreatLevel;   /// Класс определения уровня угрозы
     Painter                     *painter;                   /// Класс виджета отрисовки трасс и позиционных районов
 
     /// Вычислительные параметры
-    static constexpr float  DELTA_T             = 10.0;         /// Интервал времени измерений
+    static const float  DELTA_T             = 10.0;         /// Интервал времени измерений
 };
 
 /// Установка таймера

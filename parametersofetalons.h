@@ -62,14 +62,17 @@ private:
     /// --------------------------------------------------
 
     /// Количество групп крылатых ракет
+    static const int    GROUPS_OF_CM_MIN_COUNT  = 1;    /// Минимальное количество групп КР
     static const int    GROUPS_OF_CM_DEF_COUNT  = 5;    /// Количество групп КР по умолчанию
     static const int    GROUPS_OF_CM_MAX_COUNT  = 10;   /// Максимальное количество групп КР
 
     /// Количество крылатых ракет в группе
+    static const int    CM_IN_GROUP_MIN_COUNT   = 1;    /// Минимальное количество КР в группе
     static const int    CM_IN_GROUP_DEF_COUNT   = 1;    /// Количество КР в группе по умолчанию
     static const int    CM_IN_GROUP_MAX_COUNT   = 15;   /// Максимальное количество КР в группе
 
     /// Количество балистических целей
+    static const int    BG_MIN_COUNT            = 1;    /// Минимальное количество БЦ
     static const int    BG_DEF_COUNT            = 2;    /// Количество БЦ по умолчанию
     static const int    BG_MAX_COUNT            = 5;    /// Максимальное количество БЦ
 };

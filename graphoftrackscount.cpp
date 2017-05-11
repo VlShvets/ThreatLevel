@@ -23,18 +23,18 @@ GraphOfTracksCount::~GraphOfTracksCount()
 void GraphOfTracksCount::loadTrackCount(const int _numArea, const int _trackCount)
 {
     /// Добавление количественного состава налета в список
-    trackCount[_numArea].push_front(_trackCount);
+    tracksCount[_numArea].push_front(_trackCount);
 
     /// Проверка переполнения списка
-    if(trackCount[_numArea].count() > MAX_SUM_TRACKS)
-        trackCount[_numArea].removeLast();
+    if(tracksCount[_numArea].count() > MAX_SUM_TRACKS)
+        tracksCount[_numArea].removeLast();
 
     repaint();
 }
 
 void GraphOfTracksCount::showGraph(const int _numArea)
 {
-    if(trackCount.contains(_numArea))
+    if(tracksCount.contains(_numArea))
         numArea = _numArea;
 
     repaint();
@@ -43,11 +43,11 @@ void GraphOfTracksCount::showGraph(const int _numArea)
 /// Очистка графика количественного состава налёта
 void GraphOfTracksCount::resetGraph()
 {
-    QMap <int, QVector <int> >::iterator count = trackCount.begin();
-    for(; count != trackCount.end(); ++count)
+    QMap <int, QVector <int> >::iterator count = tracksCount.begin();
+    for(; count != tracksCount.end(); ++count)
         count.value().clear();
 
-    trackCount.clear();
+    tracksCount.clear();
 
     repaint();
 }
@@ -68,12 +68,12 @@ void GraphOfTracksCount::paintEvent(QPaintEvent *_pEvent)
     pen.setWidth(3);
     p.setPen(pen);
 
-    if(trackCount.contains(numArea))
+    if(tracksCount.contains(numArea))
     {
-        for(int i = trackCount[numArea].count() - 1; i > 0; --i)
+        for(int i = tracksCount[numArea].count() - 1; i > 0; --i)
         {
-            p.drawLine(QPointF(- i      - SHIFT, trackCount[numArea].at(i)),
-                       QPointF(- i + 1  - SHIFT, trackCount[numArea].at(i - 1)));
+            p.drawLine(QPointF(- i      - SHIFT, tracksCount[numArea].at(i)),
+                       QPointF(- i + 1  - SHIFT, tracksCount[numArea].at(i - 1)));
         }
     }
 
