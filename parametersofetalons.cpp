@@ -4,7 +4,8 @@ namespace ThreatLevel
 {
 
 /// Класс виджета редактирования параметров трасс
-ParametersOfEtalons::ParametersOfEtalons(QWidget *parent) : QWidget(parent)
+ParametersOfEtalons::ParametersOfEtalons(QWidget *parent)
+    : QWidget(parent)
 {
     QGridLayout *gridLayout = new QGridLayout(this);
 

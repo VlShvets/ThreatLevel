@@ -4,7 +4,8 @@ namespace ThreatLevel
 {
 
 /// Класс виджета графика количественного состава налёта
-GraphOfTracksCount::GraphOfTracksCount(QWidget *_parent) : Grapher2D(_parent), numArea(0)
+GraphOfTracksCount::GraphOfTracksCount(QWidget *_parent)
+    : Grapher2D(_parent), numArea(0)
 {
     setCSOrdMeasure(ORD_MEASURE);
     setCSAngles(false, true, false, false);

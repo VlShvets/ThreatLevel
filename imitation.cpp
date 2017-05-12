@@ -4,9 +4,10 @@ namespace ThreatLevel
 {
 
 /// Класс имитации
-Imitation::Imitation(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons) :
-    parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons)
+Imitation::Imitation(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons)
+    : parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons)
 {
+    initialization();
 }
 
 Imitation::~Imitation()

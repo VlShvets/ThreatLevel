@@ -23,7 +23,7 @@ SOURCES += main.cpp\
     imitation.cpp \
     parametersofetalons.cpp \
     parametersofareas.cpp \
-#    mainthread.cpp \
+    mainthread.cpp \
 #    definitionofthreatlevel.cpp \
 #    tertiaryprocessingofdata.cpp \
     graphoftrackscount.cpp
@@ -39,7 +39,7 @@ HEADERS  += \
     etalon.h \
     parametersofetalons.h \
     parametersofareas.h \
-#    mainthread.h \
+    mainthread.h \
 #    definitionofthreatlevel.h \
 #    tertiaryprocessingofdata.h \
     graphoftrackscount.h

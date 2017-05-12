@@ -18,7 +18,8 @@ int Area::raidMaxSumCount;
 int Track::numTrackMinErrTime;
 
 /// Класс виджета отображения таблицы результатов
-Results::Results(GraphOfTracksCount *_graphOfTrackCount, QWidget *_parent) : QWidget(_parent), graphOfTrackCount(_graphOfTrackCount)
+Results::Results(GraphOfTracksCount *_graphOfTrackCount, QWidget *_parent)
+    : QWidget(_parent), graphOfTrackCount(_graphOfTrackCount)
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 

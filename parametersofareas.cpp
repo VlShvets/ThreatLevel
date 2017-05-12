@@ -4,7 +4,8 @@ namespace ThreatLevel
 {
 
 /// Класс виджета редактирования параметров ЗКВ
-ParametersOfAreas::ParametersOfAreas(QWidget *parent) : QWidget(parent)
+ParametersOfAreas::ParametersOfAreas(QWidget *parent)
+    : QWidget(parent)
 {
     QGridLayout *gridLayout = new QGridLayout(this);
 

@@ -1,15 +1,13 @@
 #include "settings.h"
 
-#include <QDebug>
-
 namespace ThreatLevel
 {
 
 /// Класс виджета настроек
 Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
-                   Painter *_painter, Results *_results, QWidget *_parent) :
-    QWidget(_parent), parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons),
-    painter(_painter), results(_results), isStart(false)
+                   Painter *_painter, Results *_results, QWidget *_parent)
+    : QWidget(_parent), parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons),
+      painter(_painter), results(_results), mainThread(NULL)
 {
     QHBoxLayout *hLayout = new QHBoxLayout(this);
 
@@ -18,7 +16,7 @@ Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_
     /// Кнопка "Начать с начала"
     QPushButton *pReStart = new QPushButton(tr("Начать с начала"));
     pReStart->setFixedWidth(200);
-    QObject::connect(pReStart, SIGNAL(clicked()), painter, SLOT(reStart()));
+    QObject::connect(pReStart, SIGNAL(clicked()), this, SLOT(reStart()));
     hLayout->addWidget(pReStart);
 
     hLayout->addWidget(new QSplitter());
@@ -65,17 +63,15 @@ Settings::~Settings()
 /// Создание нового потока вычислений (удаление уже имеющегося потока)
 void Settings::reStart()
 {
+    if(mainThread)
+    {
+        mainThread->complete();
+        mainThread->quit();
+        mainThread->wait();
+        delete mainThread;
+    }
 
-//    QMap <int, Area>::iterator area = areas.begin();
-//    for(; area != areas.end(); ++area)
-//        area.value().numTrack.clear();
-
-//    areas.clear();
-//    tracks.clear();
-
-//    initTrackPar();
-
-//    results->resetTable();
+    mainThread = new MainThread(parametersOfAreas, parametersOfEtalons, painter, results);
 }
 
 /// Запуск и остановка потока вычислений
