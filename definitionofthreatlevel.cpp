@@ -6,9 +6,13 @@ namespace ThreatLevel
 /// Класс определения уровня угрозы
 DefinitionOfThreatLevel::DefinitionOfThreatLevel()
 {
-
 }
 
+DefinitionOfThreatLevel::~DefinitionOfThreatLevel()
+{
+}
+
+/// Вычислительный процесс
 void DefinitionOfThreatLevel::run()
 {
     /// Сглаживание погрешностей измерения
@@ -17,8 +21,8 @@ void DefinitionOfThreatLevel::run()
     /// Идентификация трасс с позиционными районами
     identificationOfTracksWithAreas();
 
-    /// Расчет связанных со временем переменных
-    calculationOfTime();
+    /// Расчёт времени движения
+    calculationOfMotionTime();
 
     /// Определение номера трассы с минимальным временем преодоления расстояния до ПР путем сортировки
     Track::numTrackMinErrTime = numTrackOfMinTime();
@@ -34,16 +38,13 @@ void DefinitionOfThreatLevel::run()
 
     /// Расчет количественного состава налёта с учетом тротилового эквивалента БЦ
     calculationOfRaidCount();
-
-    /// Отображение результатов вычислений
-    results->loadTable(areas, tracks);
 }
 
 /// Сглаживание погрешностей измерения
 void DefinitionOfThreatLevel::smootheningOfMeasurement()
 {
-    QMap <int, Track>::iterator track = tracks.begin();
-    for(; track != tracks.end(); ++track)
+    QMap <int, Track>::iterator track = tracks->begin();
+    for(; track != tracks->end(); ++track)
     {
         /// Проецирование вектора скорости на ось абсцисс со сглаживанием погрешностей измерения
         if(track.value().smoothVx == 0.0)
@@ -66,97 +67,78 @@ void DefinitionOfThreatLevel::smootheningOfMeasurement()
     }
 }
 
-/// Идентификация трасс с позиционными районами
+/// Идентификация трасс с ЗКВ
 void DefinitionOfThreatLevel::identificationOfTracksWithAreas()
 {
-    Area::detectTracksCount = 0;    /// Количествообнаруженных не идентифицированных ни с каким ПР трасс в текущий момент
+    Area::detectTracksCount = 0;    /// Количество обнаруженных не идентифицированных ни с каким ЗКВ трасс в текущий момент
 
-    QMap <int, Track>::iterator track = tracks.begin();
-    for(; track != tracks.end(); ++track)
+    QMap <int, Track>::iterator track = tracks->begin();
+    for(; track != tracks->end(); ++track)
     {
-        if(trackIsDetected(track.value()))
+        /// Определение номера ЗКВ
+        float numArea;
+        if(track.value().initIsBG)
+            numArea = numAreaHitFinalPosOfBG(track.value());
+        else
+            numArea = numAreaNearestOnCourseOfCM(track.value());
+
+        /// Трасса идентифицированна с ЗКВ
+        if(numArea != -1 &&
+                areas->contains(numArea))
         {
-            /// Определение номера позиционного района
-            float numArea;
-            if(track.value().initIsBG)
-                numArea = numAreaHitFinalPosOfBG(track.value());
+            /// Вычисление критической дистанции
+            float critDistance;     /// Критическая дистанция
+            if(track.value().measSpeed * areas->value(numArea).initCritTime > areas->value(numArea).initRadius)
+                critDistance = track.value().measSpeed * areas->value(numArea).initCritTime;
             else
-                numArea = numAreaNearestOnCourseOfCM(track.value());
+                critDistance = areas->value(numArea).initRadius;
 
-            /// Трасса идентифицированна с ПР
-            if(numArea != -1 &&
-               areas.contains(numArea))
-            {
-                /// Вычисление критической дистанции
-                float critDistance;     /// Критическая дистанция
-                if(track.value().measSpeed * areas[numArea].initCritTime > areas[numArea].initRadius)
-                    critDistance = track.value().measSpeed * areas[numArea].initCritTime;
-                else
-                    critDistance = areas[numArea].initRadius;
-
-                /// Вычисление координат экстраполированного конца траектории
-                track.value().finalPos = track.value().startPos +
-                        QPointF((track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qSin(track.value().measCourse),
-                                (track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qCos(track.value().measCourse));
-
-                /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
-    //            calcTanPoints(areas[numArea].initPos, areas[numArea].initRadius,
-    //                          track.value().pos, track.value().tanPoint1, track.value().tanPoint2);
-            }
-            /// Трасса не идентифицированна с ПР
-            else
-            {
-                /// Расчет количества обнаруженных не идентифицированных ни с каким ПР трасс в текущий момент
-                ++Area::detectTracksCount;
-
-                /// Подсчет координат конечной точки линии направления вектора скорости
-                track.value().finalPos = track.value().exactPos;
-            }
-
-            if(track.value().numArea != numArea)
-            {
-                /// Трасса была идентифицированна с другим ПР
-                if(track.value().numArea != -1 &&
-                   areas.contains(track.value().numArea))
-                {
-                    /// Удаление номера трассы из списка номеров идентифицированных со старым ПР трасс
-                    if(areas[track.value().numArea].numTrack.contains(track.key()))
-                        areas[track.value().numArea].numTrack.removeOne(track.key());
-                }
-
-                /// Изменение номера идентифицированного ПР
-                track.value().numArea   = numArea;
-
-                /// Трасса стала идентифицированна с новым ПР
-                if(track.value().numArea != -1 &&
-                   areas.contains(track.value().numArea))
-                {
-                    /// Добавление номера трассы в список номеров идентифицированных с новым ПР трасс
-                    if(!areas[track.value().numArea].numTrack.contains(track.key()))
-                        areas[track.value().numArea].numTrack.push_back(track.key());
-
-                    /// Определение расстояния от начальной точки траектории до центра ПР
-                    track.value().startDist     = calcDistance(track.value().startPos, areas[track.value().numArea].initPos);
-
-                    /// Определение угла между курсом и отрезком от начальной точки траектории до центра ПР
-                    track.value().angCourseToPA = track.value().measCourse -
-                                                  qAtan2(areas[track.value().numArea].initPos.x() - track.value().startPos.x(),
-                                                         areas[track.value().numArea].initPos.y() - track.value().startPos.y());
-
-                    /// Определение времения преодоления расстояния от начальной точки траектории до центра ПР
-                    track.value().startTime     = track.value().startDist /
-                                                 (track.value().measSpeed * qCos(track.value().angCourseToPA));
-                }
-            }
+            /// Вычисление координат экстраполированного конца траектории
+            track.value().finalPos = track.value().startPos +
+                    QPointF((track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qSin(track.value().measCourse),
+                            (track.value().startDist / qCos(track.value().angCourseToPA) - critDistance) * qCos(track.value().measCourse));
         }
+        /// Трасса не идентифицированна с ЗКВ
         else
         {
-            /// Присвоение координатам начальной точки траектории текущих координат
-            track.value().startPos  = track.value().exactPos;
+            /// Расчет количества обнаруженных не идентифицированных ни с каким ЗКВ трасс в текущий момент
+            ++Area::detectTracksCount;
+        }
 
-            /// Подсчет координат конечной точки линии направления вектора скорости
-            track.value().finalPos  = track.value().startPos + LENGTH * QPointF(qSin(track.value().initCourse),
-                                                                                qCos(track.value().initCourse));
+        if(track.value().numArea != numArea)
+        {
+            /// Трасса была идентифицированна с другим ЗКВ
+            if(track.value().numArea != -1 &&
+                    areas->contains(track.value().numArea))
+            {
+                /// Удаление номера трассы из списка номеров идентифицированных со старым ЗКВ трасс
+                if(areas->value(track.value().numArea).numTrack.contains(track.key()))
+                    areas->value(track.value().numArea).numTrack.removeOne(track.key());
+            }
+
+            /// Изменение номера идентифицированного ЗКВ
+            track.value().numArea   = numArea;
+
+            /// Трасса стала идентифицированна с новым ЗКВ
+            if(track.value().numArea != -1 &&
+                    areas->contains(track.value().numArea))
+            {
+                /// Добавление номера трассы в список номеров идентифицированных с новым ЗКВ трасс
+                if(!areas->value(track.value().numArea).numTrack.contains(track.key()))
+                    areas->value(track.value().numArea).numTrack.push_back(track.key());
+
+                /// Определение расстояния от начальной точки траектории до центра ЗКВ
+                track.value().startDist     = calcDistance(track.value().startPos, areas->value(track.value().numArea).initPos);
+
+                /// Определение угла между курсом и отрезком от начальной точки траектории до центра ПР
+                track.value().angCourseToPA = track.value().measCourse -
+                        qAtan2(areas->value(track.value().numArea).initPos.x() - track.value().startPos.x(),
+                        areas->value(track.value().numArea).initPos.y() - track.value().startPos.y());
+
+                /// Определение времения преодоления расстояния от начальной точки траектории до центра ПР
+                track.value().startTime     = track.value().startDist /
+                        (track.value().measSpeed * qCos(track.value().angCourseToPA));
+            }
         }
     }
 }
@@ -164,12 +146,12 @@ void DefinitionOfThreatLevel::identificationOfTracksWithAreas()
 /// Расчёт времени движения
 void DefinitionOfThreatLevel::calculationOfMotionTime()
 {
-    QMap <int, Track>::iterator track = tracks.begin();
-    for(; track != tracks.end(); ++track)
+    QMap <int, Track>::iterator track = tracks->begin();
+    for(; track != tracks->end(); ++track)
     {
         int numArea = track.value().numArea;
         if(numArea != -1 &&
-           areas.contains(numArea))
+           areas->contains(numArea))
         {
             /// --------------------------------------------------
             /// Пересчитываемые связанные с позиционным районом параметры
@@ -177,8 +159,8 @@ void DefinitionOfThreatLevel::calculationOfMotionTime()
 
             /// Определение угла между курсом и отрезком от начальной точки траектории до центра ПР
             track.value().angCourseToPA = track.value().measCourse -
-                                          qAtan2(areas[numArea].initPos.x() - track.value().startPos.x(),
-                                                 areas[numArea].initPos.y() - track.value().startPos.y());
+                                          qAtan2(areas->value(numArea).initPos.x() - track.value().startPos.x(),
+                                                 areas->value(numArea).initPos.y() - track.value().startPos.y());
 
             /// Вычисление расстояния от проекции текущей точки траектории до центра ПР
             track.value().distToPA  = track.value().startDist -
@@ -214,8 +196,8 @@ int DefinitionOfThreatLevel::numTrackOfMinTime()
 {
     int numTrack    = -1;
 
-    QMap <int, Area>::iterator area = areas.begin();
-    for(; area != areas.end(); ++area)
+    QMap <int, Area>::iterator area = areas->begin();
+    for(; area != areas->end(); ++area)
     {
         if(!area.value().numTrack.isEmpty())
         {
@@ -224,7 +206,7 @@ int DefinitionOfThreatLevel::numTrackOfMinTime()
 
             /// Определение номера трассы с минимальным временем поражения ПР
             if(numTrack == -1 ||
-               tracks[numTrack].timeToPA > tracks[area.value().numTrack.at(0)].timeToPA)
+               tracks->value(numTrack).timeToPA > tracks->value(area.value().numTrack.at(0)).timeToPA)
             {
                 numTrack   = area.value().numTrack.at(0);
             }
@@ -238,15 +220,15 @@ int DefinitionOfThreatLevel::numTrackOfMinTime()
 void DefinitionOfThreatLevel::calculationOfCMCount()
 {
     Area::CMSumCount    = 0;
-    QMap <int, Area>::iterator area = areas.begin();
-    for(; area != areas.end(); ++area)
+    QMap <int, Area>::iterator area = areas->begin();
+    for(; area != areas->end(); ++area)
     {
         /// Вычисление количества идентифицированных с конкретным ПР крылатых ракет
         area.value().CMCount = 0;
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
-            if(!tracks[area.value().numTrack.at(j)].initIsBG)
-                area.value().CMCount += tracks[area.value().numTrack.at(j)].initQuant;
+            if(!tracks->value(area.value().numTrack.at(j)).initIsBG)
+                area.value().CMCount += tracks->value(area.value().numTrack.at(j)).initQuant;
         }
 
         /// Вычисление максимального количества идентифицированных с конкретным ПР крылатых ракет
@@ -266,15 +248,15 @@ void DefinitionOfThreatLevel::calculationOfCMCount()
 void DefinitionOfThreatLevel::calculationOfBGCount()
 {
     Area::BGSumCount = 0;
-    QMap <int, Area>::iterator area = areas.begin();
-    for(; area != areas.end(); ++area)
+    QMap <int, Area>::iterator area = areas->begin();
+    for(; area != areas->end(); ++area)
     {
         /// Вычисление количества идентифицированных с конкретным ПР баллистических целей
         area.value().BGCount = 0;
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
-            if(tracks[area.value().numTrack.at(j)].initIsBG)
-                area.value().BGCount += tracks[area.value().numTrack.at(j)].initQuant;
+            if(tracks->value(area.value().numTrack.at(j)).initIsBG)
+                area.value().BGCount += tracks->value(area.value().numTrack.at(j)).initQuant;
         }
 
         /// Вычисление максимального количества идентифицированных с конкретным ПР баллистических целей
@@ -295,8 +277,8 @@ void DefinitionOfThreatLevel::calculationOfRaidCount()
 {
     Area::idenTracksMaxCount = 0;
     Area::raidSumCount = 0;
-    QMap <int, Area>::iterator area = areas.begin();
-    for(; area != areas.end(); ++area)
+    QMap <int, Area>::iterator area = areas->begin();
+    for(; area != areas->end(); ++area)
     {
         /// Вычисление количественного состава налета по конкретному ПР с учетом тротилового эквивалента БЦ
         area.value().raidCount = area.value().CMCount + Track::BG_WEIGHT_COEF * area.value().BGCount;
@@ -321,8 +303,8 @@ void DefinitionOfThreatLevel::calculationOfRaidCount()
 /// Определение номера позиционного района по попаданию конечной точки траектории БЦ
 int DefinitionOfThreatLevel::numAreaHitFinalPosOfBG(const Track &_track)
 {
-    QMap <int, Area>::iterator area = areas.begin();
-    for(area = areas.begin(); area != areas.end(); ++area)
+    QMap <int, Area>::iterator area = areas->begin();
+    for(; area != areas->end(); ++area)
     {
         if(calcDistance(area.value().initPos, _track.initFinalPos) < area.value().initRadius)
             return area.key();
@@ -339,8 +321,8 @@ int DefinitionOfThreatLevel::numAreaNearestOnCourseOfCM(const Track &_track)
     float   distance;               /// Расстояние от трассы до ПР
     float   minDistanceOnCourse;    /// Расстояние от трассы до ближайшего ПР по курсу
 
-    QMap <int, Area>::iterator area = areas.begin();
-    for(area = areas.begin(); area != areas.end(); ++area)
+    QMap <int, Area>::iterator area = areas->begin();
+    for(area = areas->begin(); area != areas->end(); ++area)
     {
         /// Определение расстояния от трассы до ПР
         distance = calcDistance(_track.exactPos, area.value().initPos);
@@ -368,16 +350,16 @@ void DefinitionOfThreatLevel::quickSortTracks(QVector <int> &_numTrack, const in
 {
     int i   = _first;
     int j   = _last;
-    float x = tracks[_numTrack.at((_first + _last) / 2.0)].timeToPA;
+    float x = tracks->value(_numTrack.at((_first + _last) / 2.0)).timeToPA;
 
     do
     {
-        while(tracks[_numTrack.at(i)].timeToPA < x) i++;
-        while(tracks[_numTrack.at(j)].timeToPA > x) j--;
+        while(tracks->value(_numTrack.at(i)).timeToPA < x) i++;
+        while(tracks->value(_numTrack.at(j)).timeToPA > x) j--;
 
         if(i <= j)
         {
-            if(tracks[_numTrack.at(i)].timeToPA > tracks[_numTrack.at(j)].timeToPA)
+            if(tracks->value(_numTrack.at(i)).timeToPA > tracks->value(_numTrack.at(j)).timeToPA)
             {
                 int tempNumTrack = _numTrack.at(i);
                 _numTrack[i] = _numTrack.at(j);
@@ -394,6 +376,57 @@ void DefinitionOfThreatLevel::quickSortTracks(QVector <int> &_numTrack, const in
         quickSortTracks(_numTrack, i, _last);
     if(_first < j)
         quickSortTracks(_numTrack, _first, j);
+}
+
+/// Сброс трасс
+void DefinitionOfThreatLevel::resetTracks()
+{
+    bool isReset;   /// Флаг сброса трассы
+
+    QMap <int, Track>::iterator track = tracks->begin();
+    for(; track != tracks->end();)
+    {
+        isReset = false;
+
+        int numArea = track.value().numArea;
+        if(numArea != -1 &&
+           areas->contains(numArea))
+        {
+            /// Сброс трассы при пересечении границ ПР
+            if(track.value().distToPA < areas->value(numArea).initRadius)
+                isReset = true;
+
+            /// Сброс трассы при значении времени преодоления расстояния до ПР меньше значения критического времени ПР
+            if(track.value().timeToPA < areas->value(numArea).initCritTime)
+                isReset = true;
+        }
+
+        if(isReset)
+        {
+            /// Удаление номера трассы из списка номеров ассоциированных с ПР трасс
+            if(areas->contains(numArea) &&
+               areas->value(numArea).numTrack.contains(track.key()))
+            {
+                areas->value(numArea).numTrack.removeOne(track.key());
+            }
+
+            /// Удаление трассы
+            track = tracks->erase(track);
+         }
+        else
+             ++track;
+    }
+}
+
+/// --------------------------------------------------
+/// Статические функции
+/// --------------------------------------------------
+
+/// Вычисление расстояния между двумя точками
+float DefinitionOfThreatLevel::calcDistance(const QPointF &_p1, const QPointF &_p2)
+{
+    return qSqrt((_p1.x() - _p2.x()) * (_p1.x() - _p2.x()) +
+                 (_p1.y() - _p2.y()) * (_p1.y() - _p2.y()));
 }
 
 }

@@ -8,16 +8,16 @@ MainWindow::MainWindow(QWidget *_parent)
     : QMainWindow(_parent)
 {
 
-#ifdef Q_OS_WIN         /// Widnows (Qt 5)
+#ifdef Q_OS_WIN             /// Widnows     (Qt 5)
     QTextCodec::setCodecForLocale(QTextCodec::codecForName("cp-1251"));
-#elif defined Q_OS_UNIX /// Linux   (Qt 4)
+#elif defined Q_OS_UNIX     /// Linux       (Qt 4)
     QTextCodec::setCodecForTr(QTextCodec::codecForName("utf-8"));
 #endif
 
     this->setWindowTitle(tr("Определение уровня угроз"));
 
-    parametersOfAreas   = new ParametersOfAreas;
     parametersOfEtalons = new ParametersOfEtalons;
+    parametersOfAreas   = new ParametersOfAreas;
     painter             = new Painter;
     graphOfTracksCount  = new GraphOfTracksCount;
     results             = new Results(graphOfTracksCount);
@@ -34,31 +34,33 @@ MainWindow::MainWindow(QWidget *_parent)
     addToolBar(tSettings);
 
     /// Виджет редактирования параметров ЗКВ
-    QDockWidget *dAreaParameters = new QDockWidget(this);
-    dAreaParameters->setWidget(parametersOfAreas);
-    dAreaParameters->setWindowTitle(tr("Параметры ЗКВ"));
-    dAreaParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
-    dAreaParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    dAreaParameters->setMinimumHeight(300);
-    addDockWidget(Qt::LeftDockWidgetArea, dAreaParameters);
+    QDockWidget *dParametersOsAreas = new QDockWidget(this);
+    dParametersOsAreas->setWidget(parametersOfAreas);
+    dParametersOsAreas->setWindowTitle(tr("Параметры ЗКВ"));
+    dParametersOsAreas->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dParametersOsAreas->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dParametersOsAreas->setMinimumHeight(300);
+    dParametersOsAreas->setVisible(false);
+    addDockWidget(Qt::LeftDockWidgetArea, dParametersOsAreas);
 
     /// Виджет редактирования параметров эталонов
-    QDockWidget *dTrackParameters = new QDockWidget(this);
-    dTrackParameters->setWidget(parametersOfEtalons);
-    dTrackParameters->setWindowTitle(tr("Параметры эталонов"));
-    dTrackParameters->setAllowedAreas(Qt::AllDockWidgetAreas);
-    dTrackParameters->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    dTrackParameters->setMinimumHeight(300);
-    addDockWidget(Qt::LeftDockWidgetArea, dTrackParameters);
+    QDockWidget *dParametersOfTracks = new QDockWidget(this);
+    dParametersOfTracks->setWidget(parametersOfEtalons);
+    dParametersOfTracks->setWindowTitle(tr("Параметры эталонов"));
+    dParametersOfTracks->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dParametersOfTracks->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dParametersOfTracks->setMinimumHeight(300);
+    dParametersOfTracks->setVisible(false);
+    addDockWidget(Qt::LeftDockWidgetArea, dParametersOfTracks);
 
     /// Виджет графика количественного состава
-    QDockWidget *dTrackGraph = new QDockWidget(this);
-    dTrackGraph->setWidget(graphOfTracksCount);
-    dTrackGraph->setWindowTitle(tr("График количественного состава налета"));
-    dTrackGraph->setAllowedAreas(Qt::AllDockWidgetAreas);
-    dTrackGraph->setFeatures(QDockWidget::AllDockWidgetFeatures);
-    dTrackGraph->setMinimumHeight(300);
-    addDockWidget(Qt::RightDockWidgetArea, dTrackGraph);
+    QDockWidget *dGraphOfTracksCount = new QDockWidget(this);
+    dGraphOfTracksCount->setWidget(graphOfTracksCount);
+    dGraphOfTracksCount->setWindowTitle(tr("График количественного состава налета"));
+    dGraphOfTracksCount->setAllowedAreas(Qt::AllDockWidgetAreas);
+    dGraphOfTracksCount->setFeatures(QDockWidget::AllDockWidgetFeatures);
+    dGraphOfTracksCount->setMinimumHeight(300);
+    addDockWidget(Qt::RightDockWidgetArea, dGraphOfTracksCount);
 
     /// Виджет отображения результатов
     QDockWidget *dResults = new QDockWidget(this);

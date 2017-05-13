@@ -2,11 +2,11 @@
 #define PARAMETERSOFETALONS_H
 
 #include <QGridLayout>
+#include <QLabel>
 #include <QSlider>
 #include <QLCDNumber>
 #include <QTableWidget>
-
-#include "painter.h"
+#include <QtMath>
 
 namespace ThreatLevel
 {

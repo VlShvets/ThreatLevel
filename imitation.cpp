@@ -12,6 +12,12 @@ Imitation::Imitation(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons 
 
 Imitation::~Imitation()
 {
+    QMap <int, Area>::iterator area = areas.begin();
+    for(; area != areas.end(); ++area)
+        area.value().numTrack.clear();
+
+    areas.clear();
+    etalons.clear();
 }
 
 /// Начальная инициализация параметров эталонов
@@ -36,8 +42,10 @@ QMap <int, Etalon> Imitation::getEtalons(const float _currentTime)
                         etalon.value().initSpeed  * qCos(etalon.value().initCourse)) * _currentTime;
 
         /// Внесение погрешностей измерения
-        etalon.value().measSpeed     = etalon.value().initSpeed   + gaussDistribution(0, Track::ERR_SPEED);
-        etalon.value().measCourse    = etalon.value().initCourse  + qDegreesToRadians(uniformDistribution(0, Track::ERR_COURSE));
+        etalon.value().measSpeed    = etalon.value().initSpeed
+                + gaussDistribution(0, Etalon::ERR_SPEED);
+        etalon.value().measCourse   = etalon.value().initCourse
+                + qDegreesToRadians(uniformDistribution(0, Etalon::ERR_COURSE));
     }
 
     return etalons;
@@ -120,6 +128,10 @@ void Imitation::initializationOfParametersEtalons()
         etalons[num].initQuant      = 1;
     }
 }
+
+/// --------------------------------------------------
+/// Статические функции
+/// --------------------------------------------------
 
 /// Равномерное распределение
 float Imitation::uniformDistribution(const float _mean, const float _dev)

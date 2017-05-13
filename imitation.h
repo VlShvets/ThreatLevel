@@ -7,6 +7,7 @@
 #include "parametersofetalons.h"
 
 #include <QMap>
+#include <QtMath>
 
 namespace ThreatLevel
 {

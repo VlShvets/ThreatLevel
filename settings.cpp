@@ -1,5 +1,7 @@
 #include "settings.h"
 
+#include <QDebug>
+
 namespace ThreatLevel
 {
 
@@ -7,47 +9,53 @@ namespace ThreatLevel
 Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
                    Painter *_painter, Results *_results, QWidget *_parent)
     : QWidget(_parent), parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons),
-      painter(_painter), results(_results), mainThread(NULL)
+      painter(_painter), results(_results), mainThread(NULL), isWaiting(true)
 {
     QHBoxLayout *hLayout = new QHBoxLayout(this);
 
     hLayout->addWidget(new QSplitter());
 
     /// Кнопка "Начать с начала"
-    QPushButton *pReStart = new QPushButton(tr("Начать с начала"));
+    QPushButton *pReStart = new QPushButton;
+    pReStart->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
     pReStart->setFixedWidth(200);
     QObject::connect(pReStart, SIGNAL(clicked()), this, SLOT(reStart()));
     hLayout->addWidget(pReStart);
 
-    hLayout->addWidget(new QSplitter());
-
-    hLayout->addWidget(new QLabel(tr("Интервал таймера (100 / X):")));
-
-    /// Слайдер регулирования интервала таймера
-    QSlider *sTimerInterval = new QSlider(Qt::Horizontal);
-    sTimerInterval->setRange(TIMER_MIN_INTERVAL, TIMER_MAX_INTERVAL);
-    sTimerInterval->setTickInterval(1);
-    sTimerInterval->setValue(TIMER_DEF_INTERVAL);
-    sTimerInterval->setTickPosition(QSlider::TicksAbove);
-    QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), this, SLOT(changeTimerInterval(int)));
-    hLayout->addWidget(sTimerInterval);
-
-    /// Дисплей отображения интервала таймера
-    lTimerInterval = new QLCDNumber(2);
-    lTimerInterval->setSegmentStyle(QLCDNumber::Flat);
-    lTimerInterval->setMode(QLCDNumber::Dec);
-    lTimerInterval->display(TIMER_DEF_INTERVAL);
-    QObject::connect(sTimerInterval, SIGNAL(valueChanged(int)), lTimerInterval, SLOT(display(int)));
-    hLayout->addWidget(lTimerInterval);
-
-    hLayout->addWidget(new QSplitter());
-
     /// Кнопка "Play/Pause"
-    pStartStop = new QPushButton;
-    pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    pStartStop->setFixedWidth(200);
-    QObject::connect(pStartStop, SIGNAL(clicked()), this, SLOT(changeState()));
-    hLayout->addWidget(pStartStop);
+    pPlayPause = new QPushButton;
+    pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    pPlayPause->setFixedWidth(200);
+    QObject::connect(pPlayPause, SIGNAL(clicked()), this, SLOT(stateChanged()));
+    hLayout->addWidget(pPlayPause);
+
+    /// Кнопка "Stop"
+    QPushButton *pStop = new QPushButton;
+    pStop->setIcon(style()->standardIcon(QStyle::SP_BrowserStop));
+    pStop->setFixedWidth(200);
+    QObject::connect(pStop, SIGNAL(clicked()), this, SLOT(stop()));
+    hLayout->addWidget(pStop);
+
+    hLayout->addWidget(new QSplitter());
+
+    hLayout->addWidget(new QLabel(tr("Время ожидания между циклами вычислений (в мс):")));
+
+    /// Слайдер регулирования времени ожидания между циклами вычислений
+    sWaitingTime = new QSlider(Qt::Horizontal);
+    sWaitingTime->setRange(WAITING_TIME_MIN, WAITING_TIME_MAX);
+    sWaitingTime->setTickInterval(100);
+    sWaitingTime->setPageStep(100);
+    sWaitingTime->setValue(WAITING_TIME_DEF);
+    sWaitingTime->setTickPosition(QSlider::TicksAbove);
+    hLayout->addWidget(sWaitingTime);
+
+    /// Дисплей отображения времени ожидания между циклами вычислений
+    lWaitingTime = new QLCDNumber(4);
+    lWaitingTime->setSegmentStyle(QLCDNumber::Flat);
+    lWaitingTime->setMode(QLCDNumber::Dec);
+    lWaitingTime->display(WAITING_TIME_DEF);
+    QObject::connect(sWaitingTime, SIGNAL(valueChanged(int)), lWaitingTime, SLOT(display(int)));
+    hLayout->addWidget(lWaitingTime);
 
     hLayout->addWidget(new QSplitter());
 
@@ -56,53 +64,81 @@ Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_
 
 Settings::~Settings()
 {
-    delete pStartStop;
-    delete lTimerInterval;
+    delete pPlayPause;
+    delete lWaitingTime;
+    delete sWaitingTime;
 }
 
-/// Создание нового потока вычислений (удаление уже имеющегося потока)
+/// Перезапуск потока вычислений
 void Settings::reStart()
 {
-    if(mainThread)
-    {
-        mainThread->complete();
-        mainThread->quit();
-        mainThread->wait();
-        delete mainThread;
-    }
+    /// Завершение имеющегося потока вычислений
+    completeOfThread();
 
-    mainThread = new MainThread(parametersOfAreas, parametersOfEtalons, painter, results);
+    /// Создание нового потока вычислений
+    createOfThread();
+
+    pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    isWaiting = false;
 }
 
 /// Запуск и остановка потока вычислений
 void Settings::stateChanged()
 {
-    /// Гласс главного потока вычислений и отрисовки
-//    ThreatLevel::MainThread mainThread(painter);
-//    mainThread.start();
+    qDebug() << "Is Waiting:" << isWaiting;
+    if(isWaiting)
+    {
+        /// Создание нового потока вычислений
+        createOfThread();
 
-//    if(isStart)
-//    {
-//        if(painter->getIdTimer() != -1)
-//            painter->killTimer(painter->getIdTimer());
-//        pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-//    }
-//    else
-//    {
-//        painter->setIdTimer(painter->startTimer((int) 100 / lTimerInterval->intValue()));
-//        pStartStop->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-//    }
-//    isStart = !isStart;
+        /// Установление флага приостановления потока вычислений
+        mainThread->setPause(false);
+
+        pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    }
+    else
+    {
+        /// Установление флага приостановления потока вычислений
+        mainThread->setPause(true);
+
+        pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    }
+    isWaiting = !isWaiting;
 }
 
-/// Изменение интервала таймера потока вычислений
-void Settings::intervalOfTimerChanged(int _interval)
+/// Остановка потока вычислений
+void Settings::stop()
 {
-//    if(isStart && painter->getIdTimer() != -1)
-//    {
-//        painter->killTimer(painter->getIdTimer());
-//        painter->setIdTimer(painter->startTimer((int) 100 / _interval));
-//    }
+    /// Завершение имеющегося потока вычислений
+    completeOfThread();
+
+    pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
+    isWaiting = true;
+}
+
+/// Создание нового потока вычислений
+void Settings::createOfThread()
+{
+    if(!mainThread)
+    {
+        qDebug() << "Create Of Thread";
+        mainThread = new MainThread(parametersOfAreas, parametersOfEtalons, painter, results, lWaitingTime->intValue());
+        QObject::connect(sWaitingTime, SIGNAL(valueChanged(int)), mainThread, SLOT(setWaitingTime(int)));
+        mainThread->start();
+    }
+}
+
+/// Завершение имеющегося потока вычислений
+void Settings::completeOfThread()
+{
+    if(mainThread)
+    {
+        qDebug() << "Complete Of Thread";
+        mainThread->complete();
+        mainThread->wait();
+        delete mainThread;
+        mainThread = NULL;
+    }
 }
 
 }

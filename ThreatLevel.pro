@@ -24,8 +24,8 @@ SOURCES += main.cpp\
     parametersofetalons.cpp \
     parametersofareas.cpp \
     mainthread.cpp \
-#    definitionofthreatlevel.cpp \
-#    tertiaryprocessingofdata.cpp \
+    definitionofthreatlevel.cpp \
+    tertiaryprocessingofdata.cpp \
     graphoftrackscount.cpp
 
 HEADERS  += \
@@ -40,8 +40,8 @@ HEADERS  += \
     parametersofetalons.h \
     parametersofareas.h \
     mainthread.h \
-#    definitionofthreatlevel.h \
-#    tertiaryprocessingofdata.h \
+    definitionofthreatlevel.h \
+    tertiaryprocessingofdata.h \
     graphoftrackscount.h
 
 unix {
