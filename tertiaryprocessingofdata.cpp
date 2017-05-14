@@ -14,29 +14,42 @@ TertiaryProcessingOfData::~TertiaryProcessingOfData()
 }
 
 /// Возврат указателя на словарь трасс
-QMap <int, Track> TertiaryProcessingOfData::getTracks(const QMap <int, Area> *_areas, const QMap <int, Etalon> *_etalons)
+void TertiaryProcessingOfData::run()
 {
-    QMap <int, Etalon>::const_iterator etalon = _etalons->begin();
-    for(; etalon != _etalons->end(); ++etalon)
+    QMap <int, Etalon>::const_iterator etalon = etalons->constBegin();
+    for(; etalon != etalons->end(); ++etalon)
     {
-        if(etalonIsDetected(_areas, &etalon.value()))
-            addTrack(etalon.key(), etalon.value());
+        if(etalonIsDetected(*areas, etalon.value()))
+        {
+            if(!tracks.contains(etalon.key()))
+            {
+                /// Добавление трассы в словарь трасс по эталону
+                addTrack(etalon.key(), etalon.value());
+            }
+
+            /// Обновление информации о трассе
+            updateTrack(etalon.key(), etalon.value());
+        }
     }
-
-    /// Обнуление рекурентных параметров
-    resettingOfRecurrenceParameters();
-
-    return tracks;
 }
 
 /// Определение попадания эталона в общую зону обнаружения всех ЗКВ
-bool TertiaryProcessingOfData::etalonIsDetected(const QMap <int, Area> *_areas, const Etalon *_etalon)
+bool TertiaryProcessingOfData::etalonIsDetected(const QMap <int, Area> &_areas, const Etalon &_etalon)
 {
-    QMap <int, Area>::const_iterator area = _areas->begin();
-    for(; area != _areas->end(); ++area)
+    QPointF     pArea;      /// Координаты ЗКВ
+    QPointF     pEtalon;    /// Текущие коодинаты эталона
+
+    QMap <int, Area>::const_iterator area = _areas.constBegin();
+    for(; area != _areas.end(); ++area)
     {
-        if(calcDistance(area.value().initPos, _etalon->exactPos) < area.value().initDetectRange)
+        pArea       = area.value().initPos;
+        pEtalon     = _etalon.exactPos;
+        if(qSqrt((pArea.x() - pEtalon.x()) * (pArea.x() - pEtalon.x()) +
+                 (pArea.y() - pEtalon.y()) * (pArea.y() - pEtalon.y())) <
+           area.value().initDetectRange)
+        {
             return true;
+        }
     }
 
     return false;
@@ -50,51 +63,45 @@ void TertiaryProcessingOfData::addTrack(const int _num, const Etalon &_etalon)
     tracks[_num].initFinalPos    = _etalon.initFinalPos;
     tracks[_num].initQuant       = _etalon.initQuant;
 
+    /// Координаты начальной точки траектории
+    tracks[_num].startPos = _etalon.exactPos;
+
+    /// Обнуление рекурентных параметров
+    resettingOfRecurrenceParameters(tracks[_num]);
+}
+
+/// Обнуление рекурентных параметров
+void TertiaryProcessingOfData::resettingOfRecurrenceParameters(Track &_track)
+{
+    /// Обнуление координат экстраполированного конца траектории
+    _track.finalPos      = QPointF();
+
+    /// Обнуление количества измерений
+    _track.countMeas     = 0;
+
+    /// Обнуление рекурентно использующихся при сглаживании проекций вектора скорости
+    _track.smoothVx      = 0.0;
+    _track.smoothVy      = 0.0;
+
+    /// Очистка номера идентифицированного ПР
+    _track.numArea       = -1;
+
+    /// Обнуление суммы квадратов разности вычисленного и измеренного времени поражения ПР
+    _track.sumDiffTime   = 0.0;
+
+    /// Обнуление среднеквадратической разности вычисленного и измеренного времени поражения ПР
+    _track.rmsDiffTime   = 0.0;
+}
+
+/// Обновление информации о трассе
+void TertiaryProcessingOfData::updateTrack(const int _num, const Etalon &_etalon)
+{
     /// Точные значения текущих параметров
     tracks[_num].exactPos        = _etalon.exactPos;
 
     /// Параметры измерения с погрешностью
     tracks[_num].measSpeed       = _etalon.measSpeed;
     tracks[_num].measCourse      = _etalon.measCourse;
-}
-
-/// Обнуление рекурентных параметров
-void TertiaryProcessingOfData::resettingOfRecurrenceParameters()
-{
-    QMap <int, Track>::iterator track = tracks.begin();
-    for(; track != tracks.end(); ++track)
-    {
-        /// Обнуление координат начальной точки и экстраполированного конца траектории
-        track.value().startPos      = QPointF();
-        track.value().finalPos      = QPointF();
-
-        /// Обнуление количества измерений
-        track.value().countMeas     = 0;
-
-        /// Обнуление рекурентно использующихся при сглаживании проекций вектора скорости
-        track.value().smoothVx      = 0.0;
-        track.value().smoothVy      = 0.0;
-
-        /// Очистка номера идентифицированного ПР
-        track.value().numArea       = -1;
-
-        /// Обнуление суммы квадратов разности вычисленного и измеренного времени поражения ПР
-        track.value().sumDiffTime   = 0.0;
-
-        /// Обнуление среднеквадратической разности вычисленного и измеренного времени поражения ПР
-        track.value().rmsDiffTime   = 0.0;
-    }
-}
-
-/// --------------------------------------------------
-/// Статические функции
-/// ---------------------------------------------------
-
-/// Вычисление расстояния между двумя точками
-float TertiaryProcessingOfData::calcDistance(const QPointF &_p1, const QPointF &_p2)
-{
-    return qSqrt((_p1.x() - _p2.x()) * (_p1.x() - _p2.x()) +
-                 (_p1.y() - _p2.y()) * (_p1.y() - _p2.y()));
 }
 
 }

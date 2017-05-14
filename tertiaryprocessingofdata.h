@@ -18,33 +18,60 @@ public:
     explicit            TertiaryProcessingOfData();
     ~TertiaryProcessingOfData();
 
+    /// Установление ЗКВ
+    inline void                 setAreas(const QMap <int, Area> &_areas);
+
+    /// Установление эталонов
+    inline void                 setEtalons(const QMap <int, Etalon> &_etalons);
+
     /// Возврат указателя на словарь трасс
-    QMap <int, Track>   getTracks(const QMap <int, Area> *_areas, const QMap <int, Etalon> *_etalons);
+    inline QMap <int, Track>    *getTracks();
+
+    /// Вычислительный процесс
+    void    run();
 
 private:
     /// Определение попадания эталона в общую зону обнаружения всех ЗКВ
-    bool    etalonIsDetected(const QMap <int, Area> *_areas, const Etalon *_etalon);
+    bool    etalonIsDetected(const QMap <int, Area> &_areas, const Etalon &_etalon);
 
     /// Добавление трассы в словарь трасс по эталону
     void    addTrack(const int _num, const Etalon &_etalon);
 
     /// Обнуление рекурентных параметров
-    void    resettingOfRecurrenceParameters();
+    void    resettingOfRecurrenceParameters(Track &_track);
 
-    /// --------------------------------------------------
-    /// Статические функции
-    /// --------------------------------------------------
-
-    /// Вычисление расстояния между двумя точками
-    static float    calcDistance(const QPointF &_p1, const QPointF &_p2);
+    /// Обновление информации о трассе
+    void    updateTrack(const int _num, const Etalon &_etalon);
 
     /// --------------------------------------------------
     /// Переменные
     /// --------------------------------------------------
 
+    /// Указатели на словари параметров ЗКВ и эталонов
+    const QMap <int, Area>      *areas;     /// Словарь ЗКВ         <номер, структура параметров>
+    const QMap <int, Etalon>    *etalons;   /// Словарь эталонов    <номер, структура параметров>
+
     /// Словарь параметров трасс
     QMap <int, Track>   tracks;     /// Словарь трасс   <номер, структура параметров>
 };
+
+/// Установление ЗКВ
+void TertiaryProcessingOfData::setAreas(const QMap <int, Area> &_areas)
+{
+    areas = &_areas;
+}
+
+/// Установление эталонов
+void TertiaryProcessingOfData::setEtalons(const QMap <int, Etalon> &_etalons)
+{
+    etalons = &_etalons;
+}
+
+/// Возврат указателя на словарь трасс
+QMap <int, Track> *TertiaryProcessingOfData::getTracks()
+{
+    return &tracks;
+}
 
 }
 

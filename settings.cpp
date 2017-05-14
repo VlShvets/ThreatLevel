@@ -9,7 +9,7 @@ namespace ThreatLevel
 Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
                    Painter *_painter, Results *_results, QWidget *_parent)
     : QWidget(_parent), parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons),
-      painter(_painter), results(_results), mainThread(NULL), isWaiting(true)
+      painter(_painter), results(_results), mainThread(NULL)
 {
     QHBoxLayout *hLayout = new QHBoxLayout(this);
 
@@ -17,22 +17,22 @@ Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_
 
     /// Кнопка "Начать с начала"
     QPushButton *pReStart = new QPushButton;
-    pReStart->setIcon(style()->standardIcon(QStyle::SP_BrowserReload));
-    pReStart->setFixedWidth(200);
+    pReStart->setIcon(style()->standardIcon(QStyle::SP_MediaSkipBackward));
+    pReStart->setFixedWidth(50);
     QObject::connect(pReStart, SIGNAL(clicked()), this, SLOT(reStart()));
     hLayout->addWidget(pReStart);
 
     /// Кнопка "Play/Pause"
     pPlayPause = new QPushButton;
     pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    pPlayPause->setFixedWidth(200);
+    pPlayPause->setFixedWidth(50);
     QObject::connect(pPlayPause, SIGNAL(clicked()), this, SLOT(stateChanged()));
     hLayout->addWidget(pPlayPause);
 
     /// Кнопка "Stop"
     QPushButton *pStop = new QPushButton;
-    pStop->setIcon(style()->standardIcon(QStyle::SP_BrowserStop));
-    pStop->setFixedWidth(200);
+    pStop->setIcon(style()->standardIcon(QStyle::SP_MediaStop));
+    pStop->setFixedWidth(50);
     QObject::connect(pStop, SIGNAL(clicked()), this, SLOT(stop()));
     hLayout->addWidget(pStop);
 
@@ -59,6 +59,28 @@ Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_
 
     hLayout->addWidget(new QSplitter());
 
+    QCheckBox *cAreas = new QCheckBox(tr("ЗКВ"));
+    cAreas->setChecked(true);
+    QObject::connect(cAreas, SIGNAL(clicked(bool)), painter, SLOT(setVisibleOfAreas(bool)));
+    hLayout->addWidget(cAreas);
+
+    QCheckBox *cEtalons = new QCheckBox(tr("Эталоны"));
+    cEtalons->setChecked(true);
+    QObject::connect(cEtalons, SIGNAL(clicked(bool)), painter, SLOT(setVisibleOfEtalons(bool)));
+    hLayout->addWidget(cEtalons);
+
+    QCheckBox *cTracks = new QCheckBox(tr("Трассы"));
+    cTracks->setChecked(true);
+    QObject::connect(cTracks, SIGNAL(clicked(bool)), painter, SLOT(setVisibleOfTracks(bool)));
+    hLayout->addWidget(cTracks);
+
+    QCheckBox *cMinDists = new QCheckBox(tr("Кратчайшие расстояния"));
+    cMinDists->setChecked(false);
+    QObject::connect(cMinDists, SIGNAL(clicked(bool)), painter, SLOT(setVisibleOfMinDists(bool)));
+    hLayout->addWidget(cMinDists);
+
+    hLayout->addWidget(new QSplitter());
+
     this->setLayout(hLayout);
 }
 
@@ -72,38 +94,44 @@ Settings::~Settings()
 /// Перезапуск потока вычислений
 void Settings::reStart()
 {
+    /// Возвращение флага приостановления потока вычислений
+    bool isPaused;
+    if(mainThread)
+        isPaused = mainThread->isPaused();
+    else
+        isPaused = true;
+
     /// Завершение имеющегося потока вычислений
     completeOfThread();
 
     /// Создание нового потока вычислений
     createOfThread();
 
-    pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-    isWaiting = false;
+    /// Установление флага приостановления потока вычислений
+    mainThread->setPause(isPaused);
 }
 
 /// Запуск и остановка потока вычислений
 void Settings::stateChanged()
 {
-    qDebug() << "Is Waiting:" << isWaiting;
-    if(isWaiting)
-    {
-        /// Создание нового потока вычислений
-        createOfThread();
-
-        /// Установление флага приостановления потока вычислений
-        mainThread->setPause(false);
-
-        pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
-    }
+    /// Возвращение флага приостановления потока вычислений
+    bool isPaused;
+    if(mainThread)
+        isPaused = mainThread->isPaused();
     else
-    {
-        /// Установление флага приостановления потока вычислений
-        mainThread->setPause(true);
+        isPaused = true;
+//    qDebug() << "Is Paused:" << isPaused;
 
+    /// Создание нового потока вычислений
+    createOfThread();
+
+    if(isPaused)
+        pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPause));
+    else
         pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    }
-    isWaiting = !isWaiting;
+
+    /// Установление флага приостановления потока вычислений
+    mainThread->setPause(!isPaused);
 }
 
 /// Остановка потока вычислений
@@ -113,7 +141,6 @@ void Settings::stop()
     completeOfThread();
 
     pPlayPause->setIcon(style()->standardIcon(QStyle::SP_MediaPlay));
-    isWaiting = true;
 }
 
 /// Создание нового потока вычислений

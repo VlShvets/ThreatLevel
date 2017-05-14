@@ -20,16 +20,16 @@ public:
     explicit        ParametersOfEtalons(QWidget *parent = 0);
     ~ParametersOfEtalons();
 
-    /// Получить количество КР
+    /// Возвращение количества КР
     inline int      getCMCount() const;
 
-    /// Получить параметр КР по номеру строки и номеру столбца
+    /// Возвращение параметра КР по номеру строки и номеру столбца
     inline float    getCMPar(int _row, int _column) const;
 
-    /// Получить количество БЦ
+    /// Возвращение количества БЦ
     inline int      getBGCount() const;
 
-    /// Получить параметр БЦ по номеру строки и номеру столбца
+    /// Возвращение параметра БЦ по номеру строки и номеру столбца
     inline float    getBGPar(int _row, int _column) const;
 
 private slots:
@@ -77,25 +77,25 @@ private:
     static const int    BG_MAX_COUNT            = 5;    /// Максимальное количество БЦ
 };
 
-/// Получить количество КР
+/// Возвращение количества КР
 int ParametersOfEtalons::getCMCount() const
 {
     return tCMPar->rowCount();
 }
 
-/// Получить параметр КР по номеру строки и номеру столбца
+/// Возвращение параметра КР по номеру строки и номеру столбца
 float ParametersOfEtalons::getCMPar(int _row, int _column) const
 {
     return tCMPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();
 }
 
-/// Получить количество БЦ
+/// Возвращение количества БЦ
 int ParametersOfEtalons::getBGCount() const
 {
     return tBGPar->rowCount();
 }
 
-/// Получить параметр БЦ по номеру строки и номеру столбца
+/// Возвращение параметра БЦ по номеру строки и номеру столбца
 float ParametersOfEtalons::getBGPar(int _row, int _column) const
 {
     return tBGPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();

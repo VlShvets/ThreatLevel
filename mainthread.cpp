@@ -13,6 +13,62 @@ MainThread::MainThread(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalon
     imitation                   = new Imitation(_parametersOfAreas, _parametersOfEtalons);
     tertiaryProcessingOfData    = new TertiaryProcessingOfData;
     definitionOfThreatLevel     = new DefinitionOfThreatLevel;
+
+    /// --------------------------------------------------
+    /// Имитация
+    /// --------------------------------------------------
+
+    /// Получение ЗКВ
+    areas = imitation->getAreas();
+
+    /// Получение эталонов
+    etalons = imitation->getEtalons();
+
+    /// --------------------------------------------------
+    /// Третичная обработка данных
+    /// --------------------------------------------------
+
+    /// Отправление ЗКВ в класс третичной обработки данных
+    tertiaryProcessingOfData->setAreas(*areas);
+
+    /// Отправление эталонов в класс третичной обработки данных
+    tertiaryProcessingOfData->setEtalons(*etalons);
+
+    /// Получение трасс
+    tracks = tertiaryProcessingOfData->getTracks();
+
+    /// --------------------------------------------------
+    /// Определение уровня угроз
+    /// --------------------------------------------------
+
+    /// Отправление ЗКВ в класс определения уровня угроз
+    definitionOfThreatLevel->setAreas(*areas);
+
+    /// Отправление трасс в класс определения уровня угроз
+    definitionOfThreatLevel->setTracks(*tracks);
+
+    /// --------------------------------------------------
+    /// Отрисовка
+    /// --------------------------------------------------
+
+    /// Отправление ЗКВ на виджет отрисовки
+    painter->setAreas(*areas);
+
+    /// Отправление эталонов на виджет отрисокви
+    painter->setEtalons(*etalons);
+
+    /// Отправление трасс на виджет отрисовки
+    painter->setTracks(*tracks);
+
+    /// --------------------------------------------------
+    /// Таблица результатов
+    /// --------------------------------------------------
+
+    /// Отправление ЗКВ на виджет таблицы результатов
+    results->setAreas(*areas);
+
+    /// Отправление трасс на виджет таблицы результатов
+    results->setTracks(*tracks);
 }
 
 MainThread::~MainThread()
@@ -20,16 +76,6 @@ MainThread::~MainThread()
     delete definitionOfThreatLevel;
     delete tertiaryProcessingOfData;
     delete imitation;
-
-    QMap <int, Area>::iterator area = areas.begin();
-    for(; area != areas.end(); ++area)
-        area.value().numTrack.clear();
-
-    areas.clear();
-    etalons.clear();
-    tracks.clear();
-
-    results->resetTable();
 }
 
 /// Процесс потока
@@ -40,7 +86,6 @@ void MainThread::run()
     /// Флаг завершения потока вычислений
     while(!isCompleted)
     {
-
          /// Флаг приостановки потока вычислений
         if(isPause)
         {
@@ -50,49 +95,19 @@ void MainThread::run()
 
         msleep(waitingTime);
         time += DELTA_T;
-        qDebug() << "Time = " << time;
+//        qDebug() << "Time = " << time;
 
-        /// --------------------------------------------------
         /// Имитация
-        /// --------------------------------------------------
+        imitation->run(time);
 
-        /// Получение ЗКВ
-        areas       = imitation->getAreas();
-
-        /// Отправление ЗКВ на виджет отрисовки
-        painter->setAreas(&areas);
-
-        /// Получение эталонов
-        etalons     = imitation->getEtalons(time);
-
-        /// Отправление эталонов на виджет отрисовки
-        painter->setEtalons(&etalons);
-
-        /// --------------------------------------------------
         /// Третичная обработка данных
-        /// --------------------------------------------------
+        tertiaryProcessingOfData->run();
 
-        /// Получение трасс
-        tracks      = tertiaryProcessingOfData->getTracks(&areas, &etalons);
-
-        /// --------------------------------------------------
         /// Определение уровня угроз
-        /// --------------------------------------------------
-
-        /// Отправление ЗКВ в класс определения уровня угроз
-        definitionOfThreatLevel->setAreas(&areas);
-
-        /// Отправление трасс в класс определения уровня угроз
-        definitionOfThreatLevel->setTracks(&tracks);
-
-        /// Вычислительный процесс
         definitionOfThreatLevel->run();
 
-        /// Отправление трасс на виджет отрисовки
-        painter->setTracks(&tracks);
-
-        /// Отправление ЗКВ и трасс на виджет отображения результатов
-        results->loadTable(areas, tracks);
+        /// Отображение таблицы результатов
+        results->loadTable();
     }
 
     /// Очищение виджета отрисовки
@@ -101,7 +116,5 @@ void MainThread::run()
     /// Очищение виджета отображения результатов
     results->resetTable();
 }
-
-
 
 }

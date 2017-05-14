@@ -5,7 +5,8 @@ namespace ThreatLevel
 
 /// Класс виджета отрисовки трасс и позиционных районов
 Painter::Painter(QWidget *_parent)
-    : Grapher2D(_parent)
+    : Grapher2D(_parent),
+      isVisibleOfAreas(true), isVisibleOfEtalons(true), isVisibleOfTracks(true), isVisibleOfMinDists(false)
 {
     setCSAbsMeasure(ABS_MEASURE);
     setCSOrdMeasure(ORD_MEASURE);
@@ -48,9 +49,9 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     pen.setCosmetic(true);
 
     /// Позиционные районы
-    if(areas)
+    if(areas && isVisibleOfAreas)
     {
-        QMap <int, Area>::const_iterator area = areas->begin();
+        QMap <int, Area>::const_iterator area = areas->constBegin();
         for(; area != areas->end(); ++area)
         {
             /// Отрисовка местоположения
@@ -71,15 +72,13 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
                 p.restore();
             }
 
-            /// Отрисовка критического времени при минимально и максимально возможной скорости
+            /// Отрисовка критического времени при минимальном значении скорости
             pen.setStyle(Qt::DashLine);
             pen.setColor(Qt::darkRed);
             pen.setWidth(1);
             p.setPen(pen);
             p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MIN_SPEED,
                           area.value().initCritTime * Track::MIN_SPEED);
-            p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MAX_SPEED,
-                          area.value().initCritTime * Track::MAX_SPEED);
 
             /// Отрисовка района обнаружения
             pen.setColor(Qt::darkBlue);
@@ -98,10 +97,10 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     }
 
     /// Эталоны
-    if(etalons)
+    if(etalons && isVisibleOfEtalons)
     {
         pen.setStyle(Qt::SolidLine);
-        QMap <int, Etalon>::const_iterator etalon = etalons->begin();
+        QMap <int, Etalon>::const_iterator etalon = etalons->constBegin();
         for(; etalon != etalons->end(); ++etalon)
         {
             if(etalon.value().initIsBG)
@@ -133,10 +132,10 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
     }
 
     /// Трассы
-    if(tracks)
+    if(tracks && isVisibleOfTracks)
     {
         pen.setStyle(Qt::SolidLine);
-        QMap <int, Track>::const_iterator track = tracks->begin();
+        QMap <int, Track>::const_iterator track = tracks->constBegin();
         for(; track != tracks->end(); ++track)
         {
             if(track.value().initIsBG)
@@ -170,25 +169,28 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
         }
 
         /// Отрисовка кратчайших расстояний и касательных от текущего положения трасс до ЗКВ
-        for(track = tracks->begin(); track != tracks->end(); ++track)
+        if(isVisibleOfMinDists)
         {
-            if(track.value().numArea != -1 &&
-                    areas->contains(track.value().numArea))
+            for(track = tracks->constBegin(); track != tracks->end(); ++track)
             {
-                /// Отрисовка кратчайшего расстояния от текущего положения трассы до центра ЗКВ
-                pen.setColor(Qt::darkRed);
-                p.setPen(pen);
-                p.drawLine(track.value().exactPos, areas->value(track.value().numArea).initPos);
+                if(track.value().numArea != -1 &&
+                   areas->contains(track.value().numArea))
+                {
+                    /// Отрисовка кратчайшего расстояния от текущего положения трассы до центра ЗКВ
+                    pen.setColor(Qt::darkRed);
+                    p.setPen(pen);
+                    p.drawLine(track.value().exactPos, areas->value(track.value().numArea).initPos);
 
-                /// Отрисовка касательных от текущих координат трассы до границы идентифицированного ЗКВ
-                pen.setColor(Qt::darkBlue);
-                p.setPen(pen);
-                QPointF tanPoint1;
-                QPointF tanPoint2;
-                calcTanPoints(areas->value(track.value().numArea).initPos, areas->value(track.value().numArea).initRadius,
-                        track.value().exactPos, tanPoint1, tanPoint2);
-                p.drawLine(track.value().exactPos, tanPoint1);
-                p.drawLine(track.value().exactPos, tanPoint2);
+                    /// Отрисовка касательных от текущих координат трассы до границы идентифицированного ЗКВ
+                    pen.setColor(Qt::darkBlue);
+                    p.setPen(pen);
+                    QPointF tanPoint1;
+                    QPointF tanPoint2;
+                    calcTanPoints(areas->value(track.value().numArea).initPos, areas->value(track.value().numArea).initRadius,
+                            track.value().exactPos, tanPoint1, tanPoint2);
+                    p.drawLine(track.value().exactPos, tanPoint1);
+                    p.drawLine(track.value().exactPos, tanPoint2);
+                }
             }
         }
     }
@@ -203,7 +205,8 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
 /// Вычисление точек соприкосновения касательных от текущего положения трассы до границы ПР
 void Painter::calcTanPoints(const QPointF &_area, const float _radius, const QPointF &_track, QPointF &_p1, QPointF &_p2)
 {
-    float distance  = calcDistance(_area, _track);
+    float distance  = qSqrt((_area.x() - _track.x()) * (_area.x() - _track.x()) +
+                            (_area.y() - _track.y()) * (_area.y() - _track.y()));
 
     QPointF midDistTargetBase((_track - _area) / 2.0);
 
@@ -234,13 +237,6 @@ void Painter::calcTanPoints(const QPointF &_area, const float _radius, const QPo
 
     _p1 += _area;
     _p2 += _area;
-}
-
-/// Вычисление расстояния между двумя точками
-float Painter::calcDistance(const QPointF &_p1, const QPointF &_p2)
-{
-    return qSqrt((_p1.x() - _p2.x()) * (_p1.x() - _p2.x()) +
-                 (_p1.y() - _p2.y()) * (_p1.y() - _p2.y()));
 }
 
 }

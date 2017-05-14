@@ -19,10 +19,10 @@ public:
     explicit        ParametersOfAreas(QWidget *parent = 0);
     ~ParametersOfAreas();
 
-    /// Получить количество ЗКВ
+    /// Возвращение количества ЗКВ
     inline int      getCount() const;
 
-    /// Получить параметр ЗКВ по номеру строки и номеру столбца
+    /// Возвращение параметра ЗКВ по номеру строки и номеру столбца
     inline float    getPar(int _row, int _column) const;
 
 private slots:
@@ -43,13 +43,13 @@ private:
     static const int    AREAS_MAX_COUNT     = 5;    /// Максимальное количество ЗКВ
 };
 
-/// Получить количество ЗКВ
+/// Возвращение количества ЗКВ
 int ParametersOfAreas::getCount() const
 {
     return tAreaPar->rowCount();
 }
 
-/// Получить параметр ЗКВ по номеру строки и номеру столбца
+/// Возвращение параметра ЗКВ по номеру строки и номеру столбца
 float ParametersOfAreas::getPar(int _row, int _column) const
 {
     return tAreaPar->item(_row, _column)->data(Qt::DisplayRole).toFloat();

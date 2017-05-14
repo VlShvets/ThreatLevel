@@ -9,11 +9,11 @@
 
 #include <QHBoxLayout>
 #include <QSplitter>
+#include <QStyle>
+#include <QPushButton>
 #include <QSlider>
 #include <QLCDNumber>
-#include <QPushButton>
-#include <QStyle>
-#include <QSpinBox>
+#include <QCheckBox>
 
 namespace ThreatLevel
 {
@@ -59,13 +59,6 @@ private:
     Painter                 *painter;               /// Класс виджета отрисовки эталонов, трасс и ЗКВ
     Results                 *results;               /// Класс виджета отображения таблицы результатов
     MainThread              *mainThread;            /// Класс главного потока вычислений и отрисовки
-
-    /// --------------------------------------------------
-    /// Переменные
-    /// --------------------------------------------------
-
-    /// Параметры потока вычислений
-    bool    isWaiting;  /// Флаг состояния потока вычислений
 
     /// --------------------------------------------------
     /// Константы

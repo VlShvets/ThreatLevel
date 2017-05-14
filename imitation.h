@@ -19,18 +19,21 @@ public:
     explicit                    Imitation(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons);
     ~Imitation();
 
-    /// Начальная инициализация всех параметров
-    void                        initialization();
+    /// Возвращение словаря ЗКВ
+    inline QMap <int, Area>             *getAreas();
 
-    /// Возврат словаря ЗКВ
-    inline QMap <int, Area>     getAreas();
+    /// Возвращение словаря эталонов
+    inline const QMap <int, Etalon>     *getEtalons();
 
-    /// Возврат словаря соответствующих заданному времени эталонов
-    QMap <int, Etalon>          getEtalons(const float _currentTime);
+    /// Вычислительный процесс
+    void    run(const float _currentTime);
 
 private:
     /// Начальная инициализация параметров ЗКВ
     void    initializationOfParametersAreas();
+
+    /// Обнуление рекурентных параметров ЗКВ
+    void    resettingOfAreasRecurrenceParameters(Area &_area);
 
     /// Начальная инициализация параметров эталонов
     void    initializationOfParametersEtalons();
@@ -49,6 +52,7 @@ private:
     /// Переменные
     /// --------------------------------------------------
 
+    /// Словарь параметров ЗКВ и эталонов
     QMap <int, Area>    areas;      /// Словарь ЗКВ         <номер, структура параметров>
     QMap <int, Etalon>  etalons;    /// Словарь эталонов    <номер, структура параметров>
 
@@ -60,10 +64,16 @@ private:
     ParametersOfEtalons     *parametersOfEtalons;   /// Класс виджета редактирования параметров эталонов
 };
 
-/// Возврат словаря ЗКВ
-QMap <int, Area> Imitation::getAreas()
+/// Возвращение словаря ЗКВ
+QMap <int, Area> *Imitation::getAreas()
 {
-    return areas;
+    return &areas;
+}
+
+/// Возвращение словаря эталонов
+const QMap <int, Etalon> *Imitation::getEtalons()
+{
+    return &etalons;
 }
 
 }

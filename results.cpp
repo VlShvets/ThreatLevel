@@ -24,7 +24,7 @@ Results::Results(GraphOfTracksCount *_graphOfTrackCount, QWidget *_parent)
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 
     QHBoxLayout *hLayout = new QHBoxLayout;
-    hLayout->addWidget(new QLabel(tr("ЗКВ\t\\\tТрассы\t\tКР + БЦ = ")));
+    hLayout->addWidget(new QLabel(tr("ЗКВ\t\\\tТрассы\tКР + БЦ = ")));
 
     /// Дисплей отображения числа количественного состава налета по всем ЗКВ
     lcdMaxSumTrack = new QLCDNumber(this);
@@ -53,15 +53,15 @@ Results::~Results()
 }
 
 /// Загрузка результатов
-void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> &_tracks)
+void Results::loadTable()
 {
-    tResults->setRowCount(_areas.count() + 1);
+    tResults->setRowCount(areas->count() + 1);
     tResults->setColumnCount(Area::idenTracksMaxCount + 8);
     tResults->setHorizontalHeaderLabels(QStringList() << tr("№ ЗКВ") << tr("КР") << tr("max КР") <<
                                         tr("БЦ") << tr("max БЦ") << tr("КР + БЦ") << tr("max КР + БЦ") << tr("СКО"));
 
-    QMap <int, Area>::const_iterator area =_areas.constBegin();
-    for(int i = 0; area != _areas.end(); ++area, ++i)
+    QMap <int, Area>::const_iterator area = areas->constBegin();
+    for(int i = 0; area != areas->end(); ++area, ++i)
     {
         /// Номер ЗКВ
         tResults->setItem(i, 0, new QTableWidgetItem(QString::number(area.key())));
@@ -96,18 +96,18 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
 
         /// Cреднеквадратическая разность времени поражения с погрешностью и точного времени поражения
         if(area.value().numTrack.count() != 0 &&
-           _tracks.contains(area.value().numTrack.at(0)))
+           tracks->contains(area.value().numTrack.at(0)))
         {
-            tResults->setItem(i, 7, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(0)].rmsDiffTime) + " (" +
+            tResults->setItem(i, 7, new QTableWidgetItem(QString::number(tracks->value(area.value().numTrack.at(0)).rmsDiffTime) + " (" +
                                                          QString::number(area.value().numTrack.at(0)) + ")"));
         }
 
         /// Время движения до ЗКВ с погрешностью и номер трассы
         for(int j = 0; j < area.value().numTrack.count(); ++j)
         {
-            if(_tracks.contains(area.value().numTrack.at(j)))
+            if(tracks->contains(area.value().numTrack.at(j)))
             {
-                tResults->setItem(i, j + 8, new QTableWidgetItem(QString::number(_tracks[area.value().numTrack.at(j)].timeToPA) + " (" +
+                tResults->setItem(i, j + 8, new QTableWidgetItem(QString::number(tracks->value(area.value().numTrack.at(j)).timeToPA) + " (" +
                                                                  QString::number(area.value().numTrack.at(j)) + ")"));
             }
         }
@@ -126,52 +126,52 @@ void Results::loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> 
             tResults->takeItem(i, 7);
 
         /// Очистка неиспользующихся ячеек времени движения до ЗКВ
-        for(int j = _tracks.count() + 8; j > area.value().numTrack.count() + 7; --j)
+        for(int j = tracks->count() + 8; j > area.value().numTrack.count() + 7; --j)
             tResults->takeItem(i, j);
     }
 
     /// Знак суммы
-    tResults->setItem(_areas.count(), 0, new QTableWidgetItem(tr("Σ")));
+    tResults->setItem(areas->count(), 0, new QTableWidgetItem(tr("Σ")));
 
     /// --------------------------------------------------
     /// Результирующие параметры по всем ЗКВ
     /// --------------------------------------------------
 
     /// Суммарное количество крылатых ракет
-    tResults->setItem(_areas.count(), 1, new QTableWidgetItem(QString::number(Area::CMSumCount) + " + " +
+    tResults->setItem(areas->count(), 1, new QTableWidgetItem(QString::number(Area::CMSumCount) + " + " +
                                                               QString::number(Area::detectTracksCount)));
-    tResults->item(_areas.count(), 1)->setBackgroundColor(QColor(255, 0, 0, 50));
+    tResults->item(areas->count(), 1)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальное суммарное количество крылатых ракет
-    tResults->setItem(_areas.count(), 2, new QTableWidgetItem(QString::number(Area::CMMaxSumCount)));
-    tResults->item(_areas.count(), 2)->setBackgroundColor(QColor(255, 0, 0, 50));
+    tResults->setItem(areas->count(), 2, new QTableWidgetItem(QString::number(Area::CMMaxSumCount)));
+    tResults->item(areas->count(), 2)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Суммарное количество баллистических целей
-    tResults->setItem(_areas.count(), 3, new QTableWidgetItem(QString::number(Area::BGSumCount)));
-    tResults->item(_areas.count(), 3)->setBackgroundColor(QColor(255, 0, 0, 50));
+    tResults->setItem(areas->count(), 3, new QTableWidgetItem(QString::number(Area::BGSumCount)));
+    tResults->item(areas->count(), 3)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальное суммарное количество баллистических целей
-    tResults->setItem(_areas.count(), 4, new QTableWidgetItem(QString::number(Area::BGMaxSumCount)));
-    tResults->item(_areas.count(), 4)->setBackgroundColor(QColor(255, 0, 0, 50));
+    tResults->setItem(areas->count(), 4, new QTableWidgetItem(QString::number(Area::BGMaxSumCount)));
+    tResults->item(areas->count(), 4)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Количественный состав налета по всем ЗКВ с учетом эквивалента БЦ
-    tResults->setItem(_areas.count(), 5, new QTableWidgetItem(QString::number(Area::raidSumCount) + " + " +
+    tResults->setItem(areas->count(), 5, new QTableWidgetItem(QString::number(Area::raidSumCount) + " + " +
                                                               QString::number(Area::detectTracksCount)));
-    tResults->item(_areas.count(), 5)->setBackgroundColor(QColor(255, 0, 0, 50));
+    tResults->item(areas->count(), 5)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Максимальный количественный состав налета по всем ЗКВ с учетом эквивалента БЦ
-    tResults->setItem(_areas.count(), 6, new QTableWidgetItem(QString::number(Area::raidMaxSumCount)));
-    tResults->item(_areas.count(), 6)->setBackgroundColor(QColor(255, 0, 0, 50));
+    tResults->setItem(areas->count(), 6, new QTableWidgetItem(QString::number(Area::raidMaxSumCount)));
+    tResults->item(areas->count(), 6)->setBackgroundColor(QColor(255, 0, 0, 50));
 
     /// Отображение числа количественного состава налета по всем ЗКВ с учетом эквивалента БЦ
     lcdMaxSumTrack->display(Area::raidSumCount + Area::detectTracksCount);
 
     /// Отправка количественного состава налета с учетом эквивалента БЦ на график
-    for(area = _areas.begin(); area != _areas.end(); ++area)
-        graphOfTrackCount->loadTrackCount((int) area.key(), area.value().raidCount);
+//    for(area = areas->constBegin(); area != areas->end(); ++area)
+//        graphOfTrackCount->loadTrackCount((int) area.key(), area.value().raidCount);
 
     /// Отправка количественного состава налета по всем ЗКВ с учетом эквивалента БЦ на график
-    graphOfTrackCount->loadTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
+//    graphOfTrackCount->loadTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
 }
 
 /// Очистка таблицы результатов

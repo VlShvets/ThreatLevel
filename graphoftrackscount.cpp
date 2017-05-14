@@ -14,10 +14,17 @@ GraphOfTracksCount::GraphOfTracksCount(QWidget *_parent)
     setCSZoomStep(STEP_ZOOM);
     setCSZoom(DEF_ZOOM);
     setCSZoomCenter(true);
+
+    startTimer(GRAPH_INTERVAL);
 }
 
 GraphOfTracksCount::~GraphOfTracksCount()
 {
+    QMap <int, QVector <int> >::iterator trackCount = tracksCount.begin();
+    for(; trackCount != tracksCount.end(); ++trackCount)
+        trackCount.value().clear();
+
+    tracksCount.clear();
 }
 
 /// Загрузка количественного состава налета
@@ -33,12 +40,11 @@ void GraphOfTracksCount::loadTrackCount(const int _numArea, const int _trackCoun
     repaint();
 }
 
+/// Выбор ЗКВ для отображения
 void GraphOfTracksCount::showGraph(const int _numArea)
 {
     if(tracksCount.contains(_numArea))
         numArea = _numArea;
-
-    repaint();
 }
 
 /// Очистка графика количественного состава налёта
@@ -49,10 +55,15 @@ void GraphOfTracksCount::resetGraph()
         count.value().clear();
 
     tracksCount.clear();
+}
 
+/// Обновление отрисокви
+void GraphOfTracksCount::timerEvent(QTimerEvent *)
+{
     repaint();
 }
 
+/// Отрисовка графика количественного состава налета
 void GraphOfTracksCount::paintEvent(QPaintEvent *_pEvent)
 {
     Grapher2D::paintEvent(_pEvent);
@@ -71,10 +82,10 @@ void GraphOfTracksCount::paintEvent(QPaintEvent *_pEvent)
 
     if(tracksCount.contains(numArea))
     {
-        for(int i = tracksCount[numArea].count() - 1; i > 0; --i)
+        for(int i = tracksCount.value(numArea).count() - 1; i > 0; --i)
         {
-            p.drawLine(QPointF(- i      - SHIFT, tracksCount[numArea].at(i)),
-                       QPointF(- i + 1  - SHIFT, tracksCount[numArea].at(i - 1)));
+            p.drawLine(QPointF(- i      - SHIFT, tracksCount.value(numArea).at(i)),
+                       QPointF(- i + 1  - SHIFT, tracksCount.value(numArea).at(i - 1)));
         }
     }
 

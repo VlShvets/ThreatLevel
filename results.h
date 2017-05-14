@@ -17,21 +17,27 @@ namespace ThreatLevel
 /// Класс виджета отображения таблицы результатов
 class Results : public QWidget
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     explicit        Results(class GraphOfTracksCount *_graphOfTrackCount, QWidget *parent = 0);
     ~Results();
 
     /// Загрузка результатов
-    void            loadTable(const QMap <int, Area> &_areas, const QMap <int, Track> &_tracks);
+    void            loadTable();
 
     /// Очистка таблицы результатов
     void            resetTable();
 
-private slots:
+    /// Установление ЗКВ
+    inline void     setAreas(const  QMap <int, Area> &_areas);
+
+    /// Установление трасс
+    inline void     setTracks(const QMap <int, Track> &_tracks);
+
+//private slots:
     /// Выбор строки в таблице
-    inline void     tableSelectionChanged(QItemSelection, QItemSelection);
+//    inline void     tableSelectionChanged(QItemSelection, QItemSelection);
 
 private:
     /// Указатели на виджеты
@@ -42,7 +48,15 @@ private:
     /// Указатели на объекты классов
     /// --------------------------------------------------
 
-    GraphOfTracksCount  *graphOfTrackCount;        /// Класс графика количественного состава налёта
+    GraphOfTracksCount  *graphOfTrackCount;     /// Класс графика количественного состава налёта
+
+    /// --------------------------------------------------
+    /// Переменные
+    /// --------------------------------------------------
+
+    /// Указатели на словари параметров ЗКВ, эталонов и трасс
+    const QMap <int, Area>      *areas;     /// Словарь ЗКВ         <номер, структура параметров>
+    const QMap <int, Track>     *tracks;    /// Словарь трасс       <номер, структура параметров>
 
     /// --------------------------------------------------
     /// Константы
@@ -52,11 +66,23 @@ private:
     static const int    LCD_DIGIT_COUNT = 4;    /// Число цифр в поле отображения максимального количественного состава налета
 };
 
-/// Выбор строки в таблице
-void Results::tableSelectionChanged(QItemSelection, QItemSelection)
+/// Установление ЗКВ
+void Results::setAreas(const QMap <int, Area> &_areas)
 {
-    graphOfTrackCount->showGraph(tResults->selectedItems().first()->text().toInt());
+    areas = &_areas;
 }
+
+/// Установление трасс
+void Results::setTracks(const QMap <int, Track> &_tracks)
+{
+    tracks = &_tracks;
+}
+
+/// Выбор строки в таблице
+//void Results::tableSelectionChanged(QItemSelection, QItemSelection)
+//{
+//    graphOfTrackCount->showGraph(tResults->selectedItems().first()->text().toInt());
+//}
 
 }
 

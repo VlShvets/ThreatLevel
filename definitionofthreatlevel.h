@@ -14,51 +14,51 @@ namespace ThreatLevel
 class DefinitionOfThreatLevel
 {
 public:
-    explicit    DefinitionOfThreatLevel();
+    explicit        DefinitionOfThreatLevel();
     ~DefinitionOfThreatLevel();
 
     /// Вычислительный процесс
-    void        run();
+    void            run();
 
     /// Установление ЗКВ
-    void        setAreas(QMap <int, Area> *_areas);
+    inline void     setAreas(QMap <int, Area> &_areas);
 
     /// Установление трасс
-    void        setTracks(QMap <int, Track> *_tracks);
+    inline void     setTracks(QMap <int, Track> &_tracks);
 
 private:
     /// Сглаживание погрешностей измерения
-    void    smootheningOfMeasurement();
+    void            smootheningOfMeasurement();
 
     /// Идентификация трасс с ЗКВ
-    void    identificationOfTracksWithAreas();
+    void            identificationOfTracksWithAreas();
+
+    /// Определение номера ЗКВ по попаданию конечной точки траектории БЦ в границы ЗКВ
+    int             numAreaHitFinalPosOfBG(const Track &_track);
+
+    /// Определение номера ближайшего ЗКВ по курсу движения КР
+    int             numAreaNearestOnCourseOfCM(const Track &_track);
 
     /// Расчёт времени движения
-    void    calculationOfMotionTime();
+    void            calculationOfMotionTime();
 
-    /// Определение номера трассы с минимальным временем преодоления расстояния до ПР путем сортировки
-    int     numTrackOfMinTime();
+    /// Определение номера трассы с минимальным временем движения до идентифицированного ЗКВ путем сортировки
+    int             numTrackOfMinTime();
+
+    /// Быстрая сортировка трасс по времени движения до идентифицированного ЗКВ
+    void            quickSortTracks(QVector <int> &_numTrack, const int _first, const int _last);
 
     /// Расчет количества крылатых ракет
-    void    calculationOfCMCount();
+    void            calculationOfCMCount();
 
     /// Расчет количества баллистических целей
-    void    calculationOfBGCount();
+    void            calculationOfBGCount();
 
-    /// Расчет количественного состава налёта с учетом тротилового эквивалента БЦ
-    void    calculationOfRaidCount();
-
-    /// Определение номера позиционного района по попаданию конечной точки траектории БЦ
-    int     numAreaHitFinalPosOfBG(const Track &_track);
-
-    /// Определение номера позиционного района ближайшего по курсу КР
-    int     numAreaNearestOnCourseOfCM(const Track &_track);
-
-    /// Быстрая сортировка трасс по времени поражения определенного ПР
-    void    quickSortTracks(QVector <int> &_numTrack, const int _first, const int _last);
+    /// Расчет количественного состава налёта с учетом эквивалента БЦ
+    void            calculationOfRaidCount();
 
     /// Сброс трасс
-    void    resetTracks();
+//    void            resetTracks();
 
     /// --------------------------------------------------
     /// Статические функции
@@ -83,14 +83,16 @@ private:
     static constexpr float  SMOOTH  = 0.9;  /// Весовой коэфициент сглаживания погрешностей ( < 1.0)
 };
 
-void DefinitionOfThreatLevel::setAreas(QMap <int, Area> *_areas)
+/// Установление трасс
+void DefinitionOfThreatLevel::setAreas(QMap <int, Area> &_areas)
 {
-    areas = _areas;
+    areas = &_areas;
 }
 
-void DefinitionOfThreatLevel::setTracks(QMap <int, Track> *_tracks)
+/// Установление трасс
+void DefinitionOfThreatLevel::setTracks(QMap <int, Track> &_tracks)
 {
-    tracks = _tracks;
+    tracks = &_tracks;
 }
 
 }

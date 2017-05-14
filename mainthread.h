@@ -25,12 +25,15 @@ public:
     /// Поток вычислений
     void            run();
 
+    /// Установление флага приостановления потока вычислений
+    inline void     setPause(const bool _pause);
+
+    /// Возвращение флага приостановления потока вычислений
+    inline bool     isPaused();
+
 public slots:
     /// Завершение потока вычислений
     inline void     complete();
-
-    /// Установление флага приостановления потока вычислений
-    inline void     setPause(bool _pause);
 
     /// Установление времени ожидания между циклами вычислений
     inline void     setWaitingTime(const int _waitingTime);
@@ -43,8 +46,8 @@ private:
 
     Imitation                   *imitation;                 /// Класс имитации
     TertiaryProcessingOfData    *tertiaryProcessingOfData;  /// Класс третичной обработки данных
-    Painter                     *painter;                   /// Класс виджета отрисовки ЗКВ и трасс
     DefinitionOfThreatLevel     *definitionOfThreatLevel;   /// Класс определения уровня угрозы
+    Painter                     *painter;                   /// Класс виджета отрисовки ЗКВ и трасс
     Results                     *results;                   /// Класс виджета отображения таблицы результатов
 
     /// --------------------------------------------------
@@ -57,9 +60,9 @@ private:
     bool                isPause;        /// Флаг приостановления потока вычислений
 
     /// Словари параметров ЗКВ, эталонов и трасс
-    QMap <int, Area>    areas;          /// Словарь ЗКВ         <номер, структура параметров>
-    QMap <int, Etalon>  etalons;        /// Словарь эталонов    <номер, структура параметров>
-    QMap <int, Track>   tracks;         /// Словарь трасс       <номер, структура параметров>
+    QMap <int, Area>            *areas;     /// Словарь ЗКВ         <номер, структура параметров>
+    const QMap <int, Etalon>    *etalons;   /// Словарь эталонов    <номер, структура параметров>
+    QMap <int, Track>           *tracks;    /// Словарь трасс       <номер, структура параметров>
 
     /// --------------------------------------------------
     /// Константы
@@ -69,18 +72,25 @@ private:
     static constexpr float  DELTA_T             = 10.0;         /// Интервал времени измерений для рассчётов (в с)
 };
 
+/// Установление флага приостановления потока вычислений
+void MainThread::setPause(const bool _pause)
+{
+    isPause = _pause;
+}
+
+/// Возвращение флага приостановления потока вычислений
+bool MainThread::isPaused()
+{
+    return isPause;
+}
+
+/// Завершение потока вычислений
 void MainThread::complete()
 {
     isCompleted = true;
 }
 
-/// Установление флага приостановления потока вычислений
-void MainThread::setPause(bool _pause)
-{
-    isPause = _pause;
-}
-
-/// Установление времени ожидания между циклами вычислений
+/// Установление времени ожидания между циклами вычислений (в мс)
 void MainThread::setWaitingTime(const int _waitingTime)
 {
     waitingTime = _waitingTime;
