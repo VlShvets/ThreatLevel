@@ -32,7 +32,7 @@ private:
     Painter                 *painter;               /// Класс виджета отрисовки эталонов, трасс и ЗКВ
     GraphOfTracksCount      *graphOfTracksCount;    /// Класс виджета графика количественного состава налёта
     Results                 *results;               /// Класс виджета отображения таблицы результатов
-    class Settings                *settings;              /// Класс виджета настроек
+    Settings                *settings;              /// Класс виджета настроек
 };
 
 }

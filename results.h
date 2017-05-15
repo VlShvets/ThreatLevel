@@ -17,14 +17,11 @@ namespace ThreatLevel
 /// Класс виджета отображения таблицы результатов
 class Results : public QWidget
 {
-//    Q_OBJECT
+    Q_OBJECT
 
 public:
     explicit        Results(class GraphOfTracksCount *_graphOfTrackCount, QWidget *parent = 0);
     ~Results();
-
-    /// Загрузка результатов
-    void            loadTable();
 
     /// Очистка таблицы результатов
     void            resetTable();
@@ -35,9 +32,13 @@ public:
     /// Установление трасс
     inline void     setTracks(const QMap <int, Track> &_tracks);
 
-//private slots:
+protected:
+    /// Обновление таблицы результатов
+    void            timerEvent(QTimerEvent *);
+
+private slots:
     /// Выбор строки в таблице
-//    inline void     tableSelectionChanged(QItemSelection, QItemSelection);
+    inline void     tableSelectionChanged(QItemSelection, QItemSelection);
 
 private:
     /// Указатели на виджеты
@@ -62,8 +63,11 @@ private:
     /// Константы
     /// --------------------------------------------------
 
-    /// Параметр поля отображения максимального количественного состава налета
-    static const int    LCD_DIGIT_COUNT = 4;    /// Число цифр в поле отображения максимального количественного состава налета
+    /// Параметры обновления таблицы результатов
+    static const int    RESULTS_INTERVAL    = 100;  /// Интервал обновления таблицы результатов (в мс)
+
+    /// Параметры поля отображения количественного состава налета
+    static const int    LCD_DIGIT_COUNT     = 4;    /// Число цифр в поле отображения количественного состава налета
 };
 
 /// Установление ЗКВ
@@ -79,10 +83,10 @@ void Results::setTracks(const QMap <int, Track> &_tracks)
 }
 
 /// Выбор строки в таблице
-//void Results::tableSelectionChanged(QItemSelection, QItemSelection)
-//{
-//    graphOfTrackCount->showGraph(tResults->selectedItems().first()->text().toInt());
-//}
+void Results::tableSelectionChanged(QItemSelection, QItemSelection)
+{
+    graphOfTrackCount->showGraph(tResults->selectedItems().first()->text().toInt());
+}
 
 }
 

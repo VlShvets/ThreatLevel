@@ -5,6 +5,7 @@
 #include "tertiaryprocessingofdata.h"
 #include "definitionofthreatlevel.h"
 #include "painter.h"
+#include "graphoftrackscount.h"
 #include "results.h"
 
 #include <QThread>
@@ -19,7 +20,8 @@ class MainThread : public QThread
 
 public:
     explicit        MainThread(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
-                               Painter *_painter, Results *_results, const int _waitingTime);
+                               Painter *_painter, GraphOfTracksCount *_graphOfTracksCount, Results *_results,
+                               const int _waitingTime);
     ~MainThread();
 
     /// Поток вычислений
@@ -48,6 +50,7 @@ private:
     TertiaryProcessingOfData    *tertiaryProcessingOfData;  /// Класс третичной обработки данных
     DefinitionOfThreatLevel     *definitionOfThreatLevel;   /// Класс определения уровня угрозы
     Painter                     *painter;                   /// Класс виджета отрисовки ЗКВ и трасс
+    GraphOfTracksCount          *graphOfTracksCount;        /// Класс виджета графика количественного состава налёта
     Results                     *results;                   /// Класс виджета отображения таблицы результатов
 
     /// --------------------------------------------------

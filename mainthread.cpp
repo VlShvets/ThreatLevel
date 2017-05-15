@@ -7,8 +7,9 @@ namespace ThreatLevel
 
 /// Гласс главного потока вычислений и отрисовки
 MainThread::MainThread(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
-                       Painter *_painter, Results *_results, const int _waitingTime)
-    : painter(_painter), results(_results), waitingTime(_waitingTime), isCompleted(false), isPause(false)
+                       Painter *_painter, GraphOfTracksCount *_graphOfTracksCount, Results *_results, const int _waitingTime)
+    : painter(_painter), graphOfTracksCount(_graphOfTracksCount), results(_results), waitingTime(_waitingTime),
+      isCompleted(false), isPause(false)
 {
     imitation                   = new Imitation(_parametersOfAreas, _parametersOfEtalons);
     tertiaryProcessingOfData    = new TertiaryProcessingOfData;
@@ -76,6 +77,15 @@ MainThread::~MainThread()
     delete definitionOfThreatLevel;
     delete tertiaryProcessingOfData;
     delete imitation;
+
+    /// Очищение виджета отрисовки
+    painter->clearing();
+
+    /// Очищение виджета отображения результатов
+    results->resetTable();
+
+    /// Очищение графика количественного состава налета
+    graphOfTracksCount->resetGraph();
 }
 
 /// Процесс потока
@@ -106,15 +116,9 @@ void MainThread::run()
         /// Определение уровня угроз
         definitionOfThreatLevel->run();
 
-        /// Отображение таблицы результатов
-        results->loadTable();
+        /// График количественного состава налета
+        graphOfTracksCount->loadTrackCount(*areas);
     }
-
-    /// Очищение виджета отрисовки
-    painter->clearing();
-
-    /// Очищение виджета отображения результатов
-    results->resetTable();
 }
 
 }

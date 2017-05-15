@@ -21,7 +21,7 @@ MainWindow::MainWindow(QWidget *_parent)
     painter             = new Painter;
     graphOfTracksCount  = new GraphOfTracksCount;
     results             = new Results(graphOfTracksCount);
-    settings            = new Settings(parametersOfAreas, parametersOfEtalons, painter, results);
+    settings            = new Settings(parametersOfAreas, parametersOfEtalons, painter, graphOfTracksCount, results);
 
     /// Виджет отрисовки трасс и позиционных районов
     setCentralWidget(painter);

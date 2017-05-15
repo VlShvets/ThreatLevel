@@ -19,7 +19,7 @@ int Track::numTrackMinErrTime;
 
 /// Класс виджета отображения таблицы результатов
 Results::Results(GraphOfTracksCount *_graphOfTrackCount, QWidget *_parent)
-    : QWidget(_parent), graphOfTrackCount(_graphOfTrackCount)
+    : QWidget(_parent), graphOfTrackCount(_graphOfTrackCount), areas(NULL), tracks(NULL)
 {
     QVBoxLayout *vLayout = new QVBoxLayout(this);
 
@@ -44,17 +44,33 @@ Results::Results(GraphOfTracksCount *_graphOfTrackCount, QWidget *_parent)
     vLayout->addWidget(tResults);
 
     this->setLayout(vLayout);
+
+    startTimer(RESULTS_INTERVAL);
 }
 
 Results::~Results()
 {
+    resetTable();
+
     delete tResults;
     delete lcdMaxSumTrack;
 }
 
-/// Загрузка результатов
-void Results::loadTable()
+/// Очистка таблицы результатов
+void Results::resetTable()
 {
+    areas   = NULL;
+    tracks  = NULL;
+
+    tResults->setRowCount(0);
+    tResults->setColumnCount(0);
+}
+
+void Results::timerEvent(QTimerEvent *)
+{
+    if(!areas || !tracks)
+        return;
+
     tResults->setRowCount(areas->count() + 1);
     tResults->setColumnCount(Area::idenTracksMaxCount + 8);
     tResults->setHorizontalHeaderLabels(QStringList() << tr("№ ЗКВ") << tr("КР") << tr("max КР") <<
@@ -165,24 +181,6 @@ void Results::loadTable()
 
     /// Отображение числа количественного состава налета по всем ЗКВ с учетом эквивалента БЦ
     lcdMaxSumTrack->display(Area::raidSumCount + Area::detectTracksCount);
-
-    /// Отправка количественного состава налета с учетом эквивалента БЦ на график
-//    for(area = areas->constBegin(); area != areas->end(); ++area)
-//        graphOfTrackCount->loadTrackCount((int) area.key(), area.value().raidCount);
-
-    /// Отправка количественного состава налета по всем ЗКВ с учетом эквивалента БЦ на график
-//    graphOfTrackCount->loadTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
 }
-
-/// Очистка таблицы результатов
-void Results::resetTable()
-{
-    tResults->setRowCount(0);
-    tResults->setColumnCount(0);
-
-    graphOfTrackCount->resetGraph();
-}
-
-
 
 }

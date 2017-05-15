@@ -7,9 +7,9 @@ namespace ThreatLevel
 
 /// Класс виджета настроек
 Settings::Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
-                   Painter *_painter, Results *_results, QWidget *_parent)
+                   Painter *_painter, GraphOfTracksCount *_graphOfTracksCount, Results *_results, QWidget *_parent)
     : QWidget(_parent), parametersOfAreas(_parametersOfAreas), parametersOfEtalons(_parametersOfEtalons),
-      painter(_painter), results(_results), mainThread(NULL)
+      painter(_painter), graphOfTracksCount(_graphOfTracksCount), results(_results), mainThread(NULL)
 {
     QHBoxLayout *hLayout = new QHBoxLayout(this);
 
@@ -149,7 +149,8 @@ void Settings::createOfThread()
     if(!mainThread)
     {
         qDebug() << "Create Of Thread";
-        mainThread = new MainThread(parametersOfAreas, parametersOfEtalons, painter, results, lWaitingTime->intValue());
+        mainThread = new MainThread(parametersOfAreas, parametersOfEtalons, painter, graphOfTracksCount, results,
+                                    lWaitingTime->intValue());
         QObject::connect(sWaitingTime, SIGNAL(valueChanged(int)), mainThread, SLOT(setWaitingTime(int)));
         mainThread->start();
     }

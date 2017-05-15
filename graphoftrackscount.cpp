@@ -20,24 +20,29 @@ GraphOfTracksCount::GraphOfTracksCount(QWidget *_parent)
 
 GraphOfTracksCount::~GraphOfTracksCount()
 {
-    QMap <int, QVector <int> >::iterator trackCount = tracksCount.begin();
-    for(; trackCount != tracksCount.end(); ++trackCount)
-        trackCount.value().clear();
-
-    tracksCount.clear();
+    resetGraph();
 }
 
 /// Загрузка количественного состава налета
-void GraphOfTracksCount::loadTrackCount(const int _numArea, const int _trackCount)
+void GraphOfTracksCount::loadTrackCount(const QMap <int, Area> &_areas)
 {
+    QMap <int, Area>::const_iterator area = _areas.constBegin();
+    for(; area != _areas.end(); ++area)
+    {
+        /// Добавление количественного состава налета в список
+        tracksCount[area.key()].push_front(area.value().raidCount);
+
+        /// Проверка переполнения списка
+        if(tracksCount[area.key()].count() > MAX_SUM_TRACKS)
+            tracksCount[area.key()].removeLast();
+    }
+
     /// Добавление количественного состава налета в список
-    tracksCount[_numArea].push_front(_trackCount);
+    tracksCount[0].push_front(Area::raidSumCount + Area::detectTracksCount);
 
     /// Проверка переполнения списка
-    if(tracksCount[_numArea].count() > MAX_SUM_TRACKS)
-        tracksCount[_numArea].removeLast();
-
-    repaint();
+    if(tracksCount[area.key()].count() > MAX_SUM_TRACKS)
+        tracksCount[area.key()].removeLast();
 }
 
 /// Выбор ЗКВ для отображения
@@ -50,6 +55,8 @@ void GraphOfTracksCount::showGraph(const int _numArea)
 /// Очистка графика количественного состава налёта
 void GraphOfTracksCount::resetGraph()
 {
+    numArea = 0;
+
     QMap <int, QVector <int> >::iterator count = tracksCount.begin();
     for(; count != tracksCount.end(); ++count)
         count.value().clear();
@@ -77,7 +84,7 @@ void GraphOfTracksCount::paintEvent(QPaintEvent *_pEvent)
 
     pen.setStyle(Qt::SolidLine);
     pen.setColor(Qt::darkRed);
-    pen.setWidth(3);
+    pen.setWidth(WIDTH);
     p.setPen(pen);
 
     if(tracksCount.contains(numArea))

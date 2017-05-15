@@ -6,6 +6,7 @@
 #include "parametersofetalons.h"
 #include "painter.h"
 #include "results.h"
+#include "graphoftrackscount.h"
 
 #include <QHBoxLayout>
 #include <QSplitter>
@@ -25,7 +26,7 @@ class Settings : public QWidget
 
 public:
     explicit    Settings(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalons *_parametersOfEtalons,
-                         Painter *_painter, Results *_results, QWidget *_parent = 0);
+                         Painter *_painter, GraphOfTracksCount *_graphOfTracksCount, Results *_results, QWidget *_parent = 0);
     ~Settings();
 
 private slots:
@@ -57,6 +58,7 @@ private:
     ParametersOfAreas       *parametersOfAreas;     /// Класс виджета редактирования параметров ЗКВ
     ParametersOfEtalons     *parametersOfEtalons;   /// Класс виджета редактирования параметров эталонов
     Painter                 *painter;               /// Класс виджета отрисовки эталонов, трасс и ЗКВ
+    GraphOfTracksCount      *graphOfTracksCount;    /// Класс виджета графика количественного состава налёта
     Results                 *results;               /// Класс виджета отображения таблицы результатов
     MainThread              *mainThread;            /// Класс главного потока вычислений и отрисовки
 

@@ -5,14 +5,12 @@ namespace ThreatLevel
 
 /// Класс виджета отрисовки трасс и позиционных районов
 Painter::Painter(QWidget *_parent)
-    : Grapher2D(_parent),
+    : Grapher2D(_parent), areas(NULL), etalons(NULL), tracks(NULL),
       isVisibleOfAreas(true), isVisibleOfEtalons(true), isVisibleOfTracks(true), isVisibleOfMinDists(false)
 {
     setCSAbsMeasure(ABS_MEASURE);
     setCSOrdMeasure(ORD_MEASURE);
     setCSZoom(DEF_ZOOM);
-
-    clearing();
 
     startTimer(PAINTER_INTERVAL);
 }

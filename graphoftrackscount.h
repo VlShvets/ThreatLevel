@@ -1,6 +1,8 @@
 #ifndef GRAPHOFTRACKSCOUNT_H
 #define GRAPHOFTRACKSCOUNT_H
 
+#include "area.h"
+
 #include "Grapher2D.h"
 
 namespace ThreatLevel
@@ -14,7 +16,7 @@ public:
     ~GraphOfTracksCount();
 
     /// Загрузка количественного состава налета
-    void        loadTrackCount(const int _numArea, const int _trackCount);
+    void        loadTrackCount(const QMap <int, Area> &_areas);
 
     /// Выбор ЗКВ для отображения
     void        showGraph(const int _numArea);
@@ -37,17 +39,21 @@ private:
     /// Выбранный ЗКВ
     int                         numArea;        /// Выбранный для отображения в данный момент времени ЗКВ
 
-    /// История количественного состава налета
+    /// Список количественного состава налета
     QMap <int, QVector <int> >  tracksCount;     /// Список количественного состава налета во времени
 
     /// --------------------------------------------------
     /// Константы
     /// --------------------------------------------------
 
-    static const int    MAX_SUM_TRACKS  = 1000;     /// Максимальный размер списка количественного состава налета во времени
+    /// Параметры ограничения количества данных
+    static const int    MAX_SUM_TRACKS  = 1000;     /// Максимальный размер списка количественного состава налета
+
+    /// Параметры обновления графика
     static const int    GRAPH_INTERVAL  = 100;      /// Интервал обновления графика (в мс)
 
     /// Параметры отрисовки
+    static const int    WIDTH           = 3;        /// Ширина линии графика количественного состава налета
     static const int    SHIFT           = 5;        /// Сдвиг график относительно правого края
     static const int    STEP_ZOOM       = 3;        /// Шаг масштабирования
     static const int    DEF_ZOOM        = 10;       /// Масштаб отображения по умолчанию
