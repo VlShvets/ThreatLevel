@@ -61,9 +61,6 @@ void Results::resetTable()
 {
     areas   = NULL;
     tracks  = NULL;
-
-    tResults->setRowCount(0);
-    tResults->setColumnCount(0);
 }
 
 void Results::timerEvent(QTimerEvent *)

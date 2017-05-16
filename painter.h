@@ -84,16 +84,16 @@ private:
     /// --------------------------------------------------
 
     /// Параметры обновления отрисовки
-    static const int    PAINTER_INTERVAL    = 100;          /// Интервал обновления отрисовки (в мс)
+    static const int    PAINTER_INTERVAL    = 1000;         /// Интервал обновления отрисовки (в мс)
 
     /// Параметры отрисовки
     static const int    DEF_ZOOM            = 10;           /// Масштаб отображения по умолчанию
-    static constexpr float  ABS_MEASURE         = 10000.0;      /// Масштаб оси абсцисс
-    static constexpr float  ORD_MEASURE         = 10000.0;      /// Масштаб оси ординат
-    static constexpr float  LENGTH_COURSE       = 100000.0;     /// Длина курса эталонов
+    static const float  ABS_MEASURE         = 10000.0;      /// Масштаб оси абсцисс
+    static const float  ORD_MEASURE         = 10000.0;      /// Масштаб оси ординат
+    static const float  LENGTH_COURSE       = 100000.0;     /// Длина курса эталонов
 
     /// Вычислительные параметры
-    static constexpr float  ACCURACY_TAN_POINT  = 1e-06;        /// Точность вычисления точек соприкосновения касательных
+    static const float  ACCURACY_TAN_POINT  = 1e-06;        /// Точность вычисления точек соприкосновения касательных
                                                             /// от текущего положения трассы до границы ПР
 };
 

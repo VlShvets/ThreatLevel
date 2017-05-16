@@ -1,10 +1,7 @@
 #ifndef CALCANGLE_H
 #define CALCANGLE_H
 
-#include "parametersofareas.h"
-#include "parametersofetalons.h"
 #include "settings.h"
-#include "graphoftrackscount.h"
 
 #include <QApplication>
 #include <QMainWindow>

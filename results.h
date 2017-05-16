@@ -1,15 +1,15 @@
 #ifndef RESULTS_H
 #define RESULTS_H
 
+#include "area.h"
+#include "track.h"
+#include "graphoftrackscount.h"
+
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLCDNumber>
 #include <QTableWidget>
-
-#include "area.h"
-#include "track.h"
-#include "graphoftrackscount.h"
 
 namespace ThreatLevel
 {
@@ -64,10 +64,10 @@ private:
     /// --------------------------------------------------
 
     /// Параметры обновления таблицы результатов
-    static const int    RESULTS_INTERVAL    = 100;  /// Интервал обновления таблицы результатов (в мс)
+    static const int    RESULTS_INTERVAL    = 1000;     /// Интервал обновления таблицы результатов (в мс)
 
     /// Параметры поля отображения количественного состава налета
-    static const int    LCD_DIGIT_COUNT     = 4;    /// Число цифр в поле отображения количественного состава налета
+    static const int    LCD_DIGIT_COUNT     = 4;        /// Число цифр в поле отображения количественного состава налета
 };
 
 /// Установление ЗКВ

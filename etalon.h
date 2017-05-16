@@ -29,8 +29,8 @@ struct Etalon
     /// --------------------------------------------------
 
     /// Погрешности
-    static constexpr float  ERR_COURSE      = 10.0;     /// Погрешность измерения курса (град.)
-    static constexpr float  ERR_SPEED       = 30.0;     /// Погрешность измерения скорости (м/c)
+    static const float  ERR_COURSE      = 10.0;     /// Погрешность измерения курса (град.)
+    static const float  ERR_SPEED       = 30.0;     /// Погрешность измерения скорости (м/c)
 };
 
 }

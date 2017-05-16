@@ -2,11 +2,6 @@
 #define SETTINGS_H
 
 #include "mainthread.h"
-#include "parametersofareas.h"
-#include "parametersofetalons.h"
-#include "painter.h"
-#include "results.h"
-#include "graphoftrackscount.h"
 
 #include <QHBoxLayout>
 #include <QSplitter>

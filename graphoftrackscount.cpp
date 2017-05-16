@@ -23,45 +23,42 @@ GraphOfTracksCount::~GraphOfTracksCount()
     resetGraph();
 }
 
-/// Загрузка количественного состава налета
-void GraphOfTracksCount::loadTrackCount(const QMap <int, Area> &_areas)
-{
-    QMap <int, Area>::const_iterator area = _areas.constBegin();
-    for(; area != _areas.end(); ++area)
-    {
-        /// Добавление количественного состава налета в список
-        tracksCount[area.key()].push_front(area.value().raidCount);
-
-        /// Проверка переполнения списка
-        if(tracksCount[area.key()].count() > MAX_SUM_TRACKS)
-            tracksCount[area.key()].removeLast();
-    }
-
-    /// Добавление количественного состава налета в список
-    tracksCount[0].push_front(Area::raidSumCount + Area::detectTracksCount);
-
-    /// Проверка переполнения списка
-    if(tracksCount[area.key()].count() > MAX_SUM_TRACKS)
-        tracksCount[area.key()].removeLast();
-}
-
-/// Выбор ЗКВ для отображения
-void GraphOfTracksCount::showGraph(const int _numArea)
-{
-    if(tracksCount.contains(_numArea))
-        numArea = _numArea;
-}
-
 /// Очистка графика количественного состава налёта
 void GraphOfTracksCount::resetGraph()
 {
-    numArea = 0;
-
     QMap <int, QVector <int> >::iterator count = tracksCount.begin();
     for(; count != tracksCount.end(); ++count)
         count.value().clear();
 
     tracksCount.clear();
+
+    numArea = 0;
+}
+
+/// Загрузка количественного состава налета
+void GraphOfTracksCount::loadTracksCount()
+{
+    QMap <int, Area>::const_iterator area = areas->constBegin();
+    for(; area != areas->end(); ++area)
+    {
+        /// Добавление количественного состава налета по ЗКВ
+        addTrackCount(area.key(), area.value().raidCount);
+    }
+
+    /// Добавление суммарного количественного состава налета
+    addTrackCount(0, Area::raidSumCount + Area::detectTracksCount);
+}
+
+/// Добавление количественного состава налета
+void GraphOfTracksCount::addTrackCount(const int _num, const int _count)
+{
+    QMutexLocker locker(&mutex);
+
+    tracksCount[_num].push_front(_count);
+
+    /// Проверка переполнения списка
+    if(tracksCount[_num].count() > MAX_SUM_TRACKS)
+        tracksCount[_num].removeLast();
 }
 
 /// Обновление отрисокви
@@ -86,6 +83,8 @@ void GraphOfTracksCount::paintEvent(QPaintEvent *_pEvent)
     pen.setColor(Qt::darkRed);
     pen.setWidth(WIDTH);
     p.setPen(pen);
+
+    QMutexLocker locker(&mutex);
 
     if(tracksCount.contains(numArea))
     {

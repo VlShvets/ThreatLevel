@@ -1,7 +1,5 @@
 #include "settings.h"
 
-#include <QDebug>
-
 namespace ThreatLevel
 {
 
@@ -89,6 +87,9 @@ Settings::~Settings()
     delete pPlayPause;
     delete lWaitingTime;
     delete sWaitingTime;
+
+    /// Завершение имеющегося потока вычислений
+    completeOfThread();
 }
 
 /// Перезапуск потока вычислений
@@ -148,7 +149,7 @@ void Settings::createOfThread()
 {
     if(!mainThread)
     {
-        qDebug() << "Create Of Thread";
+//        qDebug() << "Create Of Thread";
         mainThread = new MainThread(parametersOfAreas, parametersOfEtalons, painter, graphOfTracksCount, results,
                                     lWaitingTime->intValue());
         QObject::connect(sWaitingTime, SIGNAL(valueChanged(int)), mainThread, SLOT(setWaitingTime(int)));
@@ -161,7 +162,7 @@ void Settings::completeOfThread()
 {
     if(mainThread)
     {
-        qDebug() << "Complete Of Thread";
+//        qDebug() << "Complete Of Thread";
         mainThread->complete();
         mainThread->wait();
         delete mainThread;

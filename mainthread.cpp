@@ -1,7 +1,5 @@
 #include "mainthread.h"
 
-#include <QDebug>
-
 namespace ThreatLevel
 {
 
@@ -62,8 +60,11 @@ MainThread::MainThread(ParametersOfAreas *_parametersOfAreas, ParametersOfEtalon
     painter->setTracks(*tracks);
 
     /// --------------------------------------------------
-    /// Таблица результатов
+    /// График количественного состава налета и таблица результатов
     /// --------------------------------------------------
+
+    /// Отправление ЗКВ на виджет графика количественного состава
+    graphOfTracksCount->setAreas(*areas);
 
     /// Отправление ЗКВ на виджет таблицы результатов
     results->setAreas(*areas);
@@ -117,7 +118,7 @@ void MainThread::run()
         definitionOfThreatLevel->run();
 
         /// График количественного состава налета
-        graphOfTracksCount->loadTrackCount(*areas);
+        graphOfTracksCount->loadTracksCount();
     }
 }
 

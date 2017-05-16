@@ -17,14 +17,14 @@ public:
     explicit        DefinitionOfThreatLevel();
     ~DefinitionOfThreatLevel();
 
-    /// Вычислительный процесс
-    void            run();
-
     /// Установление ЗКВ
     inline void     setAreas(QMap <int, Area> &_areas);
 
     /// Установление трасс
     inline void     setTracks(QMap <int, Track> &_tracks);
+
+    /// Вычислительный процесс
+    void            run();
 
 private:
     /// Сглаживание погрешностей измерения
@@ -80,7 +80,7 @@ private:
     /// --------------------------------------------------
 
     /// Вычислительные параметры
-    static constexpr float  SMOOTH  = 0.9;  /// Весовой коэфициент сглаживания погрешностей ( < 1.0)
+    static const float  SMOOTH  = 0.9;  /// Весовой коэфициент сглаживания погрешностей ( < 1.0)
 };
 
 /// Установление трасс

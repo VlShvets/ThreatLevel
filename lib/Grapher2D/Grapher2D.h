@@ -11,12 +11,12 @@ class Grapher2D : public QWidget
 {
     Q_OBJECT
 
-    static constexpr float DEFABSSHIFT      = 0.0;      /// Сдвиг по оси абсцисс по умолчанию
-    static constexpr float DEFORDSHIFT      = 0.0;      /// Сдвиг по оси ординат по умолчанию
-    static constexpr float DEFABSMEASURE    = 1.0;      /// Количество единиц измерения в одном делении оси абсцисс по умолчанию
-    static constexpr float DEFORDMEASURE    = 1.0;      /// Количество единиц измерения в одном делении оси ординат по умолчанию
-    static constexpr float DEFABSEXPAND     = 1.0;      /// Растяжение оси абсцисс по умолчанию
-    static constexpr float DEFORDEXPAND     = 1.0;      /// Растяжение оси ординат по умолчанию
+    static const float DEFABSSHIFT      = 0.0;      /// Сдвиг по оси абсцисс по умолчанию
+    static const float DEFORDSHIFT      = 0.0;      /// Сдвиг по оси ординат по умолчанию
+    static const float DEFABSMEASURE    = 1.0;      /// Количество единиц измерения в одном делении оси абсцисс по умолчанию
+    static const float DEFORDMEASURE    = 1.0;      /// Количество единиц измерения в одном делении оси ординат по умолчанию
+    static const float DEFABSEXPAND     = 1.0;      /// Растяжение оси абсцисс по умолчанию
+    static const float DEFORDEXPAND     = 1.0;      /// Растяжение оси ординат по умолчанию
 
     static const int DEFZOOMVALUE       = 10;       /// Количество пикселей в одном делении по умолчанию
     static const int DEFZOOMMIN         = 1;        /// Нижняя граница зумирования по умолчанию
