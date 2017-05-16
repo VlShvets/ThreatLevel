@@ -33,7 +33,7 @@ private:
     void    initializationOfParametersAreas();
 
     /// Обнуление рекурентных параметров ЗКВ
-    void    resettingOfAreasRecurrenceParameters(Area &_area);
+    void    zeroingOfAreasRecurrenceParameters(Area &_area);
 
     /// Начальная инициализация параметров эталонов
     void    initializationOfParametersEtalons();

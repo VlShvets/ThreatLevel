@@ -19,8 +19,10 @@ void TertiaryProcessingOfData::run()
     QMap <int, Etalon>::const_iterator etalon = etalons->constBegin();
     for(; etalon != etalons->end(); ++etalon)
     {
-        if(etalonIsDetected(*areas, etalon.value()))
+        /// Трасса обнаружена
+        if(etalonIsDetected(etalon.value()))
         {
+            /// Трасса не содержится в словаре трасс
             if(!tracks.contains(etalon.key()))
             {
                 /// Добавление трассы в словарь трасс по эталону
@@ -30,17 +32,23 @@ void TertiaryProcessingOfData::run()
             /// Обновление информации о трассе
             updateTrack(etalon.key(), etalon.value());
         }
+        /// Трасса не обнаружена, но содержится в словаре трасс
+        else if(tracks.contains(etalon.key()))
+        {
+            /// Удаление трассы из словаря по ключу эталона
+            tracks.remove(etalon.key());
+        }
     }
 }
 
 /// Определение попадания эталона в общую зону обнаружения всех ЗКВ
-bool TertiaryProcessingOfData::etalonIsDetected(const QMap <int, Area> &_areas, const Etalon &_etalon)
+bool TertiaryProcessingOfData::etalonIsDetected(const Etalon &_etalon)
 {
     QPointF     pArea;      /// Координаты ЗКВ
     QPointF     pEtalon;    /// Текущие коодинаты эталона
 
-    QMap <int, Area>::const_iterator area = _areas.constBegin();
-    for(; area != _areas.end(); ++area)
+    QMap <int, Area>::const_iterator area = areas->constBegin();
+    for(; area != areas->end(); ++area)
     {
         pArea       = area.value().initPos;
         pEtalon     = _etalon.exactPos;
@@ -67,11 +75,11 @@ void TertiaryProcessingOfData::addTrack(const int _num, const Etalon &_etalon)
     tracks[_num].startPos = _etalon.exactPos;
 
     /// Обнуление рекурентных параметров
-    resettingOfRecurrenceParameters(tracks[_num]);
+    zeroingOfRecurrenceParameters(tracks[_num]);
 }
 
 /// Обнуление рекурентных параметров
-void TertiaryProcessingOfData::resettingOfRecurrenceParameters(Track &_track)
+void TertiaryProcessingOfData::zeroingOfRecurrenceParameters(Track &_track)
 {
     /// Обнуление координат экстраполированного конца траектории
     _track.finalPos      = QPointF();

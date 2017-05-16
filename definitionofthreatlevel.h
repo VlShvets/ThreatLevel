@@ -58,7 +58,7 @@ private:
     void            calculationOfRaidCount();
 
     /// Сброс трасс
-//    void            resetTracks();
+    void            resetTracks();
 
     /// --------------------------------------------------
     /// Статические функции

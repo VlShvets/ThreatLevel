@@ -32,13 +32,13 @@ public:
 
 private:
     /// Определение попадания эталона в общую зону обнаружения всех ЗКВ
-    bool    etalonIsDetected(const QMap <int, Area> &_areas, const Etalon &_etalon);
+    bool    etalonIsDetected(const Etalon &_etalon);
 
     /// Добавление трассы в словарь трасс по эталону
     void    addTrack(const int _num, const Etalon &_etalon);
 
     /// Обнуление рекурентных параметров
-    void    resettingOfRecurrenceParameters(Track &_track);
+    void    zeroingOfRecurrenceParameters(Track &_track);
 
     /// Обновление информации о трассе
     void    updateTrack(const int _num, const Etalon &_etalon);

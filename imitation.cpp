@@ -64,7 +64,7 @@ void Imitation::initializationOfParametersAreas()
     for(; area != areas.end(); ++area)
     {
         /// Обнуление рекурентных параметров ЗКВ
-        resettingOfAreasRecurrenceParameters(*area);
+        zeroingOfAreasRecurrenceParameters(*area);
     }
 
     /// Обнуление максимального суммарного количества крылатых ракет
@@ -78,7 +78,7 @@ void Imitation::initializationOfParametersAreas()
 }
 
 /// Обнуление рекурентных параметров ЗКВ
-void Imitation::resettingOfAreasRecurrenceParameters(Area &_area)
+void Imitation::zeroingOfAreasRecurrenceParameters(Area &_area)
 {
     /// Обнуление максимального количества идентифицированных с ЗКВ крылатых ракет
     _area.CMMaxCount     = 0;

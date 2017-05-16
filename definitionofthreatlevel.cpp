@@ -378,44 +378,44 @@ void DefinitionOfThreatLevel::calculationOfRaidCount()
 }
 
 /// Сброс трасс
-//void DefinitionOfThreatLevel::resetTracks()
-//{
-//    bool isReset;   /// Флаг сброса трассы
+void DefinitionOfThreatLevel::resetTracks()
+{
+    bool isReset;   /// Флаг сброса трассы
 
-//    QMap <int, Track>::iterator track = tracks->begin();
-//    for(; track != tracks->end();)
-//    {
-//        isReset = false;
+    QMap <int, Track>::iterator track = tracks->begin();
+    for(; track != tracks->end();)
+    {
+        isReset = false;
 
-//        int numArea = track.value().numArea;
-//        if(numArea != -1 &&
-//           areas->contains(numArea))
-//        {
-//            /// Сброс трассы при пересечении границ ПР
-//            if(track.value().distToPA < areas->value(numArea).initRadius)
-//                isReset = true;
+        int numArea = track.value().numArea;
+        if(numArea != -1 &&
+           areas->contains(numArea))
+        {
+            /// Сброс трассы при пересечении границ ПР
+            if(track.value().distToPA < areas->value(numArea).initRadius)
+                isReset = true;
 
-//            /// Сброс трассы при значении времени преодоления расстояния до ПР меньше значения критического времени ПР
-//            if(track.value().timeToPA < areas->value(numArea).initCritTime)
-//                isReset = true;
-//        }
+            /// Сброс трассы при значении времени преодоления расстояния до ПР меньше значения критического времени ПР
+            if(track.value().timeToPA < areas->value(numArea).initCritTime)
+                isReset = true;
+        }
 
-//        if(isReset)
-//        {
-//            /// Удаление номера трассы из списка номеров ассоциированных с ПР трасс
-//            if(areas->contains(numArea) &&
-//               areas->value(numArea).numTrack.contains(track.key()))
-//            {
-//                (*areas)[numArea].numTrack.removeOne(track.key());
-//            }
+        if(isReset)
+        {
+            /// Удаление номера трассы из списка номеров ассоциированных с ПР трасс
+            if(areas->contains(numArea) &&
+               areas->value(numArea).numTrack.contains(track.key()))
+            {
+                (*areas)[numArea].numTrack.removeOne(track.key());
+            }
 
-//            /// Удаление трассы
-//            track = tracks->erase(track);
-//         }
-//        else
-//             ++track;
-//    }
-//}
+            /// Удаление трассы
+            track = tracks->erase(track);
+         }
+        else
+             ++track;
+    }
+}
 
 /// --------------------------------------------------
 /// Статические функции
