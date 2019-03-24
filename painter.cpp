@@ -71,15 +71,25 @@ void Painter::paintEvent(QPaintEvent * _pEvent)
             }
 
             /// Отрисовка критического времени при минимальном значении скорости
-            pen.setStyle(Qt::DashLine);
-            pen.setColor(Qt::darkRed);
-            pen.setWidth(1);
-            p.setPen(pen);
-            p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MIN_SPEED,
-                          area.value().initCritTime * Track::MIN_SPEED);
+//            pen.setStyle(Qt::DashLine);
+//            pen.setColor(Qt::darkRed);
+//            pen.setWidth(1);
+//            p.setPen(pen);
+//            p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MIN_SPEED,
+//                          area.value().initCritTime * Track::MIN_SPEED);
+
+            /// Отрисовка критического времени при максимальном значении скорости
+//            pen.setStyle(Qt::DashLine);
+//            pen.setColor(Qt::darkGreen);
+//            pen.setWidth(1);
+//            p.setPen(pen);
+//            p.drawEllipse(area.value().initPos, area.value().initCritTime * Track::MAX_SPEED,
+//                          area.value().initCritTime * Track::MAX_SPEED);
 
             /// Отрисовка района обнаружения
+            pen.setStyle(Qt::DashLine);
             pen.setColor(Qt::darkBlue);
+            pen.setWidth(1);
             p.setPen(pen);
             p.drawEllipse(area.value().initPos, area.value().initDetectRange,
                           area.value().initDetectRange);

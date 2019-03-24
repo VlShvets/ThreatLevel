@@ -67,8 +67,8 @@ private:
     static const int    SHIFT           = 5;        /// Сдвиг график относительно правого края
     static const int    STEP_ZOOM       = 3;        /// Шаг масштабирования
     static const int    DEF_ZOOM        = 10;       /// Масштаб отображения по умолчанию
-    static const float  ORD_MEASURE     = 1.0;      /// Масштаб оси ординат
-    static const float  ORD_EXPANSION   = 2.0;      /// Параметр растяжения оси ординат
+    static constexpr float  ORD_MEASURE     = 1.0;      /// Масштаб оси ординат
+    static constexpr float  ORD_EXPANSION   = 2.0;      /// Параметр растяжения оси ординат
 };
 
 /// Выбор ЗКВ для отображения

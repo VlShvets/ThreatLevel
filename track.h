@@ -64,7 +64,10 @@ struct Track
     static const int    BG_WEIGHT_COEF  = 25;       /// Весовой коэффициент тратилового эквивалента БЦ
 
     /// Минимально возможное значение скорости
-    static const float  MIN_SPEED       = 180.0;    /// Минимальное значение скорости
+    static constexpr float  MIN_SPEED       = 180.0;    /// Минимальное значение скорости
+
+    /// Максимально возможное значение скорости
+    static constexpr float  MAX_SPEED       = 250.0;    /// Максимальное значение скорости
 };
 
 }

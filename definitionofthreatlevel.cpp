@@ -100,8 +100,8 @@ void DefinitionOfThreatLevel::identificationOfTracksWithAreas()
         /// Трасса не идентифицированна ни с одним ЗКВ
         else
         {
-            /// Инкрементация количества обнаруженных не идентифицированных ни с одним ЗКВ трасс
-            ++Area::detectTracksCount;
+            /// Добавление количества обнаруженных не идентифицированных ни с одним ЗКВ трасс
+            Area::detectTracksCount += track.value().initQuant;
         }
 
         /// Изменился номер идентифицированного ЗКВ
